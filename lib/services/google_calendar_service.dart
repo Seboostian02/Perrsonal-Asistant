@@ -15,7 +15,7 @@ class GoogleCalendarService {
     required TimeOfDay startTime,
     required TimeOfDay endTime,
   }) async {
-    print("-----------Intrat create event");
+    print("-----------Entered create event");
 
     await clientViaUserConsent(_clientId, _scopes, (url) {
       // Deschide URL-ul de autentificare în browserul utilizatorului
