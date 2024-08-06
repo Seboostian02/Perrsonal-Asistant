@@ -1,4 +1,6 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import '../services/google_calendar_service.dart';
 
 class EventForm extends StatefulWidget {
@@ -63,6 +65,21 @@ class _EventFormState extends State<EventForm> {
     }
   }
 
+  signInWithGoogle() async {
+    GoogleSignInAccount? googleUser =
+        GoogleSignIn().signIn() as GoogleSignInAccount?;
+
+    GoogleSignInAuthentication googleAuth =
+        await googleUser?.authentication as GoogleSignInAuthentication;
+
+    AuthCredential credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken, idToken: googleAuth.idToken);
+    UserCredential userCredential =
+        await FirebaseAuth.instance.signInWithCredential(credential);
+    print("-------------------------");
+    print(userCredential.user?.displayName);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -73,6 +90,11 @@ class _EventFormState extends State<EventForm> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              ElevatedButton(
+                  onPressed: () {
+                    signInWithGoogle();
+                  },
+                  child: Text('Log In with google')),
               TextField(
                   textAlign: TextAlign.center,
                   controller: _titleController,
