@@ -66,14 +66,12 @@ class _EventFormState extends State<EventForm> {
   }
 
   signInWithGoogle() async {
-    GoogleSignInAccount? googleUser =
-        GoogleSignIn().signIn() as GoogleSignInAccount?;
+    GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
 
-    GoogleSignInAuthentication googleAuth =
-        await googleUser?.authentication as GoogleSignInAuthentication;
+    GoogleSignInAuthentication? googleAuth = await googleUser?.authentication;
 
     AuthCredential credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken, idToken: googleAuth.idToken);
+        accessToken: googleAuth?.accessToken, idToken: googleAuth?.idToken);
     UserCredential userCredential =
         await FirebaseAuth.instance.signInWithCredential(credential);
     print("-------------------------");
@@ -147,6 +145,3 @@ class _EventFormState extends State<EventForm> {
     );
   }
 }
-
-  // Include aici UI-ul pentru formulare, selectarea datei și timpului
-
