@@ -1,7 +1,7 @@
 {
   "project_info": {
     "project_number": "1018588279964",
-    "project_id": "calendar-e5714",
+    "project_id": "calendar-430906",
     "storage_bucket": "calendar-e5714.appspot.com"
   },
   "client": [
@@ -14,7 +14,7 @@
       },
       "oauth_client": [
         {
-          "client_id": "1018588279964-alue6sv4te4qdl5qsr1q55iv53ocs4sg.apps.googleusercontent.com",
+          "client_id": "490602646023-q31pisialt5lqtvgcahcm1csbjv25ut6.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.seb_calendar",
@@ -28,7 +28,7 @@
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyAmwlyqA9xdeMaEojYpp0vwFQR6DxCAvdA"
+          "current_key": "AIzaSyBBdtTxLfn2lV5X_QC8-VYTtysvboiCDJg"
         }
       ],
       "services": {

@@ -2,7 +2,6 @@ import 'package:calendar/services/auth_service.dart';
 import 'package:calendar/services/google_calendar_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import '../services/google_calendar_service.dart';
 
 class EventForm extends StatefulWidget {
   const EventForm({Key? key}) : super(key: key);
