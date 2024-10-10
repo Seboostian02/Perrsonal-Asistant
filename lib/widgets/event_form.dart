@@ -1,7 +1,5 @@
 import 'package:calendar/services/auth_service.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 import '../services/google_calendar_service.dart';
 
 class EventForm extends StatefulWidget {
@@ -80,7 +78,7 @@ class _EventFormState extends State<EventForm> {
                   onPressed: () {
                     AuthService().signInWithGoogle();
                   },
-                  child: Text('Log In with google')),
+                  child: const Text('Log In with google')),
               TextField(
                   textAlign: TextAlign.center,
                   controller: _titleController,

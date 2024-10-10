@@ -1,4 +1,4 @@
-package com.example.calendar
+package com.seb_calendar
 
 import io.flutter.embedding.android.FlutterActivity
 

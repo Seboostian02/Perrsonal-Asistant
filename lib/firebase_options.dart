@@ -63,7 +63,8 @@ class DefaultFirebaseOptions {
     messagingSenderId: '1018588279964',
     projectId: 'calendar-e5714',
     storageBucket: 'calendar-e5714.appspot.com',
-    iosClientId: '1018588279964-c25op6s8bc3kkfb8sf8tlig49obgts3e.apps.googleusercontent.com',
+    iosClientId:
+        '1018588279964-c25op6s8bc3kkfb8sf8tlig49obgts3e.apps.googleusercontent.com',
     iosBundleId: 'com.example.calendar',
   );
 
@@ -73,7 +74,8 @@ class DefaultFirebaseOptions {
     messagingSenderId: '1018588279964',
     projectId: 'calendar-e5714',
     storageBucket: 'calendar-e5714.appspot.com',
-    iosClientId: '1018588279964-c25op6s8bc3kkfb8sf8tlig49obgts3e.apps.googleusercontent.com',
+    iosClientId:
+        '1018588279964-c25op6s8bc3kkfb8sf8tlig49obgts3e.apps.googleusercontent.com',
     iosBundleId: 'com.example.calendar',
   );
 
@@ -85,5 +87,4 @@ class DefaultFirebaseOptions {
     authDomain: 'calendar-e5714.firebaseapp.com',
     storageBucket: 'calendar-e5714.appspot.com',
   );
-
 }
