@@ -1,9 +1,11 @@
 import 'package:calendar/services/auth_service.dart';
+import 'package:calendar/services/google_calendar_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import '../services/google_calendar_service.dart';
 
 class EventForm extends StatefulWidget {
-  const EventForm({super.key});
+  const EventForm({Key? key}) : super(key: key);
 
   @override
   _EventFormState createState() => _EventFormState();
@@ -15,18 +17,59 @@ class _EventFormState extends State<EventForm> {
 
   DateTime _selectedDate = DateTime.now();
   TimeOfDay _startTime = TimeOfDay.now();
-
   TimeOfDay _endTime =
       TimeOfDay.now().replacing(hour: TimeOfDay.now().hour + 1);
+  bool _isLoggedIn = false;
+  User? _currentUser;
 
-  void _createEvent() {
-    GoogleCalendarService.createEvent(
-      title: _titleController.text,
-      description: _descriptionController.text,
-      date: _selectedDate,
-      startTime: _startTime,
-      endTime: _endTime,
-    );
+  @override
+  void initState() {
+    super.initState();
+    _checkLoginStatus();
+  }
+
+  Future<void> _checkLoginStatus() async {
+    FirebaseAuth.instance.authStateChanges().listen((user) {
+      if (user != null) {
+        setState(() {
+          _isLoggedIn = true;
+          _currentUser = user;
+        });
+      } else {
+        setState(() {
+          _isLoggedIn = false;
+          _currentUser = null;
+        });
+      }
+    });
+  }
+
+  Future<void> _signInWithGoogle() async {
+    UserCredential? userCredential = await AuthService().signInWithGoogle();
+    setState(() {
+      _isLoggedIn = true;
+      _currentUser = userCredential?.user;
+    });
+  }
+
+  Future<void> _createEvent() async {
+    if (_currentUser != null) {
+      final accessToken = await AuthService().accessToken;
+      if (accessToken != null) {
+        await GoogleCalendarService.createEvent(
+          accessToken: accessToken,
+          title: _titleController.text,
+          description: _descriptionController.text,
+          date: _selectedDate,
+          startTime: _startTime,
+          endTime: _endTime,
+        );
+      } else {
+        print("Failed to get access token");
+      }
+    } else {
+      print("User is not logged in.");
+    }
   }
 
   Future<void> _selectDate(BuildContext context) async {
@@ -74,17 +117,19 @@ class _EventFormState extends State<EventForm> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              ElevatedButton(
-                  onPressed: () {
-                    AuthService().signInWithGoogle();
-                  },
-                  child: const Text('Log In with google')),
+              _isLoggedIn
+                  ? Text("Welcome, ${_currentUser?.displayName}")
+                  : ElevatedButton(
+                      onPressed: _signInWithGoogle,
+                      child: const Text('Log In with Google'),
+                    ),
               TextField(
-                  textAlign: TextAlign.center,
-                  controller: _titleController,
-                  decoration: const InputDecoration(
-                    labelText: 'Event Title',
-                  )),
+                textAlign: TextAlign.center,
+                controller: _titleController,
+                decoration: const InputDecoration(
+                  labelText: 'Event Title',
+                ),
+              ),
               TextField(
                 textAlign: TextAlign.center,
                 controller: _descriptionController,
