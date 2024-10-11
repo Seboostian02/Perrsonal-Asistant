@@ -2,19 +2,39 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 class AuthService {
-  signInWithGoogle() async {
-    GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final GoogleSignIn _googleSignIn = GoogleSignIn(scopes: [
+    'https://www.googleapis.com/auth/calendar',
+  ]);
 
-    GoogleSignInAuthentication? googleAuth = await googleUser?.authentication;
+  GoogleSignInAccount? _googleUser;
+  GoogleSignInAuthentication? _googleAuth;
 
-    AuthCredential credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth?.accessToken, idToken: googleAuth?.idToken);
+  Future<UserCredential?> signInWithGoogle() async {
+    try {
+      _googleUser = await _googleSignIn.signIn();
+      _googleAuth = await _googleUser?.authentication;
 
-    UserCredential userCredential =
-        await FirebaseAuth.instance.signInWithCredential(credential);
-    print("-------------------------");
-    print(userCredential.user?.displayName);
+      final credential = GoogleAuthProvider.credential(
+        accessToken: _googleAuth?.accessToken,
+        idToken: _googleAuth?.idToken,
+      );
 
-    return userCredential;
+      UserCredential userCredential =
+          await _auth.signInWithCredential(credential);
+      print("User signed in: ${userCredential.user?.displayName}");
+      print("------------------");
+      return userCredential;
+    } catch (e) {
+      print("Error signing in: $e");
+      return null;
+    }
+  }
+
+  Future<String?> get accessToken async {
+    if (_googleAuth == null) {
+      await signInWithGoogle();
+    }
+    return _googleAuth?.accessToken;
   }
 }
