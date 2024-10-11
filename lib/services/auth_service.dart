@@ -23,6 +23,7 @@ class AuthService {
       UserCredential userCredential =
           await _auth.signInWithCredential(credential);
       print("User signed in: ${userCredential.user?.displayName}");
+      print("------------------");
       return userCredential;
     } catch (e) {
       print("Error signing in: $e");

@@ -116,13 +116,12 @@ class _EventFormState extends State<EventForm> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // _isLoggedIn
-              //     ? Text("Welcome, ${_currentUser?.displayName}")
-              //     :
-              ElevatedButton(
-                onPressed: _signInWithGoogle,
-                child: const Text('Log In with Google'),
-              ),
+              _isLoggedIn
+                  ? Text("Welcome, ${_currentUser?.displayName}")
+                  : ElevatedButton(
+                      onPressed: _signInWithGoogle,
+                      child: const Text('Log In with Google'),
+                    ),
               TextField(
                 textAlign: TextAlign.center,
                 controller: _titleController,
