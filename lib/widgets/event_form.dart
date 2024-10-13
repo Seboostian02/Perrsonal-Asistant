@@ -13,7 +13,6 @@ class EventForm extends StatefulWidget {
 class _EventFormState extends State<EventForm> {
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
-
   DateTime _selectedDate = DateTime.now();
   TimeOfDay _startTime = TimeOfDay.now();
   TimeOfDay _endTime =
@@ -48,6 +47,15 @@ class _EventFormState extends State<EventForm> {
     setState(() {
       _isLoggedIn = true;
       _currentUser = userCredential?.user;
+    });
+  }
+
+  Future<void> _signOut() async {
+    // await AuthService().signOut();
+    await FirebaseAuth.instance.signOut();
+    setState(() {
+      _isLoggedIn = false;
+      _currentUser = null;
     });
   }
 
@@ -109,15 +117,40 @@ class _EventFormState extends State<EventForm> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Date & Time Picker')),
+      appBar: AppBar(
+        title: const Text(
+          'Date & Time Picker',
+          style: TextStyle(
+            color: Colors.white, // Schimbă culoarea textului în alb
+            fontWeight: FontWeight.bold, // Schimbă greutatea fontului în bold
+          ),
+        ),
+        centerTitle: true,
+        toolbarHeight: 80,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.only(
+              bottomRight: Radius.circular(25),
+              bottomLeft: Radius.circular(25)),
+        ),
+        backgroundColor: Colors.deepPurple,
+        iconTheme: const IconThemeData(color: Colors.white),
+      ),
       body: Center(
         child: Padding(
-          padding: const EdgeInsets.all(90.0),
+          padding: const EdgeInsets.all(30.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               _isLoggedIn
-                  ? Text("Welcome, ${_currentUser?.displayName}")
+                  ? Column(
+                      children: [
+                        Text("Welcome, ${_currentUser?.displayName}"),
+                        ElevatedButton(
+                          onPressed: _signOut,
+                          child: const Text('Log Out'),
+                        ),
+                      ],
+                    )
                   : ElevatedButton(
                       onPressed: _signInWithGoogle,
                       child: const Text('Log In with Google'),
