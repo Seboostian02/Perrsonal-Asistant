@@ -20,7 +20,7 @@ class MainPageState extends State<MainPage> {
   bool _loading = true;
   final EventService _eventService = EventService();
 
-  int _selectedIndex = 0; // Indexul paginii selectate
+  int _selectedIndex = 0;
 
   @override
   void initState() {
@@ -59,14 +59,7 @@ class MainPageState extends State<MainPage> {
 
   void _onItemTapped(int index) {
     setState(() {
-      _selectedIndex = index; // Schimbă indexul paginii selectate
-    });
-  }
-
-  void _navigateToHome() {
-    setState(() {
-      _selectedIndex =
-          0; // Setează indexul la 0 pentru a reveni la pagina principală
+      _selectedIndex = index;
     });
   }
 
@@ -91,18 +84,19 @@ class MainPageState extends State<MainPage> {
             ),
           ),
           NotFoundPage(
-            onBackToHome: _navigateToHome, // Transmite funcția validă
+            onBackToHome: () => _onItemTapped(0),
           ),
           NotFoundPage(
-            onBackToHome: _navigateToHome,
+            onBackToHome: () => _onItemTapped(0),
           ),
           NotFoundPage(
-            onBackToHome: _navigateToHome,
+            onBackToHome: () => _onItemTapped(0),
           ),
         ],
       ),
       bottomNavigationBar: Footer(
         onItemTapped: _onItemTapped,
+        selectedIndex: _selectedIndex,
       ),
       floatingActionButton: Padding(
         padding: const EdgeInsets.only(bottom: 30.0),
