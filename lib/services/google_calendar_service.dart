@@ -65,7 +65,7 @@ class GoogleCalendarService {
   static Future<AuthClient> getAuthenticatedClient(String accessToken) async {
     final accessCredentials = AccessCredentials(
       AccessToken('Bearer', accessToken,
-          DateTime.now().add(Duration(hours: 1)).toUtc()),
+          DateTime.now().add(const Duration(hours: 1)).toUtc()),
       null,
       ['https://www.googleapis.com/auth/calendar'],
     );

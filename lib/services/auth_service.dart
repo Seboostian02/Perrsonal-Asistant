@@ -12,10 +12,8 @@ class AuthService {
 
   Future<UserCredential?> signInWithGoogle() async {
     try {
-      // force to choose your google account
-      await _googleSignIn.signOut();
+      // await _googleSignIn.signOut();
 
-      // Inițiem autentificarea Google
       _googleUser = await _googleSignIn.signIn();
       _googleAuth = await _googleUser?.authentication;
 
