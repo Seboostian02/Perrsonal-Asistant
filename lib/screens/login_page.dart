@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:provider/provider.dart';
 import '../services/auth_provider.dart';
 
@@ -15,7 +16,13 @@ class LoginPage extends StatelessWidget {
       ),
       body: Center(
         child: ElevatedButton(
-          onPressed: () {
+          onPressed: () async {
+            final GoogleSignIn _googleSignIn = GoogleSignIn(scopes: [
+              'https://www.googleapis.com/auth/calendar',
+            ]);
+
+            await _googleSignIn.signOut();
+
             authProvider.signInWithGoogle();
           },
           child: const Text("Login with Google"),
