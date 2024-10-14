@@ -46,7 +46,13 @@ class MainPage extends StatelessWidget {
             const Text("Not logged in"),
           const SizedBox(height: 20),
           ...List.generate(34, (index) {
-            return EventCard(number: index + 1);
+            return EventCard(
+              title: "Event ${index + 1}",
+              location: "Location ${index + 1}",
+              description: "Description for event ${index + 1}",
+              startTime: "10:00 AM",
+              endTime: "12:00 PM",
+            );
           }),
         ],
       ),
