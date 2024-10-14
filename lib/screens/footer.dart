@@ -28,8 +28,8 @@ class Footer extends StatelessWidget {
                 ),
                 const SizedBox(width: _sizeBoxWidth),
                 IconTextButton(
-                  icon: Icons.search,
-                  label: 'Search',
+                  icon: Icons.map,
+                  label: 'Map',
                   onPressed: () {},
                 ),
               ],

@@ -33,7 +33,7 @@ class MainPage extends StatelessWidget {
         padding: const EdgeInsets.all(16.0),
         children: [
           const Text(
-            "Your events will be here",
+            "Your events are here:",
             style: TextStyle(fontSize: 24),
           ),
           const SizedBox(height: 20),
