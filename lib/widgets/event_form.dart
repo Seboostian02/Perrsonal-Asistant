@@ -20,6 +20,15 @@ class _EventFormState extends State<EventForm> {
       TimeOfDay.now().replacing(hour: TimeOfDay.now().hour + 1);
 
   Future<void> _createEvent() async {
+    if (_endTime.hour < _startTime.hour ||
+        (_endTime.hour == _startTime.hour &&
+            _endTime.minute <= _startTime.minute)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('End time must be after start time')),
+      );
+      return;
+    }
+
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     if (authProvider.currentUser != null) {
       final accessToken = await AuthService().accessToken;
@@ -63,11 +72,24 @@ class _EventFormState extends State<EventForm> {
       setState(() {
         if (isStartTime) {
           _startTime = picked;
-          if (_endTime.hour <= _startTime.hour &&
-              _endTime.minute <= _startTime.minute) {
+
+          if (_endTime.hour < _startTime.hour ||
+              (_endTime.hour == _startTime.hour &&
+                  _endTime.minute <= _startTime.minute)) {
             _endTime = picked.replacing(hour: picked.hour + 1);
           }
         } else {
+          // see if end time > start time
+          if (picked.hour < _startTime.hour ||
+              (picked.hour == _startTime.hour &&
+                  picked.minute <= _startTime.minute)) {
+            // error msg show
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                  content: Text('End time must be after start time')),
+            );
+            return; // exit function
+          }
           _endTime = picked;
         }
       });
@@ -104,11 +126,17 @@ class _EventFormState extends State<EventForm> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               authProvider.isLoggedIn
-                  ? Text(
-                      "Welcome, ${authProvider.currentUser?.displayName ?? ''}")
-                  : ElevatedButton(
-                      onPressed: authProvider.signInWithGoogle,
-                      child: const Text('Log In with Google'),
+                  ? Center(
+                      child: Text(
+                        "Time to schedule something important, ${authProvider.currentUser?.displayName ?? ''} !",
+                        textAlign: TextAlign.center,
+                      ),
+                    )
+                  : Center(
+                      child: ElevatedButton(
+                        onPressed: authProvider.signInWithGoogle,
+                        child: const Text('Log In with Google'),
+                      ),
                     ),
               TextField(
                 textAlign: TextAlign.center,

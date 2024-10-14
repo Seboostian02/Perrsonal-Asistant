@@ -12,8 +12,6 @@ class AuthService {
 
   Future<UserCredential?> signInWithGoogle() async {
     try {
-      // await _googleSignIn.signOut();
-
       _googleUser = await _googleSignIn.signIn();
       _googleAuth = await _googleUser?.authentication;
 
@@ -26,13 +24,16 @@ class AuthService {
         UserCredential userCredential =
             await _auth.signInWithCredential(credential);
         print("User signed in: ${userCredential.user?.displayName}");
+        print("---------------------------");
         return userCredential;
       } else {
         print("Google sign-in canceled by user.");
+        print("---------------------------");
         return null;
       }
     } catch (e) {
       print("Error signing in: $e");
+      print("---------------------------");
       return null;
     }
   }

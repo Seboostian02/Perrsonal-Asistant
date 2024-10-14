@@ -72,4 +72,29 @@ class GoogleCalendarService {
 
     return authenticatedClient(http.Client(), accessCredentials);
   }
+
+  static Future<List<calendar.Event>> getEvents({
+    required String accessToken,
+    required DateTime startTime,
+    required DateTime endTime,
+  }) async {
+    try {
+      final client = await getAuthenticatedClient(accessToken);
+      var calendarApi = calendar.CalendarApi(client);
+
+      // Obține evenimentele din intervalul de timp specificat
+      var events = await calendarApi.events.list(
+        'primary',
+        timeMin: startTime.toUtc(),
+        timeMax: endTime.toUtc(),
+        singleEvents: true,
+        orderBy: 'startTime',
+      );
+
+      return events.items ?? [];
+    } catch (e) {
+      print("Error fetching events: $e");
+      return [];
+    }
+  }
 }
