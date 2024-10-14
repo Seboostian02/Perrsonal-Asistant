@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../services/auth_provider.dart';
 import 'footer.dart';
 import '../widgets/event_form.dart';
+import '../widgets/event_card.dart';
 
 class MainPage extends StatelessWidget {
   const MainPage({super.key});
@@ -28,24 +29,26 @@ class MainPage extends StatelessWidget {
             ? "Hello, ${authProvider.currentUser?.displayName ?? 'User'}"
             : "Main App"),
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Text(
-              "Your events will be here",
-              style: TextStyle(fontSize: 24),
-            ),
-            const SizedBox(height: 20),
-            if (authProvider.isLoggedIn)
-              ElevatedButton(
-                onPressed: authProvider.signOut,
-                child: const Text('Log Out'),
-              )
-            else
-              const Text("Not logged in"),
-          ],
-        ),
+      body: ListView(
+        padding: const EdgeInsets.all(16.0),
+        children: [
+          const Text(
+            "Your events will be here",
+            style: TextStyle(fontSize: 24),
+          ),
+          const SizedBox(height: 20),
+          if (authProvider.isLoggedIn)
+            ElevatedButton(
+              onPressed: authProvider.signOut,
+              child: const Text('Log Out'),
+            )
+          else
+            const Text("Not logged in"),
+          const SizedBox(height: 20),
+          ...List.generate(34, (index) {
+            return EventCard(number: index + 1);
+          }),
+        ],
       ),
       bottomNavigationBar: const Footer(),
       floatingActionButton: Padding(

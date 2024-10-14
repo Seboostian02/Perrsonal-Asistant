@@ -20,7 +20,7 @@ class IconTextButton extends StatelessWidget {
         IconButton(
           icon: Icon(icon),
           onPressed: onPressed,
-          iconSize: 30.0, 
+          iconSize: 30.0,
           color: Colors.white,
         ),
         Text(
