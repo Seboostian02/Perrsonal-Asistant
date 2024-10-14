@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../widgets/event_form.dart';
 
 class Footer extends StatelessWidget {
   const Footer({super.key});
