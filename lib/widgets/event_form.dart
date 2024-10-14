@@ -5,13 +5,13 @@ import 'package:calendar/services/google_calendar_service.dart';
 import '../services/auth_provider.dart';
 
 class EventForm extends StatefulWidget {
-  const EventForm({Key? key}) : super(key: key);
+  const EventForm({super.key});
 
   @override
-  _EventFormState createState() => _EventFormState();
+  EventFormState createState() => EventFormState();
 }
 
-class _EventFormState extends State<EventForm> {
+class EventFormState extends State<EventForm> {
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
   DateTime _selectedDate = DateTime.now();
