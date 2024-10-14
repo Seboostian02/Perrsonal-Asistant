@@ -4,6 +4,11 @@ import '../widgets/event_form.dart';
 class Footer extends StatelessWidget {
   const Footer({super.key});
 
+  final double _iconSize = 30.0;
+  static const double _sizeBoxWidth = 30.0;
+  final Color iconColor = Colors.white;
+  static final Color footerColor = Colors.deepPurple.shade600;
+
   void _showEventForm(BuildContext context) {
     showModalBottomSheet(
       context: context,
@@ -22,6 +27,7 @@ class Footer extends StatelessWidget {
       bottomNavigationBar: BottomAppBar(
         shape: const CircularNotchedRectangle(),
         notchMargin: 6.0,
+        color: footerColor,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -30,10 +36,15 @@ class Footer extends StatelessWidget {
                 IconButton(
                   icon: const Icon(Icons.home),
                   onPressed: () {},
+                  iconSize: _iconSize,
+                  color: iconColor,
                 ),
+                const SizedBox(width: _sizeBoxWidth),
                 IconButton(
                   icon: const Icon(Icons.search),
                   onPressed: () {},
+                  iconSize: _iconSize,
+                  color: iconColor,
                 ),
               ],
             ),
@@ -42,21 +53,35 @@ class Footer extends StatelessWidget {
                 IconButton(
                   icon: const Icon(Icons.settings),
                   onPressed: () {},
+                  iconSize: _iconSize,
+                  color: iconColor,
                 ),
+                const SizedBox(width: _sizeBoxWidth),
                 IconButton(
                   icon: const Icon(Icons.info),
                   onPressed: () {},
+                  iconSize: _iconSize,
+                  color: iconColor,
                 ),
               ],
             ),
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _showEventForm(context),
-        child: const Icon(Icons.add),
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.only(bottom: 40.0),
+        child: FloatingActionButton(
+          onPressed: () => _showEventForm(context),
+          backgroundColor: footerColor,
+          shape: const CircleBorder(),
+          child: const Icon(
+            Icons.add,
+            color: Colors.white,
+          ),
+        ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      // backgroundColor: Colors.deepPurple.shade500,
     );
   }
 }

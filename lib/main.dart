@@ -19,6 +19,7 @@ class MyApp extends StatelessWidget {
           title: const Text("Main App"),
         ),
         body: const Footer(),
+        // backgroundColor: Colors.deepPurple.shade600,
       ),
     );
   }
