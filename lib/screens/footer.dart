@@ -2,7 +2,11 @@ import 'package:calendar/widgets/icont_text_button.dart';
 import 'package:flutter/material.dart';
 
 class Footer extends StatefulWidget {
-  const Footer({super.key});
+  const Footer(
+      {super.key,
+      required this.onItemTapped}); // Acceptă un parametru pentru callback
+
+  final ValueChanged<int> onItemTapped; // Definește un tip pentru callback
 
   static const double _sizeBoxWidth = 30.0;
 
@@ -18,38 +22,16 @@ class FooterState extends State<Footer> {
   bool _isSettingsPressed = false;
   bool _isProfilePressed = false;
 
-  void _onButtonPressed(String button) {
+  void _onButtonPressed(int index) {
     setState(() {
-      _isHomePressed = false;
-      _isMapPressed = false;
-      _isSettingsPressed = false;
-      _isProfilePressed = false;
-
-      if (button == 'home') {
-        _isHomePressed = true;
-      } else if (button == 'map') {
-        _isMapPressed = true;
-      } else if (button == 'settings') {
-        _isSettingsPressed = true;
-      } else if (button == 'profile') {
-        _isProfilePressed = true;
-      }
+      _isHomePressed = index == 0;
+      _isMapPressed = index == 1;
+      _isSettingsPressed = index == 2;
+      _isProfilePressed = index == 3;
     });
 
-    switch (button) {
-      case 'home':
-        Navigator.pushReplacementNamed(context, '/eventList');
-        break;
-      case 'map':
-        Navigator.pushReplacementNamed(context, '/notFound');
-        break;
-      case 'settings':
-        Navigator.pushReplacementNamed(context, '/notFound');
-        break;
-      case 'profile':
-        Navigator.pushReplacementNamed(context, '/notFound');
-        break;
-    }
+    // Apelează callback-ul pentru a schimba pagina
+    widget.onItemTapped(index);
   }
 
   @override
@@ -70,7 +52,7 @@ class FooterState extends State<Footer> {
                   icon: Icons.home,
                   label: 'Home',
                   onPressed: () {
-                    _onButtonPressed('home');
+                    _onButtonPressed(0);
                   },
                   isPressed: _isHomePressed,
                 ),
@@ -79,7 +61,7 @@ class FooterState extends State<Footer> {
                   icon: Icons.map,
                   label: 'Map',
                   onPressed: () {
-                    _onButtonPressed('map');
+                    _onButtonPressed(1);
                   },
                   isPressed: _isMapPressed,
                 ),
@@ -91,7 +73,7 @@ class FooterState extends State<Footer> {
                   icon: Icons.settings,
                   label: 'Settings',
                   onPressed: () {
-                    _onButtonPressed('settings');
+                    _onButtonPressed(2);
                   },
                   isPressed: _isSettingsPressed,
                 ),
@@ -100,7 +82,7 @@ class FooterState extends State<Footer> {
                   icon: Icons.people_alt,
                   label: 'Profile',
                   onPressed: () {
-                    _onButtonPressed('profile');
+                    _onButtonPressed(3);
                   },
                   isPressed: _isProfilePressed,
                 ),

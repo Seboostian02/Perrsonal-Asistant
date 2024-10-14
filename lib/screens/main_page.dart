@@ -20,6 +20,8 @@ class MainPageState extends State<MainPage> {
   bool _loading = true;
   final EventService _eventService = EventService();
 
+  int _selectedIndex = 0; // Indexul paginii selectate
+
   @override
   void initState() {
     super.initState();
@@ -55,6 +57,19 @@ class MainPageState extends State<MainPage> {
     });
   }
 
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index; // Schimbă indexul paginii selectate
+    });
+  }
+
+  void _navigateToHome() {
+    setState(() {
+      _selectedIndex =
+          0; // Setează indexul la 0 pentru a reveni la pagina principală
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context);
@@ -65,14 +80,30 @@ class MainPageState extends State<MainPage> {
             ? "Hello, ${authProvider.currentUser?.displayName ?? 'User'}"
             : "Main App"),
       ),
-      body: RefreshIndicator(
-        onRefresh: _onRefresh,
-        child: EventList(
-          events: _events,
-          loading: _loading,
-        ),
+      body: IndexedStack(
+        index: _selectedIndex,
+        children: [
+          RefreshIndicator(
+            onRefresh: _onRefresh,
+            child: EventList(
+              events: _events,
+              loading: _loading,
+            ),
+          ),
+          NotFoundPage(
+            onBackToHome: _navigateToHome, // Transmite funcția validă
+          ),
+          NotFoundPage(
+            onBackToHome: _navigateToHome,
+          ),
+          NotFoundPage(
+            onBackToHome: _navigateToHome,
+          ),
+        ],
       ),
-      bottomNavigationBar: const Footer(),
+      bottomNavigationBar: Footer(
+        onItemTapped: _onItemTapped,
+      ),
       floatingActionButton: Padding(
         padding: const EdgeInsets.only(bottom: 30.0),
         child: FloatingActionButton(
@@ -86,31 +117,6 @@ class MainPageState extends State<MainPage> {
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-    );
-  }
-}
-
-void main() {
-  runApp(MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Calendar App',
-      theme: ThemeData(
-        primarySwatch: Colors.deepPurple,
-      ),
-      initialRoute: '/',
-      routes: {
-        '/': (context) => MainPage(),
-        '/eventList': (context) => EventList(
-              events: _events,
-              loading: _loading,
-            ),
-        '/notFound': (context) => NotFoundPage(),
-      },
     );
   }
 }
