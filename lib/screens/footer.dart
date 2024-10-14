@@ -35,6 +35,21 @@ class FooterState extends State<Footer> {
         _isProfilePressed = true;
       }
     });
+
+    switch (button) {
+      case 'home':
+        Navigator.pushReplacementNamed(context, '/eventList');
+        break;
+      case 'map':
+        Navigator.pushReplacementNamed(context, '/notFound');
+        break;
+      case 'settings':
+        Navigator.pushReplacementNamed(context, '/notFound');
+        break;
+      case 'profile':
+        Navigator.pushReplacementNamed(context, '/notFound');
+        break;
+    }
   }
 
   @override

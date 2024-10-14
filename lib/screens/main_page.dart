@@ -4,6 +4,7 @@ import '../services/auth_provider.dart';
 import 'footer.dart';
 import '../widgets/event_form.dart';
 import '../widgets/event_list.dart';
+import './not_found_page.dart';
 import '../services/event_service.dart';
 import 'package:googleapis/calendar/v3.dart' as calendar;
 
@@ -85,6 +86,31 @@ class MainPageState extends State<MainPage> {
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+    );
+  }
+}
+
+void main() {
+  runApp(MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Calendar App',
+      theme: ThemeData(
+        primarySwatch: Colors.deepPurple,
+      ),
+      initialRoute: '/',
+      routes: {
+        '/': (context) => MainPage(),
+        '/eventList': (context) => EventList(
+              events: _events,
+              loading: _loading,
+            ),
+        '/notFound': (context) => NotFoundPage(),
+      },
     );
   }
 }
