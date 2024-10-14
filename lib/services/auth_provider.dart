@@ -10,7 +10,6 @@ class AuthProvider with ChangeNotifier {
   User? get currentUser => _currentUser;
 
   AuthProvider() {
-    // Verificăm dacă utilizatorul este deja logat la inițializarea provider-ului
     FirebaseAuth.instance.authStateChanges().listen((user) {
       if (user != null) {
         _isLoggedIn = true;

@@ -53,7 +53,6 @@ class Footer extends StatelessWidget {
           ),
         ],
       ),
-      // Mutăm butonul de acțiune la MainPage
     );
   }
 }
