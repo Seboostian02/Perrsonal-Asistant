@@ -24,7 +24,9 @@ class MainPage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Main App"),
+        title: Text(authProvider.isLoggedIn
+            ? "Hello, ${authProvider.currentUser?.displayName ?? 'User'}"
+            : "Main App"),
       ),
       body: Center(
         child: Column(
