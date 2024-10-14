@@ -33,7 +33,7 @@ class _MainPageState extends State<MainPage> {
       DateTime startTime =
           now.subtract(const Duration(hours: 12)); // 12 ore în urma
       DateTime endTime =
-          now.add(const Duration(days: 365 * 10)); // event pe 10 ani
+          now.add(const Duration(days: 365 * 10)); // evenimente pe 10 ani
       List<calendar.Event> events = await GoogleCalendarService.getEvents(
         accessToken: accessToken,
         startTime: startTime,
@@ -71,6 +71,15 @@ class _MainPageState extends State<MainPage> {
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context);
 
+    final DateTime today = DateTime.now();
+    final List<calendar.Event> todayEvents = _events.where((event) {
+      final eventDate = event.start?.dateTime?.toLocal();
+      return eventDate != null &&
+          eventDate.year == today.year &&
+          eventDate.month == today.month &&
+          eventDate.day == today.day;
+    }).toList();
+
     return Scaffold(
       appBar: AppBar(
         title: Text(authProvider.isLoggedIn
@@ -97,7 +106,43 @@ class _MainPageState extends State<MainPage> {
             const SizedBox(height: 20),
             if (_loading)
               const Center(child: CircularProgressIndicator())
-            else
+            else if (_events.isEmpty)
+              const Center(
+                child: Text(
+                  "No events available.",
+                  style: TextStyle(fontSize: 18, color: Colors.grey),
+                ),
+              )
+            else ...[
+              const Text(
+                "Today's Events:",
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 10),
+              if (todayEvents.isEmpty)
+                const Center(
+                  child: Text(
+                    "No events for today.",
+                    style: TextStyle(fontSize: 18, color: Colors.grey),
+                  ),
+                )
+              else
+                for (var event in todayEvents)
+                  EventCard(
+                    title: event.summary ?? "No Title",
+                    location: event.location ?? "No Location",
+                    description: event.description ?? "No Description",
+                    startTime: event.start?.dateTime?.toLocal().toString() ??
+                        "No Start Time",
+                    endTime: event.end?.dateTime?.toLocal().toString() ??
+                        "No End Time",
+                  ),
+              const SizedBox(height: 20),
+              const Text(
+                "All Events:",
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 10),
               for (var event in _events)
                 EventCard(
                   title: event.summary ?? "No Title",
@@ -108,6 +153,7 @@ class _MainPageState extends State<MainPage> {
                   endTime: event.end?.dateTime?.toLocal().toString() ??
                       "No End Time",
                 ),
+            ],
           ],
         ),
       ),
