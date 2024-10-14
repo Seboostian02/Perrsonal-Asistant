@@ -1,7 +1,8 @@
 import 'package:calendar/services/auth_service.dart';
-import 'package:calendar/services/google_calendar_service.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:calendar/services/google_calendar_service.dart';
+import '../services/auth_provider.dart';
 
 class EventForm extends StatefulWidget {
   const EventForm({Key? key}) : super(key: key);
@@ -17,50 +18,10 @@ class _EventFormState extends State<EventForm> {
   TimeOfDay _startTime = TimeOfDay.now();
   TimeOfDay _endTime =
       TimeOfDay.now().replacing(hour: TimeOfDay.now().hour + 1);
-  bool _isLoggedIn = false;
-  User? _currentUser;
-
-  @override
-  void initState() {
-    super.initState();
-    _checkLoginStatus();
-  }
-
-  Future<void> _checkLoginStatus() async {
-    FirebaseAuth.instance.authStateChanges().listen((user) {
-      if (user != null) {
-        setState(() {
-          _isLoggedIn = true;
-          _currentUser = user;
-        });
-      } else {
-        setState(() {
-          _isLoggedIn = false;
-          _currentUser = null;
-        });
-      }
-    });
-  }
-
-  Future<void> _signInWithGoogle() async {
-    UserCredential? userCredential = await AuthService().signInWithGoogle();
-    setState(() {
-      _isLoggedIn = true;
-      _currentUser = userCredential?.user;
-    });
-  }
-
-  Future<void> _signOut() async {
-    // await AuthService().signOut();
-    await FirebaseAuth.instance.signOut();
-    setState(() {
-      _isLoggedIn = false;
-      _currentUser = null;
-    });
-  }
 
   Future<void> _createEvent() async {
-    if (_currentUser != null) {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    if (authProvider.currentUser != null) {
       final accessToken = await AuthService().accessToken;
       if (accessToken != null) {
         await GoogleCalendarService.createEvent(
@@ -102,7 +63,6 @@ class _EventFormState extends State<EventForm> {
       setState(() {
         if (isStartTime) {
           _startTime = picked;
-
           if (_endTime.hour <= _startTime.hour &&
               _endTime.minute <= _startTime.minute) {
             _endTime = picked.replacing(hour: picked.hour + 1);
@@ -116,21 +76,23 @@ class _EventFormState extends State<EventForm> {
 
   @override
   Widget build(BuildContext context) {
+    final authProvider = Provider.of<AuthProvider>(context);
     return Scaffold(
       appBar: AppBar(
         title: const Text(
           'Date & Time Picker',
           style: TextStyle(
-            color: Colors.white, // Schimbă culoarea textului în alb
-            fontWeight: FontWeight.bold, // Schimbă greutatea fontului în bold
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
           ),
         ),
         centerTitle: true,
         toolbarHeight: 80,
         shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.only(
-              bottomRight: Radius.circular(25),
-              bottomLeft: Radius.circular(25)),
+            bottomRight: Radius.circular(25),
+            bottomLeft: Radius.circular(25),
+          ),
         ),
         backgroundColor: Colors.deepPurple,
         iconTheme: const IconThemeData(color: Colors.white),
@@ -141,18 +103,11 @@ class _EventFormState extends State<EventForm> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              _isLoggedIn
-                  ? Column(
-                      children: [
-                        Text("Welcome, ${_currentUser?.displayName}"),
-                        ElevatedButton(
-                          onPressed: _signOut,
-                          child: const Text('Log Out'),
-                        ),
-                      ],
-                    )
+              authProvider.isLoggedIn
+                  ? Text(
+                      "Welcome, ${authProvider.currentUser?.displayName ?? ''}")
                   : ElevatedButton(
-                      onPressed: _signInWithGoogle,
+                      onPressed: authProvider.signInWithGoogle,
                       child: const Text('Log In with Google'),
                     ),
               TextField(
