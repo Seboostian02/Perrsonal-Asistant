@@ -41,12 +41,47 @@ class _EventFormState extends State<EventForm> {
           startTime: _startTime,
           endTime: _endTime,
         );
+
+        _showTopSnackBar(context, 'Event created successfully');
+        Navigator.pop(context);
       } else {
         print("Failed to get access token");
       }
     } else {
       print("User is not logged in.");
     }
+  }
+
+  void _showTopSnackBar(BuildContext context, String message) {
+    final overlay = Overlay.of(context);
+    final overlayEntry = OverlayEntry(
+      builder: (context) => Positioned(
+        top: MediaQuery.of(context).padding.top,
+        left: 0,
+        right: 0,
+        child: Material(
+          elevation: 6.0,
+          child: Container(
+            color: Colors.green,
+            padding: const EdgeInsets.all(16.0),
+            child: Text(
+              message,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 20,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    overlay.insert(overlayEntry);
+
+    Future.delayed(const Duration(seconds: 4), () {
+      overlayEntry.remove();
+    });
   }
 
   Future<void> _selectDate(BuildContext context) async {
