@@ -9,79 +9,52 @@ class Footer extends StatelessWidget {
   final Color iconColor = Colors.white;
   static final Color footerColor = Colors.deepPurple.shade600;
 
-  void _showEventForm(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      builder: (_) => const Padding(
-        padding: EdgeInsets.all(16.0),
-        child: EventForm(),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: const Center(child: Text("Your events will be here")),
-      bottomNavigationBar: BottomAppBar(
-        shape: const CircularNotchedRectangle(),
-        notchMargin: 6.0,
-        color: footerColor,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Row(
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.home),
-                  onPressed: () {},
-                  iconSize: _iconSize,
-                  color: iconColor,
-                ),
-                const SizedBox(width: _sizeBoxWidth),
-                IconButton(
-                  icon: const Icon(Icons.search),
-                  onPressed: () {},
-                  iconSize: _iconSize,
-                  color: iconColor,
-                ),
-              ],
-            ),
-            Row(
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.settings),
-                  onPressed: () {},
-                  iconSize: _iconSize,
-                  color: iconColor,
-                ),
-                const SizedBox(width: _sizeBoxWidth),
-                IconButton(
-                  icon: const Icon(Icons.info),
-                  onPressed: () {},
-                  iconSize: _iconSize,
-                  color: iconColor,
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-      floatingActionButton: Padding(
-        padding: const EdgeInsets.only(bottom: 40.0),
-        child: FloatingActionButton(
-          onPressed: () => _showEventForm(context),
-          backgroundColor: footerColor,
-          shape: const CircleBorder(),
-          child: const Icon(
-            Icons.add,
-            color: Colors.white,
+    return BottomAppBar(
+      shape: const CircularNotchedRectangle(),
+      notchMargin: 6.0,
+      color: footerColor,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            children: [
+              IconButton(
+                icon: const Icon(Icons.home),
+                onPressed: () {},
+                iconSize: _iconSize,
+                color: iconColor,
+              ),
+              const SizedBox(width: _sizeBoxWidth),
+              IconButton(
+                icon: const Icon(Icons.search),
+                onPressed: () {},
+                iconSize: _iconSize,
+                color: iconColor,
+              ),
+            ],
           ),
-        ),
+          Row(
+            children: [
+              IconButton(
+                icon: const Icon(Icons.settings),
+                onPressed: () {},
+                iconSize: _iconSize,
+                color: iconColor,
+              ),
+              const SizedBox(width: _sizeBoxWidth),
+              IconButton(
+                icon: const Icon(Icons.info),
+                onPressed: () {},
+                iconSize: _iconSize,
+                color: iconColor,
+              ),
+            ],
+          ),
+        ],
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      // backgroundColor: Colors.deepPurple.shade500,
+      // Mutăm butonul de acțiune la MainPage
     );
   }
 }

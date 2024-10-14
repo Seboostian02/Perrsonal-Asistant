@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'screens/footer.dart';
+import 'screens/main_page.dart';
 import 'package:firebase_core/firebase_core.dart';
 
 void main() async {
@@ -13,14 +13,8 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(
-          title: const Text("Main App"),
-        ),
-        body: const Footer(),
-        // backgroundColor: Colors.deepPurple.shade600,
-      ),
+    return const MaterialApp(
+      home: MainPage(),
     );
   }
 }
