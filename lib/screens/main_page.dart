@@ -1,11 +1,11 @@
-import 'package:calendar/services/auth_service.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/auth_provider.dart';
 import 'footer.dart';
 import '../widgets/event_form.dart';
-import '../widgets/event_card.dart';
-import '../services/google_calendar_service.dart';
+import '../widgets/event_list.dart';
+import './not_found_page.dart';
+import '../services/event_service.dart';
 import 'package:googleapis/calendar/v3.dart' as calendar;
 
 class MainPage extends StatefulWidget {
@@ -18,6 +18,9 @@ class MainPage extends StatefulWidget {
 class MainPageState extends State<MainPage> {
   List<calendar.Event> _events = [];
   bool _loading = true;
+  final EventService _eventService = EventService();
+
+  int _selectedIndex = 0;
 
   @override
   void initState() {
@@ -26,31 +29,18 @@ class MainPageState extends State<MainPage> {
   }
 
   Future<void> _fetchEvents() async {
-    final String? accessToken = await AuthService().accessToken;
-
-    if (accessToken != null) {
-      DateTime now = DateTime.now();
-      DateTime startTime =
-          now.subtract(const Duration(hours: 12)); // 12 ore în urma
-      DateTime endTime =
-          now.add(const Duration(days: 365 * 10)); // evenimente pe 10 ani
-      List<calendar.Event> events = await GoogleCalendarService.getEvents(
-        accessToken: accessToken,
-        startTime: startTime,
-        endTime: endTime,
-      );
-
-      setState(() {
-        _events = events;
-        _loading = false;
-      });
-    }
-  }
-
-  Future<void> _onRefresh() async {
     setState(() {
       _loading = true;
     });
+
+    _events = await _eventService.fetchEvents();
+
+    setState(() {
+      _loading = false;
+    });
+  }
+
+  Future<void> _onRefresh() async {
     await _fetchEvents();
   }
 
@@ -67,18 +57,15 @@ class MainPageState extends State<MainPage> {
     });
   }
 
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context);
-
-    final DateTime today = DateTime.now();
-    final List<calendar.Event> todayEvents = _events.where((event) {
-      final eventDate = event.start?.dateTime?.toLocal();
-      return eventDate != null &&
-          eventDate.year == today.year &&
-          eventDate.month == today.month &&
-          eventDate.day == today.day;
-    }).toList();
 
     return Scaffold(
       appBar: AppBar(
@@ -86,78 +73,31 @@ class MainPageState extends State<MainPage> {
             ? "Hello, ${authProvider.currentUser?.displayName ?? 'User'}"
             : "Main App"),
       ),
-      body: RefreshIndicator(
-        onRefresh: _onRefresh,
-        child: ListView(
-          padding: const EdgeInsets.all(16.0),
-          children: [
-            const Text(
-              "Your events are here:",
-              style: TextStyle(fontSize: 24),
+      body: IndexedStack(
+        index: _selectedIndex,
+        children: [
+          RefreshIndicator(
+            onRefresh: _onRefresh,
+            child: EventList(
+              events: _events,
+              loading: _loading,
             ),
-            const SizedBox(height: 20),
-            if (authProvider.isLoggedIn)
-              ElevatedButton(
-                onPressed: authProvider.signOut,
-                child: const Text('Log Out'),
-              )
-            else
-              const Text("Not logged in"),
-            const SizedBox(height: 20),
-            if (_loading)
-              const Center(child: CircularProgressIndicator())
-            else if (_events.isEmpty)
-              const Center(
-                child: Text(
-                  "No events available.",
-                  style: TextStyle(fontSize: 18, color: Colors.grey),
-                ),
-              )
-            else ...[
-              const Text(
-                "Today's Events:",
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 10),
-              if (todayEvents.isEmpty)
-                const Center(
-                  child: Text(
-                    "No events for today.",
-                    style: TextStyle(fontSize: 18, color: Colors.grey),
-                  ),
-                )
-              else
-                for (var event in todayEvents)
-                  EventCard(
-                    title: event.summary ?? "No Title",
-                    location: event.location ?? "No Location",
-                    description: event.description ?? "No Description",
-                    startTime: event.start?.dateTime?.toLocal().toString() ??
-                        "No Start Time",
-                    endTime: event.end?.dateTime?.toLocal().toString() ??
-                        "No End Time",
-                  ),
-              const SizedBox(height: 20),
-              const Text(
-                "All Events:",
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 10),
-              for (var event in _events)
-                EventCard(
-                  title: event.summary ?? "No Title",
-                  location: event.location ?? "No Location",
-                  description: event.description ?? "No Description",
-                  startTime: event.start?.dateTime?.toLocal().toString() ??
-                      "No Start Time",
-                  endTime: event.end?.dateTime?.toLocal().toString() ??
-                      "No End Time",
-                ),
-            ],
-          ],
-        ),
+          ),
+          NotFoundPage(
+            onBackToHome: () => _onItemTapped(0),
+          ),
+          NotFoundPage(
+            onBackToHome: () => _onItemTapped(0),
+          ),
+          NotFoundPage(
+            onBackToHome: () => _onItemTapped(0),
+          ),
+        ],
       ),
-      bottomNavigationBar: const Footer(),
+      bottomNavigationBar: Footer(
+        onItemTapped: _onItemTapped,
+        selectedIndex: _selectedIndex,
+      ),
       floatingActionButton: Padding(
         padding: const EdgeInsets.only(bottom: 30.0),
         child: FloatingActionButton(

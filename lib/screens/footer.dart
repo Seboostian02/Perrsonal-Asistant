@@ -1,41 +1,14 @@
 import 'package:calendar/widgets/icont_text_button.dart';
 import 'package:flutter/material.dart';
 
-class Footer extends StatefulWidget {
-  const Footer({super.key});
+class Footer extends StatelessWidget {
+  final Function(int) onItemTapped;
+  final int selectedIndex;
+  static final Color footerColor = Colors.deepPurple.shade600;
+  const Footer(
+      {super.key, required this.onItemTapped, required this.selectedIndex});
 
   static const double _sizeBoxWidth = 30.0;
-
-  @override
-  FooterState createState() => FooterState();
-}
-
-class FooterState extends State<Footer> {
-  static final Color footerColor = Colors.deepPurple.shade600;
-
-  bool _isHomePressed = true;
-  bool _isMapPressed = false;
-  bool _isSettingsPressed = false;
-  bool _isProfilePressed = false;
-
-  void _onButtonPressed(String button) {
-    setState(() {
-      _isHomePressed = false;
-      _isMapPressed = false;
-      _isSettingsPressed = false;
-      _isProfilePressed = false;
-
-      if (button == 'home') {
-        _isHomePressed = true;
-      } else if (button == 'map') {
-        _isMapPressed = true;
-      } else if (button == 'settings') {
-        _isSettingsPressed = true;
-      } else if (button == 'profile') {
-        _isProfilePressed = true;
-      }
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -55,18 +28,18 @@ class FooterState extends State<Footer> {
                   icon: Icons.home,
                   label: 'Home',
                   onPressed: () {
-                    _onButtonPressed('home');
+                    onItemTapped(0);
                   },
-                  isPressed: _isHomePressed,
+                  isPressed: selectedIndex == 0,
                 ),
-                const SizedBox(width: Footer._sizeBoxWidth),
+                const SizedBox(width: _sizeBoxWidth),
                 IconTextButton(
                   icon: Icons.map,
                   label: 'Map',
                   onPressed: () {
-                    _onButtonPressed('map');
+                    onItemTapped(1);
                   },
-                  isPressed: _isMapPressed,
+                  isPressed: selectedIndex == 1,
                 ),
               ],
             ),
@@ -76,18 +49,18 @@ class FooterState extends State<Footer> {
                   icon: Icons.settings,
                   label: 'Settings',
                   onPressed: () {
-                    _onButtonPressed('settings');
+                    onItemTapped(2);
                   },
-                  isPressed: _isSettingsPressed,
+                  isPressed: selectedIndex == 2,
                 ),
-                const SizedBox(width: Footer._sizeBoxWidth),
+                const SizedBox(width: _sizeBoxWidth),
                 IconTextButton(
                   icon: Icons.people_alt,
                   label: 'Profile',
                   onPressed: () {
-                    _onButtonPressed('profile');
+                    onItemTapped(3);
                   },
-                  isPressed: _isProfilePressed,
+                  isPressed: selectedIndex == 3,
                 ),
               ],
             ),
