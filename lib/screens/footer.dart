@@ -2,8 +2,8 @@ import 'package:calendar/widgets/icont_text_button.dart';
 import 'package:flutter/material.dart';
 
 class Footer extends StatelessWidget {
-  final Function(int) onItemTapped; // Callback pentru a schimba indexul
-  final int selectedIndex; // Indexul curent selectat
+  final Function(int) onItemTapped;
+  final int selectedIndex;
   static final Color footerColor = Colors.deepPurple.shade600;
   const Footer(
       {super.key, required this.onItemTapped, required this.selectedIndex});
