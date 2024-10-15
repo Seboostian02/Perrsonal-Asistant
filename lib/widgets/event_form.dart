@@ -63,7 +63,7 @@ class EventFormState extends State<EventForm> {
           description: _descriptionController.text,
           location: _selectedLocation != null
               ? '${_selectedLocation!.latitude}, ${_selectedLocation!.longitude}'
-              : 'No location selected', // mesaj default
+              : 'No location selected', // default message
           date: _selectedDate,
           startTime: _startTime,
           endTime: _endTime,
