@@ -1,5 +1,7 @@
+import 'package:calendar/screens/location_picker.dart';
 import 'package:calendar/services/auth_service.dart';
 import 'package:flutter/material.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:calendar/services/google_calendar_service.dart';
 import '../services/auth_provider.dart';
@@ -14,12 +16,34 @@ class EventForm extends StatefulWidget {
 class EventFormState extends State<EventForm> {
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
+  LatLng? _selectedLocation;
+
   DateTime _selectedDate = DateTime.now();
   TimeOfDay _startTime = TimeOfDay.now();
   TimeOfDay _endTime =
       TimeOfDay.now().replacing(hour: TimeOfDay.now().hour + 1);
 
   Future<void> _createEvent() async {
+    final now = DateTime.now();
+    final currentDate = DateTime(now.year, now.month, now.day);
+    final selectedDate =
+        DateTime(_selectedDate.year, _selectedDate.month, _selectedDate.day);
+
+    if (selectedDate == currentDate) {
+      final nowTime = TimeOfDay.fromDateTime(now);
+
+      if (_startTime.hour < nowTime.hour ||
+          (_startTime.hour == nowTime.hour &&
+              _startTime.minute <= nowTime.minute)) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Start time must be later than the current time'),
+          ),
+        );
+        return;
+      }
+    }
+
     if (_endTime.hour < _startTime.hour ||
         (_endTime.hour == _startTime.hour &&
             _endTime.minute <= _startTime.minute)) {
@@ -37,6 +61,9 @@ class EventFormState extends State<EventForm> {
           accessToken: accessToken,
           title: _titleController.text,
           description: _descriptionController.text,
+          location: _selectedLocation != null
+              ? '${_selectedLocation!.latitude}, ${_selectedLocation!.longitude}'
+              : 'No location selected', // mesaj default
           date: _selectedDate,
           startTime: _startTime,
           endTime: _endTime,
@@ -114,16 +141,14 @@ class EventFormState extends State<EventForm> {
             _endTime = picked.replacing(hour: picked.hour + 1);
           }
         } else {
-          // see if end time > start time
           if (picked.hour < _startTime.hour ||
               (picked.hour == _startTime.hour &&
                   picked.minute <= _startTime.minute)) {
-            // error msg show
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
                   content: Text('End time must be after start time')),
             );
-            return; // exit function
+            return;
           }
           _endTime = picked;
         }
@@ -163,7 +188,7 @@ class EventFormState extends State<EventForm> {
               authProvider.isLoggedIn
                   ? Center(
                       child: Text(
-                        "Time to schedule something important, ${authProvider.currentUser?.displayName ?? ''} !",
+                        "Time to schedule something important, ${authProvider.currentUser?.displayName ?? ''}! ",
                         textAlign: TextAlign.center,
                       ),
                     )
@@ -185,6 +210,35 @@ class EventFormState extends State<EventForm> {
                 controller: _descriptionController,
                 decoration:
                     const InputDecoration(labelText: 'Event Description'),
+              ),
+              ElevatedButton(
+                onPressed: () async {
+                  print("-----------------/nlocation pressed");
+                  final selectedLocation = await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => LocationPickerPage(
+                        onLocationSelected: (LatLng location) {
+                          setState(() {
+                            _selectedLocation = location;
+                          });
+                        },
+                      ),
+                    ),
+                  );
+
+                  // Opțional: Poți verifica dacă locația a fost selectată
+                  if (selectedLocation != null) {
+                    setState(() {
+                      _selectedLocation = selectedLocation;
+                    });
+                  }
+                },
+                child: Text(
+                  _selectedLocation != null
+                      ? 'Selected Location: (${_selectedLocation!.latitude}, ${_selectedLocation!.longitude})'
+                      : 'Select Location',
+                ),
               ),
               const SizedBox(height: 20),
               Text(
