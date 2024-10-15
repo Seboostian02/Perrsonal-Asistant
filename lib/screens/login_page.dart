@@ -17,11 +17,11 @@ class LoginPage extends StatelessWidget {
       body: Center(
         child: ElevatedButton(
           onPressed: () async {
-            final GoogleSignIn _googleSignIn = GoogleSignIn(scopes: [
+            final GoogleSignIn googleSignIn = GoogleSignIn(scopes: [
               'https://www.googleapis.com/auth/calendar',
             ]);
 
-            await _googleSignIn.signOut();
+            await googleSignIn.signOut();
 
             authProvider.signInWithGoogle();
           },

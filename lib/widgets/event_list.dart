@@ -8,10 +8,10 @@ class EventList extends StatelessWidget {
   final bool loading;
 
   const EventList({
-    Key? key,
+    super.key,
     required this.events,
     required this.loading,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

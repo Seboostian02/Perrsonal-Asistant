@@ -1,8 +1,6 @@
 import 'package:calendar/services/auth_service.dart';
 import 'package:googleapis_auth/googleapis_auth.dart';
-
 import 'package:googleapis/calendar/v3.dart' as calendar;
-
 import 'package:googleapis_auth/auth_io.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -15,6 +13,7 @@ class GoogleCalendarService {
     required DateTime date,
     required TimeOfDay startTime,
     required TimeOfDay endTime,
+    String? location,
   }) async {
     try {
       String? accessToken = await AuthService().accessToken;
@@ -26,6 +25,7 @@ class GoogleCalendarService {
         var event = calendar.Event();
         event.summary = title;
         event.description = description;
+        event.location = location;
 
         var startDateTime = DateTime(
           date.year,

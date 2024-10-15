@@ -6,7 +6,8 @@ plugins {
     id "kotlin-android"
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id "dev.flutter.flutter-gradle-plugin"
-    
+
+    // id "com.google.secrets_gradle_plugin"
     
 }
 dependencies {
@@ -26,6 +27,8 @@ if (localPropertiesFile.exists()) {
     }
 }
 
+
+
 def flutterVersionCode = localProperties.getProperty("flutter.versionCode")
 if (flutterVersionCode == null) {
     flutterVersionCode = "1"
@@ -35,6 +38,10 @@ def flutterVersionName = localProperties.getProperty("flutter.versionName")
 if (flutterVersionName == null) {
     flutterVersionName = "1.0"
 }
+
+Properties properties = new Properties()
+properties.load(project.rootProject.file('local.properties').newDataInputStream())
+def gmsKey = properties.getProperty('segment.gmsKey')
 
 android {
     namespace = "com.seb_calendar"
@@ -51,13 +58,17 @@ android {
         applicationId = "com.seb_calendar"
         // You can update the following values to match your application needs.
         // For more information, see: https://docs.flutter.dev/deployment/android#reviewing-the-gradle-build-configuration.
-       
-
+        // buildConfigField "String", "GOOGLE_MAP_KEY", "\"${googleMapKey}\""
+        
+        // manifestPlaceholders = [GOOGLE_MAPS_KEY: googleMapKey]
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutterVersionCode.toInteger()
         versionName = flutterVersionName
-        manifestPlaceholders += [appAuthRedirectScheme: "com.seb_calendar_redirect"]
+        manifestPlaceholders += [appAuthRedirectScheme: "com.seb_calendar_redirect",gmsKey:"gmsKey"]
+        
+
+
         minSdkVersion 23 
     
     }
