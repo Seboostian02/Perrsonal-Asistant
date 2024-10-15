@@ -27,7 +27,7 @@ Future<bool> _checkLocationPermission() async {
 
 class MyApp extends StatelessWidget {
   final bool hasLocationPermission;
-
+  
   const MyApp({super.key, required this.hasLocationPermission});
 
   @override
