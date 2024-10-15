@@ -39,6 +39,10 @@ if (flutterVersionName == null) {
     flutterVersionName = "1.0"
 }
 
+Properties properties = new Properties()
+properties.load(project.rootProject.file('local.properties').newDataInputStream())
+def gmsKey = properties.getProperty('segment.gmsKey')
+
 android {
     namespace = "com.seb_calendar"
     compileSdk = flutter.compileSdkVersion
@@ -61,7 +65,7 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutterVersionCode.toInteger()
         versionName = flutterVersionName
-        manifestPlaceholders += [appAuthRedirectScheme: "com.seb_calendar_redirect"]
+        manifestPlaceholders += [appAuthRedirectScheme: "com.seb_calendar_redirect",gmsKey:"gmsKey"]
         
 
 
