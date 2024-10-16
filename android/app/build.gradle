@@ -39,8 +39,6 @@ if (flutterVersionName == null) {
     flutterVersionName = "1.0"
 }
 
-def gmsKey = localProperties.getProperty("segment.gms_key")
-
 android {
     namespace = "com.seb_calendar"
     compileSdk = flutter.compileSdkVersion
@@ -56,17 +54,16 @@ android {
         applicationId = "com.seb_calendar"
         // You can update the following values to match your application needs.
         // For more information, see: https://docs.flutter.dev/deployment/android#reviewing-the-gradle-build-configuration.
-        // buildConfigField "String", "GOOGLE_MAP_KEY", "\"${googleMapKey}\""
         
-        // manifestPlaceholders = [GOOGLE_MAPS_KEY: googleMapKey]
+        resValue "string", "GMS_API_KEY", localProperties.getProperty('MY_GMS_KEY')
+   
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutterVersionCode.toInteger()
         versionName = flutterVersionName
-        manifestPlaceholders += [appAuthRedirectScheme: "com.seb_calendar_redirect",gmsKey:"gmsKey"]
+
+        manifestPlaceholders += [appAuthRedirectScheme: "com.seb_calendar_redirect"] //,gmsKey:"gmsKey"
         
-
-
         minSdkVersion 23 
     
     }
