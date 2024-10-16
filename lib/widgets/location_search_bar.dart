@@ -41,11 +41,17 @@ class LocationSearchBar extends StatelessWidget {
                   EdgeInsets.symmetric(horizontal: 20, vertical: 15),
               prefixIcon: Icon(Icons.search, color: Colors.grey),
             ),
-            onChanged: onSearch,
+            onChanged: (text) {
+              onSearch(text);
+              print("---------------------");
+              print(
+                  'Predictions: ${predictions.map((p) => p.description).toList()}');
+            },
           ),
         ),
         if (predictions.isNotEmpty)
           Container(
+            margin: const EdgeInsets.only(top: 5),
             color: Colors.white,
             child: ListView.builder(
               shrinkWrap: true,

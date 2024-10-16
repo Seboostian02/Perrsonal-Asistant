@@ -14,7 +14,7 @@ class LocationPickerPage extends StatefulWidget {
 }
 
 class _LocationPickerPageState extends State<LocationPickerPage> {
-  late GooglePlace _googlePlace;
+  GooglePlace? _googlePlace;
   late GoogleMapController _mapController;
   LatLng? _selectedLocation;
   List<AutocompletePrediction> _predictions = [];
@@ -28,10 +28,19 @@ class _LocationPickerPageState extends State<LocationPickerPage> {
 
   Future<void> _initializeGooglePlace() async {
     await FlutterConfig.loadEnvVariables();
-    String apiKey = FlutterConfig.get('GMS_API_KEY');
-    setState(() {
-      _googlePlace = GooglePlace(apiKey);
-    });
+    // String apiKey = FlutterConfig.get('GMS_API_KEY');
+    String apiKey = "AIzaSyDZTD9rMwvZyxlrz4Gd0UG-2UR7zfZO1U4";
+    print(apiKey);
+    if (apiKey.isNotEmpty) {
+      setState(() {
+        print("--------------------------------");
+        print(apiKey);
+        _googlePlace = GooglePlace(apiKey);
+      });
+    } else {
+      print("------------------------.");
+      print("API KEY NOT FOUND.");
+    }
   }
 
   void _onMapCreated(GoogleMapController controller) {
@@ -46,14 +55,22 @@ class _LocationPickerPageState extends State<LocationPickerPage> {
   }
 
   void _searchPlace(String input) async {
-    final result = await _googlePlace.autocomplete.get(input);
+    if (_googlePlace == null) {
+      print("e null-------------------------");
+      return;
+    }
+    final result = await _googlePlace!.autocomplete.get(input);
+    print("-------------rezultat");
+    print(result?.status);
     setState(() {
       _predictions = result?.predictions ?? [];
     });
   }
 
   void _selectPrediction(String placeId) async {
-    final details = await _googlePlace.details.get(placeId);
+    if (_googlePlace == null) return;
+
+    final details = await _googlePlace!.details.get(placeId);
     if (details != null && details.result != null) {
       final lat = details.result!.geometry!.location!.lat;
       final lng = details.result!.geometry!.location!.lng;
