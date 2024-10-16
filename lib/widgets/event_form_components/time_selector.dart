@@ -17,7 +17,7 @@ class TimeSelector extends StatelessWidget {
     return Column(
       children: [
         Text(
-          'Start time: ${startTime.format(context)}',
+          'Start time: ${_formatTime(startTime)}',
           style: const TextStyle(fontSize: 24),
         ),
         ElevatedButton(
@@ -26,7 +26,7 @@ class TimeSelector extends StatelessWidget {
         ),
         const SizedBox(height: 20),
         Text(
-          'End time: ${endTime.format(context)}',
+          'End time: ${_formatTime(endTime)}',
           style: const TextStyle(fontSize: 24),
         ),
         ElevatedButton(
@@ -35,5 +35,11 @@ class TimeSelector extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  String _formatTime(TimeOfDay time) {
+    final hour = time.hour.toString().padLeft(2, '0');
+    final minute = time.minute.toString().padLeft(2, '0');
+    return '$hour:$minute';
   }
 }

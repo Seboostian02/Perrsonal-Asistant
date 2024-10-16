@@ -1,4 +1,3 @@
-import 'package:calendar/screens/location_picker.dart';
 import 'package:calendar/services/auth_service.dart';
 import 'package:calendar/widgets/event_form_components/create_event_button.dart';
 import 'package:calendar/widgets/event_form_components/date_selector.dart';
@@ -26,7 +25,8 @@ class EventFormState extends State<EventForm> {
   LatLng? _selectedLocation;
 
   DateTime _selectedDate = DateTime.now();
-  TimeOfDay _startTime = TimeOfDay.now();
+  TimeOfDay _startTime =
+      TimeOfDay.now().replacing(minute: TimeOfDay.now().minute + 15);
   TimeOfDay _endTime =
       TimeOfDay.now().replacing(hour: TimeOfDay.now().hour + 1);
 
@@ -70,10 +70,11 @@ class EventFormState extends State<EventForm> {
           description: _descriptionController.text,
           location: _selectedLocation != null
               ? '${_selectedLocation!.latitude}, ${_selectedLocation!.longitude}'
-              : 'No location selected', // mesaj default
+              : 'No location selected',
           date: _selectedDate,
           startTime: _startTime,
-          endTime: _endTime, location_name: '',
+          endTime: _endTime,
+          location_name: '',
         );
 
         _showTopSnackBar(context, 'Event created successfully');
@@ -165,7 +166,6 @@ class EventFormState extends State<EventForm> {
 
   @override
   Widget build(BuildContext context) {
-    final authProvider = Provider.of<AuthProvider>(context);
     return Scaffold(
       appBar: AppBar(
         title: const Text(
