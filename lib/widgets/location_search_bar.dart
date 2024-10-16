@@ -2,38 +2,66 @@ import 'package:flutter/material.dart';
 import 'package:google_place/google_place.dart';
 
 class LocationSearchBar extends StatelessWidget {
+  final TextEditingController controller;
   final Function(String) onSearch;
   final List<AutocompletePrediction> predictions;
   final Function(String) onPredictionSelected;
 
-  LocationSearchBar({
+  const LocationSearchBar({
+    Key? key,
+    required this.controller,
     required this.onSearch,
     required this.predictions,
     required this.onPredictionSelected,
-  });
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        TextField(
-          onChanged: (value) => onSearch(value),
-          decoration: InputDecoration(
-            hintText: "Search location",
-            filled: true,
-            fillColor: Colors.white,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide.none,
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(25),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.2),
+                spreadRadius: 2,
+                blurRadius: 5,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: TextField(
+            controller: controller,
+            decoration: const InputDecoration(
+              hintText: 'Search location...',
+              border: InputBorder.none,
+              contentPadding:
+                  EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+              prefixIcon: Icon(Icons.search, color: Colors.grey),
+            ),
+            onChanged: onSearch,
+          ),
+        ),
+        if (predictions.isNotEmpty)
+          Container(
+            color: Colors.white,
+            child: ListView.builder(
+              shrinkWrap: true,
+              itemCount: predictions.length,
+              itemBuilder: (context, index) {
+                final prediction = predictions[index];
+                return ListTile(
+                  title: Text(prediction.description ?? ''),
+                  onTap: () {
+                    onPredictionSelected(prediction.placeId!);
+                    controller.clear();
+                  },
+                );
+              },
             ),
           ),
-        ),
-        ...predictions.map(
-          (p) => ListTile(
-            title: Text(p.description ?? ''),
-            onTap: () => onPredictionSelected(p.placeId!),
-          ),
-        ),
       ],
     );
   }

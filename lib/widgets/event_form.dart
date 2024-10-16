@@ -66,7 +66,7 @@ class EventFormState extends State<EventForm> {
               : 'No location selected', // mesaj default
           date: _selectedDate,
           startTime: _startTime,
-          endTime: _endTime,
+          endTime: _endTime, location_name: '',
         );
 
         _showTopSnackBar(context, 'Event created successfully');
@@ -227,7 +227,6 @@ class EventFormState extends State<EventForm> {
                     ),
                   );
 
-                  // Opțional: Poți verifica dacă locația a fost selectată
                   if (selectedLocation != null) {
                     setState(() {
                       _selectedLocation = selectedLocation;
