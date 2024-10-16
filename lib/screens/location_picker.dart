@@ -2,58 +2,50 @@ import 'package:calendar/widgets/location_search_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_place/google_place.dart';
-import 'package:googleapis/cloudfunctions/v2.dart';
 
 class LocationPickerPage extends StatefulWidget {
-  final Function(LatLng location)
-      onLocationSelected; // Add this function to handle the location selection
+  final Function(LatLng) onLocationSelected;
 
-  const LocationPickerPage({
-    Key? key,
-    required this.onLocationSelected,
-  }) : super(key: key);
+  const LocationPickerPage({super.key, required this.onLocationSelected});
 
   @override
-  _LocationPickerPageState createState() => _LocationPickerPageState();
+  State<LocationPickerPage> createState() => _LocationPickerPageState();
 }
 
 class _LocationPickerPageState extends State<LocationPickerPage> {
   late GoogleMapController _mapController;
-  late GooglePlace googlePlace;
+  final _googlePlace = GooglePlace("AIzaSyDZTD9rMwvZyxlrz4Gd0UG-2UR7zfZO1U4");
+  LatLng? _selectedLocation;
   List<AutocompletePrediction> _predictions = [];
-  String _searchInput = '';
-
-  @override
-  void initState() {
-    super.initState();
-    // Initialize Google Place API (ensure you replace YOUR_API_KEY with your actual API key)
-    googlePlace = GooglePlace("AIzaSyDZTD9rMwvZyxlrz4Gd0UG-2UR7zfZO1U4");
-  }
+  final TextEditingController _searchController = TextEditingController();
 
   void _onMapCreated(GoogleMapController controller) {
     _mapController = controller;
   }
 
-  void _searchLocation(String input) async {
-    if (input.isNotEmpty) {
-      final response = await googlePlace.autocomplete.get(input);
-      setState(() {
-        _predictions = response?.predictions ?? []; // Use null-aware operator
-      });
-    } else {
-      setState(() {
-        _predictions = [];
-      });
-    }
+  void _selectLocation(LatLng location) {
+    setState(() {
+      _selectedLocation = location;
+    });
+    widget.onLocationSelected(location);
   }
 
-  Future<void> _selectLocation(String placeId) async {
-    final details = await googlePlace.details.get(placeId);
-    final location = details!.result!.geometry?.location;
-    if (location != null) {
-      final latLng = LatLng(location.lat!, location.lng!);
-      widget.onLocationSelected(latLng); // Pass the selected location back
-      Navigator.pop(context); // Close the picker
+  void _searchPlace(String input) async {
+    final result = await _googlePlace.autocomplete.get(input);
+    setState(() {
+      _predictions = result?.predictions ?? [];
+    });
+  }
+
+  void _selectPrediction(String placeId) async {
+    final details = await _googlePlace.details.get(placeId);
+    if (details != null && details.result != null) {
+      final lat = details.result!.geometry!.location!.lat;
+      final lng = details.result!.geometry!.location!.lng;
+      final newLocation = LatLng(lat!, lng!);
+
+      _mapController.animateCamera(CameraUpdate.newLatLngZoom(newLocation, 15));
+      _selectLocation(newLocation);
     }
   }
 
@@ -61,27 +53,64 @@ class _LocationPickerPageState extends State<LocationPickerPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Pick a Location"),
+        title: const Text(
+          'Pick a Location',
+          style: TextStyle(color: Colors.white),
+        ),
+        backgroundColor: Colors.deepPurple,
       ),
-      body: Column(
+      body: Stack(
         children: [
-          LocationSearchBar(
-            onSearch: _searchLocation,
-            predictions: _predictions,
-            onPredictionSelected: _selectLocation,
+          GoogleMap(
+            onMapCreated: _onMapCreated,
+            initialCameraPosition: CameraPosition(
+              target: _selectedLocation ?? const LatLng(45.0, 25.0),
+              zoom: 5,
+            ),
+            markers: _selectedLocation != null
+                ? {
+                    Marker(
+                      markerId: const MarkerId('selected-location'),
+                      position: _selectedLocation!,
+                    ),
+                  }
+                : {},
+            onTap: _selectLocation,
           ),
-          Expanded(
-            child: GoogleMap(
-              onMapCreated: _onMapCreated,
-              initialCameraPosition: const CameraPosition(
-                target: LatLng(-23.5557714, -46.6395571), // Initial position
-                zoom: 12,
-              ),
-              mapType: MapType.normal,
-              myLocationEnabled: true,
-              myLocationButtonEnabled: true,
+          Positioned(
+            top: MediaQuery.of(context).padding.top + 20,
+            left: 15,
+            right: 15,
+            child: LocationSearchBar(
+              controller: _searchController,
+              onSearch: _searchPlace,
+              predictions: _predictions,
+              onPredictionSelected: _selectPrediction,
             ),
           ),
+          if (_selectedLocation != null)
+            Positioned(
+              bottom: 20,
+              left: MediaQuery.of(context).size.width * 0.3,
+              right: MediaQuery.of(context).size.width * 0.3,
+              child: SizedBox(
+                width: MediaQuery.of(context).size.width * 0.4,
+                child: ElevatedButton(
+                  onPressed: () {
+                    widget.onLocationSelected(_selectedLocation!);
+                    Navigator.pop(context);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    backgroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                  ),
+                  child: const Text("Choose this location"),
+                ),
+              ),
+            ),
         ],
       ),
     );

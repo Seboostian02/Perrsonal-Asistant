@@ -14,6 +14,7 @@ class GoogleCalendarService {
     required TimeOfDay startTime,
     required TimeOfDay endTime,
     String? location,
+    required String location_name,
   }) async {
     try {
       String? accessToken = await AuthService().accessToken;

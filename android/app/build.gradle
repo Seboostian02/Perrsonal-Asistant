@@ -39,9 +39,7 @@ if (flutterVersionName == null) {
     flutterVersionName = "1.0"
 }
 
-Properties properties = new Properties()
-properties.load(project.rootProject.file('local.properties').newDataInputStream())
-def gmsKey = properties.getProperty('segment.gmsKey')
+def gmsKey = localProperties.getProperty("segment.gms_key")
 
 android {
     namespace = "com.seb_calendar"
