@@ -90,6 +90,7 @@ class _LocationPickerPageState extends State<LocationPickerPage> {
           style: TextStyle(color: Colors.white),
         ),
         backgroundColor: Colors.deepPurple,
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: Stack(
         children: [
