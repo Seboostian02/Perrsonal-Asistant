@@ -1,3 +1,5 @@
+import 'package:calendar/screens/event_view_on_map.dart';
+import 'package:calendar/services/auth_service.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/auth_provider.dart';
@@ -6,6 +8,7 @@ import '../widgets/event_form.dart';
 import '../widgets/event_list.dart';
 import './not_found_page.dart';
 import '../services/event_service.dart';
+import '../services/google_calendar_service.dart';
 import 'package:googleapis/calendar/v3.dart' as calendar;
 
 class MainPage extends StatefulWidget {
@@ -19,6 +22,7 @@ class MainPageState extends State<MainPage> {
   List<calendar.Event> _events = [];
   bool _loading = true;
   final EventService _eventService = EventService();
+  final GoogleCalendarService _googleCalendarService = GoogleCalendarService();
 
   int _selectedIndex = 0;
 
@@ -33,7 +37,22 @@ class MainPageState extends State<MainPage> {
       _loading = true;
     });
 
-    _events = await _eventService.fetchEvents();
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    String? accessToken = await AuthService().accessToken;
+
+    if (accessToken != null) {
+      DateTime now = DateTime.now();
+      DateTime startTime = DateTime(now.year, now.month, now.day);
+      DateTime endTime = startTime.add(Duration(days: 30));
+
+      _events = await GoogleCalendarService.getEvents(
+        accessToken: accessToken,
+        startTime: startTime,
+        endTime: endTime,
+      );
+      print("in main-----------------");
+      print(_events);
+    }
 
     setState(() {
       _loading = false;
@@ -83,9 +102,7 @@ class MainPageState extends State<MainPage> {
               loading: _loading,
             ),
           ),
-          NotFoundPage(
-            onBackToHome: () => _onItemTapped(0),
-          ),
+          EventView(events: _events),
           NotFoundPage(
             onBackToHome: () => _onItemTapped(0),
           ),
