@@ -2,6 +2,7 @@ import 'package:calendar/widgets/location_search_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_place/google_place.dart';
+import 'package:flutter_config/flutter_config.dart';
 
 class LocationPickerPage extends StatefulWidget {
   final Function(LatLng) onLocationSelected;
@@ -13,11 +14,25 @@ class LocationPickerPage extends StatefulWidget {
 }
 
 class _LocationPickerPageState extends State<LocationPickerPage> {
+  late GooglePlace _googlePlace;
   late GoogleMapController _mapController;
-  final _googlePlace = GooglePlace("AIzaSyDZTD9rMwvZyxlrz4Gd0UG-2UR7zfZO1U4");
   LatLng? _selectedLocation;
   List<AutocompletePrediction> _predictions = [];
   final TextEditingController _searchController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeGooglePlace();
+  }
+
+  Future<void> _initializeGooglePlace() async {
+    await FlutterConfig.loadEnvVariables();
+    String apiKey = FlutterConfig.get('GMS_API_KEY');
+    setState(() {
+      _googlePlace = GooglePlace(apiKey);
+    });
+  }
 
   void _onMapCreated(GoogleMapController controller) {
     _mapController = controller;
