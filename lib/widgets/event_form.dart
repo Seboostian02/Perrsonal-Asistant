@@ -1,5 +1,12 @@
 import 'package:calendar/screens/location_picker.dart';
 import 'package:calendar/services/auth_service.dart';
+import 'package:calendar/widgets/event_form_components/create_event_button.dart';
+import 'package:calendar/widgets/event_form_components/date_selector.dart';
+import 'package:calendar/widgets/event_form_components/event_description_field.dart';
+import 'package:calendar/widgets/event_form_components/event_title_field.dart';
+import 'package:calendar/widgets/event_form_components/location_selector.dart';
+import 'package:calendar/widgets/event_form_components/time_selector.dart';
+import 'package:calendar/widgets/event_form_components/user_greeting.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
@@ -185,93 +192,30 @@ class EventFormState extends State<EventForm> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              authProvider.isLoggedIn
-                  ? Center(
-                      child: Text(
-                        "Time to schedule something important, ${authProvider.currentUser?.displayName ?? ''}! ",
-                        textAlign: TextAlign.center,
-                      ),
-                    )
-                  : Center(
-                      child: ElevatedButton(
-                        onPressed: authProvider.signInWithGoogle,
-                        child: const Text('Log In with Google'),
-                      ),
-                    ),
-              TextField(
-                textAlign: TextAlign.center,
-                controller: _titleController,
-                decoration: const InputDecoration(
-                  labelText: 'Event Title',
-                ),
-              ),
-              TextField(
-                textAlign: TextAlign.center,
-                controller: _descriptionController,
-                decoration:
-                    const InputDecoration(labelText: 'Event Description'),
-              ),
-              ElevatedButton(
-                onPressed: () async {
-                  print("-----------------/nlocation pressed");
-                  final selectedLocation = await Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => LocationPickerPage(
-                        onLocationSelected: (LatLng location) {
-                          setState(() {
-                            _selectedLocation = location;
-                          });
-                        },
-                      ),
-                    ),
-                  );
-
-                  if (selectedLocation != null) {
-                    setState(() {
-                      _selectedLocation = selectedLocation;
-                    });
-                  }
+              const UserGreeting(),
+              EventTitleField(controller: _titleController),
+              EventDescriptionField(controller: _descriptionController),
+              LocationSelector(
+                selectedLocation: _selectedLocation,
+                onLocationSelected: (LatLng location) {
+                  setState(() {
+                    _selectedLocation = location;
+                  });
                 },
-                child: Text(
-                  _selectedLocation != null
-                      ? 'Selected Location: (${_selectedLocation!.latitude}, ${_selectedLocation!.longitude})'
-                      : 'Select Location',
-                ),
               ),
               const SizedBox(height: 20),
-              Text(
-                'Selected date: ${_selectedDate.day}/${_selectedDate.month}/${_selectedDate.year}',
-                style: const TextStyle(fontSize: 24),
-                textAlign: TextAlign.center,
-              ),
-              ElevatedButton(
-                onPressed: () => _selectDate(context),
-                child: const Text('Pick Date'),
+              DateSelector(
+                selectedDate: _selectedDate,
+                onDateSelected: _selectDate,
               ),
               const SizedBox(height: 20),
-              Text(
-                'Start time: ${_startTime.format(context)}',
-                style: const TextStyle(fontSize: 24),
-              ),
-              ElevatedButton(
-                onPressed: () => _selectTime(context, true),
-                child: const Text('Pick Start Time'),
-              ),
-              const SizedBox(height: 20),
-              Text(
-                'End time: ${_endTime.format(context)}',
-                style: const TextStyle(fontSize: 24),
-              ),
-              ElevatedButton(
-                onPressed: () => _selectTime(context, false),
-                child: const Text('Pick End Time'),
+              TimeSelector(
+                startTime: _startTime,
+                endTime: _endTime,
+                onTimeSelected: _selectTime,
               ),
               const SizedBox(height: 40),
-              ElevatedButton(
-                onPressed: _createEvent,
-                child: const Text('Create Event'),
-              ),
+              CreateEventButton(onPressed: _createEvent),
             ],
           ),
         ),
