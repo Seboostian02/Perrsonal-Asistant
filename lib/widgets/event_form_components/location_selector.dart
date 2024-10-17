@@ -7,10 +7,11 @@ class LocationSelector extends StatelessWidget {
   final Function(LatLng) onLocationSelected;
 
   const LocationSelector({
-    Key? key,
+    super.key,
     required this.selectedLocation,
     required this.onLocationSelected,
-  }) : super(key: key);
+    required String selectedLocationName,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +21,11 @@ class LocationSelector extends StatelessWidget {
           context,
           MaterialPageRoute(
             builder: (context) => LocationPickerPage(
-              onLocationSelected: onLocationSelected,
+              onLocationSelected: (location, placeName) {
+                final googleLatLng =
+                    LatLng(location.latitude, location.longitude);
+                onLocationSelected(googleLatLng);
+              },
             ),
           ),
         );
@@ -30,9 +35,7 @@ class LocationSelector extends StatelessWidget {
         }
       },
       child: Text(
-        selectedLocation != null
-            ? 'Selected Location: (${selectedLocation!.latitude}, ${selectedLocation!.longitude})'
-            : 'Select Location',
+        selectedLocation != null ? 'Location Selected' : 'Select Location',
       ),
     );
   }

@@ -1,19 +1,31 @@
 import 'package:flutter/material.dart';
-import 'package:google_place/google_place.dart';
+import 'package:geocoding/geocoding.dart';
 
 class LocationSearchBar extends StatelessWidget {
   final TextEditingController controller;
   final Function(String) onSearch;
-  final List<AutocompletePrediction> predictions;
-  final Function(String) onPredictionSelected;
+  final List<Location> predictions;
+  final Function(int) onPredictionSelected;
 
   const LocationSearchBar({
-    Key? key,
+    super.key,
     required this.controller,
     required this.onSearch,
     required this.predictions,
     required this.onPredictionSelected,
-  }) : super(key: key);
+  });
+
+  Future<String> _getPlaceName(double latitude, double longitude) async {
+    try {
+      final placemarks = await placemarkFromCoordinates(latitude, longitude);
+      if (placemarks.isNotEmpty) {
+        return placemarks.first.name ?? 'Unknown location';
+      }
+    } catch (e) {
+      print('Error getting place name: $e');
+    }
+    return 'Unknown location';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -41,30 +53,40 @@ class LocationSearchBar extends StatelessWidget {
                   EdgeInsets.symmetric(horizontal: 20, vertical: 15),
               prefixIcon: Icon(Icons.search, color: Colors.grey),
             ),
-            onChanged: (text) {
-              onSearch(text);
-              print("---------------------");
-              print(
-                  'Predictions: ${predictions.map((p) => p.description).toList()}');
-            },
+            onChanged: (text) => onSearch(text),
           ),
         ),
         if (predictions.isNotEmpty)
           Container(
             margin: const EdgeInsets.only(top: 5),
             color: Colors.white,
-            child: ListView.builder(
-              shrinkWrap: true,
-              itemCount: predictions.length,
-              itemBuilder: (context, index) {
-                final prediction = predictions[index];
-                return ListTile(
-                  title: Text(prediction.description ?? ''),
-                  onTap: () {
-                    onPredictionSelected(prediction.placeId!);
-                    controller.clear();
-                  },
-                );
+            child: FutureBuilder<List<String>>(
+              future: Future.wait(predictions.map((prediction) async {
+                return await _getPlaceName(
+                    prediction.latitude, prediction.longitude);
+              })),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return CircularProgressIndicator();
+                } else if (snapshot.hasError) {
+                  return Text('Error: ${snapshot.error}');
+                } else {
+                  final names = snapshot.data!;
+                  return ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: names.length,
+                    itemBuilder: (context, index) {
+                      final name = names[index];
+                      return ListTile(
+                        title: Text(name),
+                        onTap: () {
+                          onPredictionSelected(index);
+                          controller.clear();
+                        },
+                      );
+                    },
+                  );
+                }
               },
             ),
           ),

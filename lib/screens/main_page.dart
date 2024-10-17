@@ -7,7 +7,7 @@ import 'footer.dart';
 import '../widgets/event_form.dart';
 import '../widgets/event_list.dart';
 import './not_found_page.dart';
-import '../services/event_service.dart';
+
 import '../services/google_calendar_service.dart';
 import 'package:googleapis/calendar/v3.dart' as calendar;
 
@@ -21,8 +21,6 @@ class MainPage extends StatefulWidget {
 class MainPageState extends State<MainPage> {
   List<calendar.Event> _events = [];
   bool _loading = true;
-  final EventService _eventService = EventService();
-  final GoogleCalendarService _googleCalendarService = GoogleCalendarService();
 
   int _selectedIndex = 0;
 
@@ -37,21 +35,19 @@ class MainPageState extends State<MainPage> {
       _loading = true;
     });
 
-    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    Provider.of<AuthProvider>(context, listen: false);
     String? accessToken = await AuthService().accessToken;
 
     if (accessToken != null) {
       DateTime now = DateTime.now();
       DateTime startTime = DateTime(now.year, now.month, now.day);
-      DateTime endTime = startTime.add(Duration(days: 30));
+      DateTime endTime = startTime.add(const Duration(days: 30));
 
       _events = await GoogleCalendarService.getEvents(
         accessToken: accessToken,
         startTime: startTime,
         endTime: endTime,
       );
-      print("in main-----------------");
-      print(_events);
     }
 
     setState(() {
