@@ -202,6 +202,7 @@ class EventFormState extends State<EventForm> {
                     _selectedLocation = location;
                   });
                 },
+                selectedLocationName: '',
               ),
               const SizedBox(height: 20),
               DateSelector(

@@ -1,11 +1,11 @@
 import 'package:calendar/widgets/location_search_bar.dart';
 import 'package:flutter/material.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:google_place/google_place.dart';
-import 'package:flutter_config/flutter_config.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart';
+import 'package:geocoding/geocoding.dart';
 
 class LocationPickerPage extends StatefulWidget {
-  final Function(LatLng) onLocationSelected;
+  final Function(LatLng, String) onLocationSelected;
 
   const LocationPickerPage({super.key, required this.onLocationSelected});
 
@@ -14,71 +14,59 @@ class LocationPickerPage extends StatefulWidget {
 }
 
 class _LocationPickerPageState extends State<LocationPickerPage> {
-  GooglePlace? _googlePlace;
-  late GoogleMapController _mapController;
   LatLng? _selectedLocation;
-  List<AutocompletePrediction> _predictions = [];
+  List<Location> _searchResults = [];
   final TextEditingController _searchController = TextEditingController();
-
-  @override
-  void initState() {
-    super.initState();
-    _initializeGooglePlace();
-  }
-
-  Future<void> _initializeGooglePlace() async {
-    await FlutterConfig.loadEnvVariables();
-    // String apiKey = FlutterConfig.get('GMS_API_KEY');
-    String apiKey = "AIzaSyDZTD9rMwvZyxlrz4Gd0UG-2UR7zfZO1U4";
-    print(apiKey);
-    if (apiKey.isNotEmpty) {
-      setState(() {
-        print("--------------------------------");
-        print(apiKey);
-        _googlePlace = GooglePlace(apiKey);
-      });
-    } else {
-      print("------------------------.");
-      print("API KEY NOT FOUND.");
-    }
-  }
-
-  void _onMapCreated(GoogleMapController controller) {
-    _mapController = controller;
-  }
+  final MapController _mapController = MapController();
 
   void _selectLocation(LatLng location) {
     setState(() {
       _selectedLocation = location;
     });
-    widget.onLocationSelected(location);
   }
 
-  void _searchPlace(String input) async {
-    if (_googlePlace == null) {
-      print("e null-------------------------");
-      return;
+  Future<void> _searchPlace(String input) async {
+    try {
+      final locations = await locationFromAddress(input);
+      setState(() {
+        _searchResults = locations;
+      });
+    } catch (e) {
+      print('Error finding location: $e');
     }
-    final result = await _googlePlace!.autocomplete.get(input);
-    print("-------------rezultat");
-    print(result?.status);
-    setState(() {
-      _predictions = result?.predictions ?? [];
-    });
   }
 
-  void _selectPrediction(String placeId) async {
-    if (_googlePlace == null) return;
+  void _selectPrediction(Location location) async {
+    final latLng = LatLng(location.latitude, location.longitude);
+    _mapController.move(latLng, 15.0);
+    _selectLocation(latLng);
 
-    final details = await _googlePlace!.details.get(placeId);
-    if (details != null && details.result != null) {
-      final lat = details.result!.geometry!.location!.lat;
-      final lng = details.result!.geometry!.location!.lng;
-      final newLocation = LatLng(lat!, lng!);
+    String placeName =
+        await _getPlaceName(location.latitude, location.longitude);
 
-      _mapController.animateCamera(CameraUpdate.newLatLngZoom(newLocation, 15));
-      _selectLocation(newLocation);
+    widget.onLocationSelected(latLng, placeName);
+  }
+
+  Future<String> _getPlaceName(double latitude, double longitude) async {
+    String address = '';
+    try {
+      final placemarks = await placemarkFromCoordinates(latitude, longitude);
+      if (placemarks.isNotEmpty) {
+        address =
+            '${placemarks.first.name}, ${placemarks.first.street}, ${placemarks.first.locality}, ${placemarks.first.country}';
+      }
+    } catch (e) {
+      print('Error getting place name: $e');
     }
+    return address.isNotEmpty ? address : 'Unknown location';
+  }
+
+  void _zoomIn() {
+    _mapController.move(_mapController.center, _mapController.zoom + 1);
+  }
+
+  void _zoomOut() {
+    _mapController.move(_mapController.center, _mapController.zoom - 1);
   }
 
   @override
@@ -94,31 +82,44 @@ class _LocationPickerPageState extends State<LocationPickerPage> {
       ),
       body: Stack(
         children: [
-          GoogleMap(
-            onMapCreated: _onMapCreated,
-            initialCameraPosition: CameraPosition(
-              target: _selectedLocation ?? const LatLng(45.0, 25.0),
+          FlutterMap(
+            mapController: _mapController,
+            options: MapOptions(
+              center: _selectedLocation ?? LatLng(45.0, 25.0),
               zoom: 5,
+              onTap: (_, latLng) => _selectLocation(latLng),
             ),
-            markers: _selectedLocation != null
-                ? {
-                    Marker(
-                      markerId: const MarkerId('selected-location'),
-                      position: _selectedLocation!,
-                    ),
-                  }
-                : {},
-            onTap: _selectLocation,
+            children: [
+              TileLayer(
+                urlTemplate:
+                    'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+                subdomains: const ['a', 'b', 'c'],
+              ),
+              MarkerLayer(
+                markers: _selectedLocation != null
+                    ? [
+                        Marker(
+                          width: 80.0,
+                          height: 80.0,
+                          point: _selectedLocation!,
+                          builder: (ctx) =>
+                              const Icon(Icons.location_pin, color: Colors.red),
+                        ),
+                      ]
+                    : [],
+              ),
+            ],
           ),
           Positioned(
-            top: MediaQuery.of(context).padding.top + 20,
+            top: 20,
             left: 15,
             right: 15,
             child: LocationSearchBar(
               controller: _searchController,
               onSearch: _searchPlace,
-              predictions: _predictions,
-              onPredictionSelected: _selectPrediction,
+              predictions: _searchResults,
+              onPredictionSelected: (index) =>
+                  _selectPrediction(_searchResults[index]),
             ),
           ),
           if (_selectedLocation != null)
@@ -130,8 +131,13 @@ class _LocationPickerPageState extends State<LocationPickerPage> {
                 width: MediaQuery.of(context).size.width * 0.4,
                 child: ElevatedButton(
                   onPressed: () {
-                    widget.onLocationSelected(_selectedLocation!);
-                    Navigator.pop(context);
+                    // Obține numele locației pentru a-l trimite înapoi
+                    _getPlaceName(_selectedLocation!.latitude,
+                            _selectedLocation!.longitude)
+                        .then((placeName) {
+                      widget.onLocationSelected(_selectedLocation!, placeName);
+                      Navigator.pop(context);
+                    });
                   },
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 12),
@@ -144,6 +150,27 @@ class _LocationPickerPageState extends State<LocationPickerPage> {
                 ),
               ),
             ),
+          Positioned(
+            bottom: 80,
+            right: 20,
+            child: Column(
+              children: [
+                FloatingActionButton(
+                  onPressed: _zoomIn,
+                  backgroundColor: Colors.deepPurple,
+                  foregroundColor: Colors.white,
+                  child: const Icon(Icons.add),
+                ),
+                const SizedBox(height: 10),
+                FloatingActionButton(
+                  onPressed: _zoomOut,
+                  backgroundColor: Colors.deepPurple,
+                  foregroundColor: Colors.white,
+                  child: const Icon(Icons.remove),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );
