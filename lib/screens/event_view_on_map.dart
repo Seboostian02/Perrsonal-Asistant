@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:googleapis/calendar/v3.dart' as calendar;
 import 'package:geocoding/geocoding.dart';
 
@@ -13,10 +14,9 @@ class EventView extends StatefulWidget {
 }
 
 class _EventViewState extends State<EventView> {
-  late GoogleMapController _controller;
-  final Set<Marker> _markers = {};
+  final List<Marker> _markers = [];
 
-  static const LatLng _initialPosition = LatLng(45.521563, -122.677433);
+  static LatLng _initialPosition = LatLng(47.1585, 27.6014);
 
   @override
   void initState() {
@@ -24,28 +24,28 @@ class _EventViewState extends State<EventView> {
     _setMarkers();
   }
 
-  void _onMapCreated(GoogleMapController controller) {
-    _controller = controller;
-  }
-
   Future<void> _setMarkers() async {
     for (var event in widget.events) {
-      print("events-------------------");
       print(event);
       if (event.location != null && event.location!.isNotEmpty) {
         try {
           List<Location> locations = await locationFromAddress(event.location!);
+          print(
+              "Marker coordinates: ${locations[0].latitude}, ${locations[0].longitude}");
           if (locations.isNotEmpty) {
             final latLng =
                 LatLng(locations[0].latitude, locations[0].longitude);
             _markers.add(
               Marker(
-                markerId: MarkerId(event.id!),
-                position: latLng,
-                infoWindow: InfoWindow(
-                  title: event.summary,
-                  snippet: event.description ?? '',
+                point: latLng,
+                builder: (context) => Container(
+                  child: const Icon(
+                    Icons.location_on,
+                    color: Colors.red,
+                    size: 40.0,
+                  ),
                 ),
+                anchorPos: AnchorPos.align(AnchorAlign.top),
               ),
             );
           }
@@ -59,13 +59,18 @@ class _EventViewState extends State<EventView> {
 
   @override
   Widget build(BuildContext context) {
-    return GoogleMap(
-      onMapCreated: _onMapCreated,
-      initialCameraPosition: CameraPosition(
-        target: _initialPosition,
+    return FlutterMap(
+      options: MapOptions(
+        center: _initialPosition,
         zoom: 10.0,
       ),
-      markers: _markers,
+      children: [
+        TileLayer(
+          urlTemplate: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+          subdomains: ['a', 'b', 'c'],
+        ),
+        MarkerLayer(markers: _markers),
+      ],
     );
   }
 }
