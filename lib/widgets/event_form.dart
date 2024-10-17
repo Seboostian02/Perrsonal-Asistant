@@ -25,10 +25,17 @@ class EventFormState extends State<EventForm> {
   LatLng? _selectedLocation;
 
   DateTime _selectedDate = DateTime.now();
-  TimeOfDay _startTime =
-      TimeOfDay.now().replacing(minute: TimeOfDay.now().minute + 15);
-  TimeOfDay _endTime =
-      TimeOfDay.now().replacing(hour: TimeOfDay.now().hour + 1);
+  late TimeOfDay _startTime;
+  late TimeOfDay _endTime;
+
+  @override
+  void initState() {
+    super.initState();
+
+    final now = TimeOfDay.now();
+    _startTime = TimeOfDay(hour: now.hour, minute: (now.minute + 15) % 60);
+    _endTime = TimeOfDay(hour: (now.hour + 1) % 24, minute: now.minute);
+  }
 
   Future<void> _createEvent() async {
     final now = DateTime.now();

@@ -14,17 +14,24 @@ class LocationSearchBar extends StatelessWidget {
     required this.predictions,
     required this.onPredictionSelected,
   });
-
   Future<String> _getPlaceName(double latitude, double longitude) async {
+    String address = 'Unknown location';
     try {
       final placemarks = await placemarkFromCoordinates(latitude, longitude);
       if (placemarks.isNotEmpty) {
-        return placemarks.first.name ?? 'Unknown location';
+        final name = placemarks.first.name ?? '';
+        final country = placemarks.first.country ?? '';
+        final street = placemarks.first.street ?? '';
+        final postalCode = placemarks.first.postalCode ?? '';
+
+        address = '$name, $street, $postalCode, $country'
+            .trim()
+            .replaceAll(RegExp(', +'), ', ');
       }
     } catch (e) {
       print('Error getting place name: $e');
     }
-    return 'Unknown location';
+    return address;
   }
 
   @override
