@@ -124,6 +124,8 @@ class EventViewState extends State<EventView> {
             child: IconButton(
               icon: const Icon(Icons.arrow_back, color: Colors.black, size: 30),
               onPressed: () {
+                print("popped");
+
                 Navigator.of(context).pop();
               },
             ),

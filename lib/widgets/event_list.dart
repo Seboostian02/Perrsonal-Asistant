@@ -81,6 +81,8 @@ class EventList extends StatelessWidget {
             for (var event in events)
               EventCard(
                 event: event,
+                showLocation: true,
+                key: ValueKey(event.id),
               ),
           ],
         ],

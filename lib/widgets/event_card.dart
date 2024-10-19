@@ -24,31 +24,48 @@ class EventCard extends StatelessWidget {
 
   void _onLocationTap(BuildContext context) {
     if (showLocation) {
-      Navigator.push(
-        context,
-        PageRouteBuilder(
-          pageBuilder: (context, animation, secondaryAnimation) => EventView(
-            events: [event],
-            showBackArrow: true,
-          ),
-          transitionsBuilder: (context, animation, secondaryAnimation, child) {
-            const begin = Offset(1.0, 0.0);
-            const end = Offset.zero;
-            const curve = Curves.ease;
-
-            var tween =
-                Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
-            var offsetAnimation = animation.drive(tween);
-
-            return SlideTransition(
-              position: offsetAnimation,
-              child: child,
-            );
-          },
-        ),
+      showDialog(
+        context: context,
+        barrierDismissible: true,
+        builder: (BuildContext context) {
+          return Dialog(
+            insetPadding: EdgeInsets.zero,
+            child: EventView(
+              events: [event],
+              showBackArrow: true,
+            ),
+          );
+        },
       );
     }
   }
+  // void _onLocationTap(BuildContext context) {
+  //   if (showLocation) {
+  //     Navigator.push(
+  //       context,
+  //       PageRouteBuilder(
+  //         pageBuilder: (context, animation, secondaryAnimation) => EventView(
+  //           events: [event],
+  //           showBackArrow: true,
+  //         ),
+  //         transitionsBuilder: (context, animation, secondaryAnimation, child) {
+  //           const begin = Offset(1.0, 0.0);
+  //           const end = Offset.zero;
+  //           const curve = Curves.ease;
+
+  //           var tween =
+  //               Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+  //           var offsetAnimation = animation.drive(tween);
+
+  //           return SlideTransition(
+  //             position: offsetAnimation,
+  //             child: child,
+  //           );
+  //         },
+  //       ),
+  //     );
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {
