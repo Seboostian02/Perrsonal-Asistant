@@ -121,13 +121,28 @@ class EventViewState extends State<EventView> {
           Positioned(
             top: 50,
             left: 20,
-            child: IconButton(
-              icon: const Icon(Icons.arrow_back, color: Colors.black, size: 30),
-              onPressed: () {
-                print("popped");
-
-                Navigator.of(context).pop();
-              },
+            child: Material(
+              elevation: 6, // adaugă o umbră pentru un efect de adâncime
+              shape: const CircleBorder(), // formează un cerc
+              child: InkWell(
+                onTap: () {
+                  print("popped");
+                  Navigator.of(context).pop();
+                },
+                child: Container(
+                  width: 56,
+                  height: 56,
+                  decoration: const BoxDecoration(
+                    color: Colors.deepPurple,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.arrow_back,
+                    color: Colors.white,
+                    size: 30,
+                  ),
+                ),
+              ),
             ),
           ),
         if (_selectedEvent != null && _selectedEventLatLng != null)
