@@ -28,7 +28,6 @@ class EventCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Random index
     final randomIndex = Random().nextInt(colors.length);
     final backgroundColor = colors[randomIndex];
 
