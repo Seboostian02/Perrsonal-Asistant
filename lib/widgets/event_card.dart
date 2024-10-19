@@ -2,15 +2,10 @@ import 'package:calendar/screens/event_view_on_map.dart';
 import 'package:flutter/material.dart';
 import 'dart:math';
 import 'package:intl/intl.dart';
-import 'package:flutter/material.dart';
 import 'package:googleapis/calendar/v3.dart' as calendar;
 
 class EventCard extends StatelessWidget {
-  final String title;
-  final String location;
-  final String description;
-  final String startTime;
-  final String endTime;
+  final calendar.Event event;
 
   static const List<Color> colors = [
     Colors.redAccent,
@@ -23,11 +18,7 @@ class EventCard extends StatelessWidget {
 
   const EventCard({
     super.key,
-    required this.title,
-    required this.location,
-    required this.description,
-    required this.startTime,
-    required this.endTime,
+    required this.event,
   });
 
   @override
@@ -35,8 +26,8 @@ class EventCard extends StatelessWidget {
     final randomIndex = Random().nextInt(colors.length);
     final backgroundColor = colors[randomIndex];
 
-    final startDateTime = DateTime.parse(startTime);
-    final endDateTime = DateTime.parse(endTime);
+    final startDateTime = DateTime.parse(event.start!.dateTime!.toString());
+    final endDateTime = DateTime.parse(event.end!.dateTime!.toString());
     final String startHour =
         "${startDateTime.hour}:${startDateTime.minute.toString().padLeft(2, '0')}";
     final String endHour =
@@ -55,12 +46,12 @@ class EventCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              title,
+              event.summary ?? "No Title",
               style: const TextStyle(fontSize: 23, fontWeight: FontWeight.w800),
             ),
             const SizedBox(height: 4),
             Text(
-              description,
+              event.description ?? "No Description",
               style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
             ),
             const SizedBox(height: 4),
@@ -70,13 +61,13 @@ class EventCard extends StatelessWidget {
                   context,
                   MaterialPageRoute(
                     builder: (context) => EventView(
-                      events: [],
+                      events: [event], // Transmiterea evenimentului selectat
                     ),
                   ),
                 );
               },
               child: Text(
-                'Location: $location',
+                'Location: ${event.location ?? "No Location"}',
                 style: const TextStyle(
                     fontSize: 16,
                     color: Colors.blue,
