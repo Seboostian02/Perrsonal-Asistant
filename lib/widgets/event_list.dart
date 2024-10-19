@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/auth_provider.dart';
 import '../widgets/event_card.dart';
+import 'package:googleapis/calendar/v3.dart' as calendar;
 
 class EventList extends StatelessWidget {
-  final List<dynamic> events;
+  final List<calendar.Event> events;
   final bool loading;
 
   const EventList({
@@ -18,7 +19,7 @@ class EventList extends StatelessWidget {
     final authProvider = Provider.of<AuthProvider>(context);
     final DateTime today = DateTime.now();
 
-    final List<dynamic> todayEvents = events.where((event) {
+    final List<calendar.Event> todayEvents = events.where((event) {
       final eventDate = event.start?.dateTime?.toLocal();
       return eventDate != null &&
           eventDate.year == today.year &&
@@ -68,13 +69,8 @@ class EventList extends StatelessWidget {
             else
               for (var event in todayEvents)
                 EventCard(
-                  title: event.summary ?? "No Title",
-                  location: event.location ?? "No Location",
-                  description: event.description ?? "No Description",
-                  startTime: event.start?.dateTime?.toLocal().toString() ??
-                      "No Start Time",
-                  endTime: event.end?.dateTime?.toLocal().toString() ??
-                      "No End Time",
+                  event: event,
+                  showLocation: true,
                 ),
             const SizedBox(height: 20),
             const Text(
@@ -84,13 +80,9 @@ class EventList extends StatelessWidget {
             const SizedBox(height: 10),
             for (var event in events)
               EventCard(
-                title: event.summary ?? "No Title",
-                location: event.location ?? "No Location",
-                description: event.description ?? "No Description",
-                startTime: event.start?.dateTime?.toLocal().toString() ??
-                    "No Start Time",
-                endTime:
-                    event.end?.dateTime?.toLocal().toString() ?? "No End Time",
+                event: event,
+                showLocation: true,
+                key: ValueKey(event.id),
               ),
           ],
         ],
