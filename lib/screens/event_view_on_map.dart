@@ -58,8 +58,6 @@ class EventViewState extends State<EventView> {
   }
 
   Future<void> setMarkers(List<calendar.Event> events) async {
-    // print("events--------------------");
-    // print(events);
     widget.events.clear();
     widget.events.addAll(events);
 

@@ -8,7 +8,6 @@ import 'footer.dart';
 import '../widgets/event_form.dart';
 import '../widgets/event_list.dart';
 import './not_found_page.dart';
-
 import '../services/google_calendar_service.dart';
 import 'package:googleapis/calendar/v3.dart' as calendar;
 
@@ -21,9 +20,7 @@ class MainPage extends StatefulWidget {
 
 class MainPageState extends State<MainPage> {
   bool _loading = true;
-
   int _selectedIndex = 0;
-
   final GlobalKey<EventViewState> _eventViewKey = GlobalKey<EventViewState>();
 
   @override
@@ -74,6 +71,7 @@ class MainPageState extends State<MainPage> {
   Future<void> _setMarkersOnMap() async {
     final events = Provider.of<EventProvider>(context, listen: false).events;
     print("Set markers called. Events count: ${events.length}");
+    print("-----------------");
     if (events.isNotEmpty && _eventViewKey.currentState != null) {
       await _eventViewKey.currentState!.setMarkers(events);
     }
@@ -92,12 +90,13 @@ class MainPageState extends State<MainPage> {
     });
   }
 
-  void _onItemTapped(int index) {
+  void _onItemTapped(int index) async {
+    await _onRefresh();
     setState(() {
       _selectedIndex = index;
     });
     if (index == 1) {
-      _setMarkersOnMap();
+      // await _setMarkersOnMap();
     }
   }
 
