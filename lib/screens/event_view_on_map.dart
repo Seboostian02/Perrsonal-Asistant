@@ -8,7 +8,7 @@ import 'package:geocoding/geocoding.dart';
 class EventView extends StatefulWidget {
   final List<calendar.Event> events;
 
-  const EventView({super.key, required this.events});
+  const EventView({Key? key, required this.events}) : super(key: key);
 
   @override
   EventViewState createState() => EventViewState();
@@ -58,6 +58,8 @@ class EventViewState extends State<EventView> {
   }
 
   Future<void> setMarkers(List<calendar.Event> events) async {
+    // print("events--------------------");
+    // print(events);
     widget.events.clear();
     widget.events.addAll(events);
 

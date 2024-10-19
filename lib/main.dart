@@ -1,3 +1,4 @@
+import 'package:calendar/services/event_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'screens/main_page.dart';
@@ -12,7 +13,15 @@ void main() async {
 
   final hasPermission = await _checkLocationPermission();
 
-  runApp(MyApp(hasLocationPermission: hasPermission));
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => EventProvider()),
+        ChangeNotifierProvider(create: (_) => AuthProvider()),
+      ],
+      child: MyApp(hasLocationPermission: hasPermission),
+    ),
+  );
 }
 
 Future<bool> _checkLocationPermission() async {
@@ -27,26 +36,17 @@ Future<bool> _checkLocationPermission() async {
 
 class MyApp extends StatelessWidget {
   final bool hasLocationPermission;
-  
+
   const MyApp({super.key, required this.hasLocationPermission});
 
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_) => AuthProvider()),
-      ],
-      child: Consumer<AuthProvider>(
-        builder: (context, authProvider, _) {
-          return MaterialApp(
-            home: hasLocationPermission
-                ? (authProvider.isLoggedIn
-                    ? const MainPage()
-                    : const LoginPage())
-                : const LocationPermissionPage(),
-          );
-        },
-      ),
+    return MaterialApp(
+      home: hasLocationPermission
+          ? (Provider.of<AuthProvider>(context).isLoggedIn
+              ? const MainPage()
+              : const LoginPage())
+          : const LocationPermissionPage(),
     );
   }
 }

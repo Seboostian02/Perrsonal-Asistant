@@ -1,5 +1,6 @@
 import 'package:calendar/screens/event_view_on_map.dart';
 import 'package:calendar/services/auth_service.dart';
+import 'package:calendar/services/event_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/auth_provider.dart';
@@ -19,12 +20,10 @@ class MainPage extends StatefulWidget {
 }
 
 class MainPageState extends State<MainPage> {
-  List<calendar.Event> _events = [];
   bool _loading = true;
 
   int _selectedIndex = 0;
 
-  // Definim un GlobalKey pentru EventViewState
   final GlobalKey<EventViewState> _eventViewKey = GlobalKey<EventViewState>();
 
   @override
@@ -38,7 +37,6 @@ class MainPageState extends State<MainPage> {
       _loading = true;
     });
 
-    Provider.of<AuthProvider>(context, listen: false);
     String? accessToken = await AuthService().accessToken;
 
     if (accessToken != null) {
@@ -46,31 +44,38 @@ class MainPageState extends State<MainPage> {
       DateTime startTime = DateTime(now.year, now.month, now.day);
       DateTime endTime = startTime.add(const Duration(days: 30));
 
-      _events = await GoogleCalendarService.getEvents(
+      List<calendar.Event> events = await GoogleCalendarService.getEvents(
         accessToken: accessToken,
         startTime: startTime,
         endTime: endTime,
       );
-    }
 
-    setState(() {
-      _loading = false;
-    });
+      if (events.isNotEmpty) {
+        Provider.of<EventProvider>(context, listen: false).setEvents(events);
+      }
+
+      setState(() {
+        _loading = false;
+      });
+    } else {
+      setState(() {
+        _loading = false;
+      });
+    }
   }
 
   Future<void> _onRefresh() async {
     await _fetchEvents();
     if (_selectedIndex == 1) {
-      // Dacă e pe pagina de hartă
-      await _setMarkersOnMap(); // Reîmprospătează marker-ele pe hartă
+      await _setMarkersOnMap();
     }
   }
 
   Future<void> _setMarkersOnMap() async {
-    print("chestie-------------");
-    print(_eventViewKey.currentState);
-    if (_eventViewKey.currentState != null) {
-      await _eventViewKey.currentState!.setMarkers(_events);
+    final events = Provider.of<EventProvider>(context, listen: false).events;
+    print("Set markers called. Events count: ${events.length}");
+    if (events.isNotEmpty && _eventViewKey.currentState != null) {
+      await _eventViewKey.currentState!.setMarkers(events);
     }
   }
 
@@ -92,14 +97,14 @@ class MainPageState extends State<MainPage> {
       _selectedIndex = index;
     });
     if (index == 1) {
-      // Dacă selectezi harta
-      _setMarkersOnMap(); // Actualizează marker-ele pe hartă
+      _setMarkersOnMap();
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context);
+    final eventProvider = Provider.of<EventProvider>(context);
 
     return Scaffold(
       appBar: AppBar(
@@ -113,12 +118,14 @@ class MainPageState extends State<MainPage> {
           RefreshIndicator(
             onRefresh: _onRefresh,
             child: EventList(
-              events: _events,
+              events: eventProvider.events,
               loading: _loading,
             ),
           ),
-          // Atribuim key-ul GlobalKey widget-ului EventView
-          EventView(key: _eventViewKey, events: _events),
+          EventView(
+            key: _eventViewKey,
+            events: eventProvider.events,
+          ),
           NotFoundPage(
             onBackToHome: () => _onItemTapped(0),
           ),
