@@ -5,7 +5,7 @@ import '../widgets/event_card.dart';
 import 'package:googleapis/calendar/v3.dart' as calendar;
 
 class EventList extends StatelessWidget {
-  final List<calendar.Event> events; // Modificare tip
+  final List<calendar.Event> events;
   final bool loading;
 
   const EventList({
@@ -70,6 +70,7 @@ class EventList extends StatelessWidget {
               for (var event in todayEvents)
                 EventCard(
                   event: event,
+                  showLocation: true,
                 ),
             const SizedBox(height: 20),
             const Text(

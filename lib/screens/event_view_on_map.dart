@@ -2,14 +2,17 @@ import 'package:calendar/widgets/event_card.dart';
 import 'package:calendar/widgets/zoom_controls.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
+
 import 'package:latlong2/latlong.dart';
 import 'package:googleapis/calendar/v3.dart' as calendar;
 import 'package:geocoding/geocoding.dart';
 
 class EventView extends StatefulWidget {
   final List<calendar.Event> events;
+  final bool showBackArrow;
 
-  const EventView({Key? key, required this.events}) : super(key: key);
+  const EventView({Key? key, required this.events, this.showBackArrow = false})
+      : super(key: key);
 
   @override
   EventViewState createState() => EventViewState();
@@ -75,6 +78,18 @@ class EventViewState extends State<EventView> {
     await _setMarkers();
   }
 
+  calendar.Event createNonNullEvent(calendar.Event? event) {
+    return calendar.Event(
+      summary: event?.summary ?? "Default Title",
+      location: event?.location ?? "Default Location",
+      description: event?.description ?? "Default Description",
+      start: event?.start ?? calendar.EventDateTime(dateTime: DateTime.now()),
+      end: event?.end ??
+          calendar.EventDateTime(
+              dateTime: DateTime.now().add(Duration(hours: 1))),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Stack(
@@ -102,6 +117,17 @@ class EventViewState extends State<EventView> {
             ],
           ),
         ),
+        if (widget.showBackArrow)
+          Positioned(
+            top: 50,
+            left: 20,
+            child: IconButton(
+              icon: const Icon(Icons.arrow_back, color: Colors.black, size: 30),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ),
         if (_selectedEvent != null && _selectedEventLatLng != null)
           Positioned(
             left: MediaQuery.of(context).size.width / 2 - 150,
@@ -109,15 +135,8 @@ class EventViewState extends State<EventView> {
             child: Stack(
               children: [
                 EventCard(
-                  title: _selectedEvent!.summary ?? "No Title",
-                  location: _selectedEvent!.location ?? "No Location",
-                  description: _selectedEvent!.description ?? "No Description",
-                  startTime:
-                      _selectedEvent!.start?.dateTime?.toLocal().toString() ??
-                          "No Start Time",
-                  endTime:
-                      _selectedEvent!.end?.dateTime?.toLocal().toString() ??
-                          "No End Time",
+                  event: createNonNullEvent(_selectedEvent),
+                  showLocation: false,
                 ),
                 Positioned(
                   top: 0,

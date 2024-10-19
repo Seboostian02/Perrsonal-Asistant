@@ -6,7 +6,7 @@ import 'package:googleapis/calendar/v3.dart' as calendar;
 
 class EventCard extends StatelessWidget {
   final calendar.Event event;
-
+  final bool showLocation;
   static const List<Color> colors = [
     Colors.redAccent,
     Colors.blueAccent,
@@ -17,9 +17,38 @@ class EventCard extends StatelessWidget {
   ];
 
   const EventCard({
-    super.key,
+    Key? key,
     required this.event,
-  });
+    this.showLocation = false,
+  }) : super(key: key);
+
+  void _onLocationTap(BuildContext context) {
+    if (showLocation) {
+      Navigator.push(
+        context,
+        PageRouteBuilder(
+          pageBuilder: (context, animation, secondaryAnimation) => EventView(
+            events: [event],
+            showBackArrow: true,
+          ),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            const begin = Offset(1.0, 0.0);
+            const end = Offset.zero;
+            const curve = Curves.ease;
+
+            var tween =
+                Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+            var offsetAnimation = animation.drive(tween);
+
+            return SlideTransition(
+              position: offsetAnimation,
+              child: child,
+            );
+          },
+        ),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -56,22 +85,16 @@ class EventCard extends StatelessWidget {
             ),
             const SizedBox(height: 4),
             GestureDetector(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => EventView(
-                      events: [event], // Transmiterea evenimentului selectat
-                    ),
-                  ),
-                );
-              },
+              onTap: () => _onLocationTap(context),
               child: Text(
                 'Location: ${event.location ?? "No Location"}',
-                style: const TextStyle(
-                    fontSize: 16,
-                    color: Colors.blue,
-                    decoration: TextDecoration.underline),
+                style: TextStyle(
+                  fontSize: 16,
+                  color: showLocation ? Colors.blue : Colors.grey,
+                  decoration: showLocation
+                      ? TextDecoration.underline
+                      : TextDecoration.none,
+                ),
               ),
             ),
             const SizedBox(height: 4),

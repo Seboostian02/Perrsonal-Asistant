@@ -96,7 +96,7 @@ class MainPageState extends State<MainPage> {
       _selectedIndex = index;
     });
     if (index == 1) {
-      // await _setMarkersOnMap();
+      await _setMarkersOnMap();
     }
   }
 
