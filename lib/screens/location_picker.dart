@@ -1,4 +1,5 @@
 import 'package:calendar/widgets/location_search_bar.dart';
+import 'package:calendar/widgets/zoom_controls.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
@@ -131,7 +132,6 @@ class _LocationPickerPageState extends State<LocationPickerPage> {
                 width: MediaQuery.of(context).size.width * 0.4,
                 child: ElevatedButton(
                   onPressed: () {
-                    // Obține numele locației pentru a-l trimite înapoi
                     _getPlaceName(_selectedLocation!.latitude,
                             _selectedLocation!.longitude)
                         .then((placeName) {
@@ -150,27 +150,7 @@ class _LocationPickerPageState extends State<LocationPickerPage> {
                 ),
               ),
             ),
-          Positioned(
-            bottom: 80,
-            right: 20,
-            child: Column(
-              children: [
-                FloatingActionButton(
-                  onPressed: _zoomIn,
-                  backgroundColor: Colors.deepPurple,
-                  foregroundColor: Colors.white,
-                  child: const Icon(Icons.add),
-                ),
-                const SizedBox(height: 10),
-                FloatingActionButton(
-                  onPressed: _zoomOut,
-                  backgroundColor: Colors.deepPurple,
-                  foregroundColor: Colors.white,
-                  child: const Icon(Icons.remove),
-                ),
-              ],
-            ),
-          ),
+          ZoomControls(mapController: _mapController),
         ],
       ),
     );

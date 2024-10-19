@@ -24,6 +24,9 @@ class MainPageState extends State<MainPage> {
 
   int _selectedIndex = 0;
 
+  // Definim un GlobalKey pentru EventViewState
+  final GlobalKey<EventViewState> _eventViewKey = GlobalKey<EventViewState>();
+
   @override
   void initState() {
     super.initState();
@@ -57,6 +60,18 @@ class MainPageState extends State<MainPage> {
 
   Future<void> _onRefresh() async {
     await _fetchEvents();
+    if (_selectedIndex == 1) {
+      // Dacă e pe pagina de hartă
+      await _setMarkersOnMap(); // Reîmprospătează marker-ele pe hartă
+    }
+  }
+
+  Future<void> _setMarkersOnMap() async {
+    print("chestie-------------");
+    print(_eventViewKey.currentState);
+    if (_eventViewKey.currentState != null) {
+      await _eventViewKey.currentState!.setMarkers(_events);
+    }
   }
 
   void _showEventForm(BuildContext context) {
@@ -76,6 +91,10 @@ class MainPageState extends State<MainPage> {
     setState(() {
       _selectedIndex = index;
     });
+    if (index == 1) {
+      // Dacă selectezi harta
+      _setMarkersOnMap(); // Actualizează marker-ele pe hartă
+    }
   }
 
   @override
@@ -98,7 +117,8 @@ class MainPageState extends State<MainPage> {
               loading: _loading,
             ),
           ),
-          EventView(events: _events),
+          // Atribuim key-ul GlobalKey widget-ului EventView
+          EventView(key: _eventViewKey, events: _events),
           NotFoundPage(
             onBackToHome: () => _onItemTapped(0),
           ),

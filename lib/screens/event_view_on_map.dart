@@ -1,3 +1,4 @@
+import 'package:calendar/widgets/zoom_controls.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
@@ -7,14 +8,15 @@ import 'package:geocoding/geocoding.dart';
 class EventView extends StatefulWidget {
   final List<calendar.Event> events;
 
-  const EventView({Key? key, required this.events}) : super(key: key);
+  const EventView({super.key, required this.events});
 
   @override
-  _EventViewState createState() => _EventViewState();
+  EventViewState createState() => EventViewState();
 }
 
-class _EventViewState extends State<EventView> {
+class EventViewState extends State<EventView> {
   final List<Marker> _markers = [];
+  final MapController _mapController = MapController();
 
   static LatLng _initialPosition = LatLng(47.1585, 27.6014);
 
@@ -25,29 +27,27 @@ class _EventViewState extends State<EventView> {
   }
 
   Future<void> _setMarkers() async {
+    _markers.clear();
     for (var event in widget.events) {
-      print(event);
       if (event.location != null && event.location!.isNotEmpty) {
         try {
           List<Location> locations = await locationFromAddress(event.location!);
-          print(
-              "Marker coordinates: ${locations[0].latitude}, ${locations[0].longitude}");
           if (locations.isNotEmpty) {
             final latLng =
                 LatLng(locations[0].latitude, locations[0].longitude);
-            _markers.add(
-              Marker(
-                point: latLng,
-                builder: (context) => Container(
-                  child: const Icon(
+            setState(() {
+              _markers.add(
+                Marker(
+                  point: latLng,
+                  builder: (context) => const Icon(
                     Icons.location_on,
                     color: Colors.red,
                     size: 40.0,
                   ),
+                  anchorPos: AnchorPos.align(AnchorAlign.top),
                 ),
-                anchorPos: AnchorPos.align(AnchorAlign.top),
-              ),
-            );
+              );
+            });
           }
         } catch (e) {
           print("Error retrieving location for event ${event.summary}: $e");
@@ -57,19 +57,32 @@ class _EventViewState extends State<EventView> {
     setState(() {});
   }
 
+  Future<void> setMarkers(List<calendar.Event> events) async {
+    widget.events.clear();
+    widget.events.addAll(events);
+
+    await _setMarkers();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return FlutterMap(
-      options: MapOptions(
-        center: _initialPosition,
-        zoom: 10.0,
-      ),
+    return Stack(
       children: [
-        TileLayer(
-          urlTemplate: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-          subdomains: ['a', 'b', 'c'],
+        FlutterMap(
+          mapController: _mapController,
+          options: MapOptions(
+            center: _initialPosition,
+            zoom: 10.0,
+          ),
+          children: [
+            TileLayer(
+              urlTemplate: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+              subdomains: ['a', 'b', 'c'],
+            ),
+            MarkerLayer(markers: _markers),
+          ],
         ),
-        MarkerLayer(markers: _markers),
+        ZoomControls(mapController: _mapController),
       ],
     );
   }
