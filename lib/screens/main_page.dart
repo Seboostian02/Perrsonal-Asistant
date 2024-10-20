@@ -124,6 +124,7 @@ class MainPageState extends State<MainPage> {
           EventView(
             key: _eventViewKey,
             events: eventProvider.events,
+            showCurrLocation: true,
           ),
           NotFoundPage(
             onBackToHome: () => _onItemTapped(0),

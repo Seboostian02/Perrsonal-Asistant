@@ -7,14 +7,7 @@ import 'package:googleapis/calendar/v3.dart' as calendar;
 class EventCard extends StatelessWidget {
   final calendar.Event event;
   final bool showLocation;
-  static const List<Color> colors = [
-    Colors.redAccent,
-    Colors.blueAccent,
-    Colors.greenAccent,
-    Colors.orangeAccent,
-    Colors.purpleAccent,
-    Colors.tealAccent,
-  ];
+  static const Color cardColor = Color(0xFFE1BEE7);
 
   const EventCard({
     Key? key,
@@ -39,39 +32,9 @@ class EventCard extends StatelessWidget {
       );
     }
   }
-  // void _onLocationTap(BuildContext context) {
-  //   if (showLocation) {
-  //     Navigator.push(
-  //       context,
-  //       PageRouteBuilder(
-  //         pageBuilder: (context, animation, secondaryAnimation) => EventView(
-  //           events: [event],
-  //           showBackArrow: true,
-  //         ),
-  //         transitionsBuilder: (context, animation, secondaryAnimation, child) {
-  //           const begin = Offset(1.0, 0.0);
-  //           const end = Offset.zero;
-  //           const curve = Curves.ease;
-
-  //           var tween =
-  //               Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
-  //           var offsetAnimation = animation.drive(tween);
-
-  //           return SlideTransition(
-  //             position: offsetAnimation,
-  //             child: child,
-  //           );
-  //         },
-  //       ),
-  //     );
-  //   }
-  // }
 
   @override
   Widget build(BuildContext context) {
-    final randomIndex = Random().nextInt(colors.length);
-    final backgroundColor = colors[randomIndex];
-
     final startDateTime = DateTime.parse(event.start!.dateTime!.toString());
     final endDateTime = DateTime.parse(event.end!.dateTime!.toString());
     final String startHour =
@@ -82,10 +45,23 @@ class EventCard extends StatelessWidget {
     final String formattedDate =
         DateFormat('EEEE, d MMMM yyyy').format(startDateTime);
 
+    String location = event.location ?? "No Location";
+    List<String> locationParts;
+
+    if (location.length > 30) {
+      int midPoint = (location.length / 2).round();
+      locationParts = [
+        location.substring(0, midPoint),
+        location.substring(midPoint)
+      ];
+    } else {
+      locationParts = [location];
+    }
+
     return Card(
       elevation: 4,
       margin: const EdgeInsets.symmetric(vertical: 8.0),
-      color: backgroundColor,
+      color: cardColor,
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -103,15 +79,30 @@ class EventCard extends StatelessWidget {
             const SizedBox(height: 4),
             GestureDetector(
               onTap: () => _onLocationTap(context),
-              child: Text(
-                'Location: ${event.location ?? "No Location"}',
-                style: TextStyle(
-                  fontSize: 16,
-                  color: showLocation ? Colors.blue : Colors.grey,
-                  decoration: showLocation
-                      ? TextDecoration.underline
-                      : TextDecoration.none,
-                ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Location:',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: showLocation ? Colors.blue : Colors.grey,
+                      decoration: showLocation
+                          ? TextDecoration.underline
+                          : TextDecoration.none,
+                    ),
+                  ),
+                  ...locationParts.map((part) => Text(
+                        part,
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: showLocation ? Colors.blue : Colors.grey,
+                          decoration: showLocation
+                              ? TextDecoration.underline
+                              : TextDecoration.none,
+                        ),
+                      )),
+                ],
               ),
             ),
             const SizedBox(height: 4),

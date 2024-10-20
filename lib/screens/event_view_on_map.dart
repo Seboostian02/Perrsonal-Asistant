@@ -2,16 +2,23 @@ import 'package:calendar/widgets/event_card.dart';
 import 'package:calendar/widgets/zoom_controls.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
-
 import 'package:latlong2/latlong.dart';
 import 'package:googleapis/calendar/v3.dart' as calendar;
+
 import 'package:geocoding/geocoding.dart';
+
+import 'package:geolocator/geolocator.dart';
 
 class EventView extends StatefulWidget {
   final List<calendar.Event> events;
   final bool showBackArrow;
+  final bool showCurrLocation;
 
-  const EventView({Key? key, required this.events, this.showBackArrow = false})
+  const EventView(
+      {Key? key,
+      required this.events,
+      this.showBackArrow = false,
+      this.showCurrLocation = false})
       : super(key: key);
 
   @override
@@ -23,17 +30,80 @@ class EventViewState extends State<EventView> {
   final MapController _mapController = MapController();
   calendar.Event? _selectedEvent;
   LatLng? _selectedEventLatLng;
+  LatLng? _currentLocationLatLng;
 
   static LatLng _initialPosition = LatLng(47.1585, 27.6014);
 
   @override
   void initState() {
     super.initState();
+    _getCurrentLocation();
     _setMarkers();
+  }
+
+  Future<void> _getCurrentLocation() async {
+    bool serviceEnabled;
+    LocationPermission permission;
+
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      return Future.error('Serviciul de locație este dezactivat.');
+    }
+
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        return Future.error('Permisiunea de locație a fost refuzată.');
+      }
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      return Future.error(
+          'Permisiunea de locație este permanent refuzată, nu se poate solicita.');
+    }
+
+    Position position = await Geolocator.getCurrentPosition();
+    setState(() {
+      _currentLocationLatLng = LatLng(position.latitude, position.longitude);
+
+      _markers.removeWhere((marker) => marker.point == _currentLocationLatLng);
+      _markers.add(
+        Marker(
+          point: _currentLocationLatLng!,
+          builder: (context) => const Icon(
+            Icons.my_location,
+            color: Colors.blue,
+            size: 40.0,
+          ),
+          anchorPos: AnchorPos.align(AnchorAlign.top),
+        ),
+      );
+
+      _mapController.move(_currentLocationLatLng!, 15.0);
+    });
   }
 
   Future<void> _setMarkers() async {
     _markers.clear();
+
+    Position position = await Geolocator.getCurrentPosition();
+    _currentLocationLatLng = LatLng(position.latitude, position.longitude);
+
+    _markers.add(
+      Marker(
+        point: _currentLocationLatLng!,
+        builder: (context) => const Icon(
+          Icons.my_location,
+          color: Colors.blue,
+          size: 40.0,
+        ),
+        anchorPos: AnchorPos.align(AnchorAlign.top),
+      ),
+    );
+
+    _mapController.move(_currentLocationLatLng!, 15.0);
+
     for (var event in widget.events) {
       if (event.location != null && event.location!.isNotEmpty) {
         try {
@@ -41,33 +111,32 @@ class EventViewState extends State<EventView> {
           if (locations.isNotEmpty) {
             final latLng =
                 LatLng(locations[0].latitude, locations[0].longitude);
-            setState(() {
-              _markers.add(
-                Marker(
-                  point: latLng,
-                  builder: (context) => GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        _selectedEvent = event;
-                        _selectedEventLatLng = latLng;
-                      });
-                    },
-                    child: const Icon(
-                      Icons.location_on,
-                      color: Colors.red,
-                      size: 40.0,
-                    ),
+            _markers.add(
+              Marker(
+                point: latLng,
+                builder: (context) => GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      _selectedEvent = event;
+                      _selectedEventLatLng = latLng;
+                    });
+                  },
+                  child: const Icon(
+                    Icons.location_on,
+                    color: Colors.red,
+                    size: 40.0,
                   ),
-                  anchorPos: AnchorPos.align(AnchorAlign.top),
                 ),
-              );
-            });
+                anchorPos: AnchorPos.align(AnchorAlign.top),
+              ),
+            );
           }
         } catch (e) {
           print("Error retrieving location for event ${event.summary}: $e");
         }
       }
     }
+
     setState(() {});
   }
 
@@ -86,7 +155,7 @@ class EventViewState extends State<EventView> {
       start: event?.start ?? calendar.EventDateTime(dateTime: DateTime.now()),
       end: event?.end ??
           calendar.EventDateTime(
-              dateTime: DateTime.now().add(Duration(hours: 1))),
+              dateTime: DateTime.now().add(const Duration(hours: 1))),
     );
   }
 
@@ -101,7 +170,7 @@ class EventViewState extends State<EventView> {
               FlutterMap(
                 mapController: _mapController,
                 options: MapOptions(
-                  center: _initialPosition,
+                  center: _currentLocationLatLng ?? _initialPosition,
                   zoom: 10.0,
                 ),
                 children: [
@@ -117,16 +186,26 @@ class EventViewState extends State<EventView> {
             ],
           ),
         ),
+        if (widget.showCurrLocation)
+          Positioned(
+            top: 20,
+            right: 20,
+            child: FloatingActionButton(
+              onPressed: _getCurrentLocation,
+              backgroundColor: Colors.deepPurple,
+              foregroundColor: Colors.white,
+              child: const Icon(Icons.my_location),
+            ),
+          ),
         if (widget.showBackArrow)
           Positioned(
             top: 50,
             left: 20,
             child: Material(
-              elevation: 6, // adaugă o umbră pentru un efect de adâncime
-              shape: const CircleBorder(), // formează un cerc
+              elevation: 6,
+              shape: const CircleBorder(),
               child: InkWell(
                 onTap: () {
-                  print("popped");
                   Navigator.of(context).pop();
                 },
                 child: Container(
@@ -147,12 +226,14 @@ class EventViewState extends State<EventView> {
           ),
         if (_selectedEvent != null && _selectedEventLatLng != null)
           Positioned(
-            left: MediaQuery.of(context).size.width / 2 - 150,
-            top: MediaQuery.of(context).size.height / 2 - 200,
+            left: (MediaQuery.of(context).size.width - 300) / 2,
+            top: (MediaQuery.of(context).size.height - 200) / 2,
             child: Stack(
               children: [
                 EventCard(
-                  event: createNonNullEvent(_selectedEvent),
+                  event: _selectedEvent != null
+                      ? createNonNullEvent(_selectedEvent)
+                      : createNonNullEvent(null),
                   showLocation: false,
                 ),
                 Positioned(
