@@ -37,6 +37,7 @@ class EventViewState extends State<EventView> {
   @override
   void initState() {
     super.initState();
+    _getCurrentLocation();
     _setMarkers();
   }
 
@@ -66,6 +67,7 @@ class EventViewState extends State<EventView> {
     setState(() {
       _currentLocationLatLng = LatLng(position.latitude, position.longitude);
 
+      _markers.removeWhere((marker) => marker.point == _currentLocationLatLng);
       _markers.add(
         Marker(
           point: _currentLocationLatLng!,
@@ -84,6 +86,24 @@ class EventViewState extends State<EventView> {
 
   Future<void> _setMarkers() async {
     _markers.clear();
+
+    Position position = await Geolocator.getCurrentPosition();
+    _currentLocationLatLng = LatLng(position.latitude, position.longitude);
+
+    _markers.add(
+      Marker(
+        point: _currentLocationLatLng!,
+        builder: (context) => const Icon(
+          Icons.my_location,
+          color: Colors.blue,
+          size: 40.0,
+        ),
+        anchorPos: AnchorPos.align(AnchorAlign.top),
+      ),
+    );
+
+    _mapController.move(_currentLocationLatLng!, 15.0);
+
     for (var event in widget.events) {
       if (event.location != null && event.location!.isNotEmpty) {
         try {
@@ -91,33 +111,32 @@ class EventViewState extends State<EventView> {
           if (locations.isNotEmpty) {
             final latLng =
                 LatLng(locations[0].latitude, locations[0].longitude);
-            setState(() {
-              _markers.add(
-                Marker(
-                  point: latLng,
-                  builder: (context) => GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        _selectedEvent = event;
-                        _selectedEventLatLng = latLng;
-                      });
-                    },
-                    child: const Icon(
-                      Icons.location_on,
-                      color: Colors.red,
-                      size: 40.0,
-                    ),
+            _markers.add(
+              Marker(
+                point: latLng,
+                builder: (context) => GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      _selectedEvent = event;
+                      _selectedEventLatLng = latLng;
+                    });
+                  },
+                  child: const Icon(
+                    Icons.location_on,
+                    color: Colors.red,
+                    size: 40.0,
                   ),
-                  anchorPos: AnchorPos.align(AnchorAlign.top),
                 ),
-              );
-            });
+                anchorPos: AnchorPos.align(AnchorAlign.top),
+              ),
+            );
           }
         } catch (e) {
           print("Error retrieving location for event ${event.summary}: $e");
         }
       }
     }
+
     setState(() {});
   }
 
@@ -151,7 +170,7 @@ class EventViewState extends State<EventView> {
               FlutterMap(
                 mapController: _mapController,
                 options: MapOptions(
-                  center: _initialPosition,
+                  center: _currentLocationLatLng ?? _initialPosition,
                   zoom: 10.0,
                 ),
                 children: [
