@@ -231,7 +231,7 @@ class EventViewState extends State<EventView> {
               ),
             ),
           ),
-        if (_selectedEventLatLng != null)
+        if (_selectedEventLatLng != null && widget.events.length == 1)
           RouteDrawer(
             currentLocation: _currentLocationLatLng!,
             destination: _selectedEventLatLng!,
