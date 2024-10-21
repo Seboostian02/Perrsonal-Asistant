@@ -7,20 +7,19 @@ class LocationService {
 
     serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
-      throw Exception('Serviciul de locație este dezactivat.');
+      throw Exception('Location Service is disabled.');
     }
 
     permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
       if (permission == LocationPermission.denied) {
-        throw Exception('Permisiunea de locație a fost refuzată.');
+        throw Exception('Location permission was denied.');
       }
     }
 
     if (permission == LocationPermission.deniedForever) {
-      throw Exception(
-          'Permisiunea de locație este permanent refuzată, nu se poate solicita.');
+      throw Exception('Location permission was denied, can not request it.');
     }
 
     return await Geolocator.getCurrentPosition();

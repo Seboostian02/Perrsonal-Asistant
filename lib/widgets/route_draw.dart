@@ -24,6 +24,13 @@ class _RouteDrawerState extends State<RouteDrawer> {
   String selectedTransportMode = 'Driving';
   List<LatLng> routePoints = [];
 
+  // Define the mapping of transport modes to API parameters
+  final Map<String, String> transportModes = {
+    'Foot': 'walking',
+    'Bike': 'cycling',
+    'Driving': 'driving',
+  };
+
   @override
   void initState() {
     super.initState();
@@ -36,15 +43,16 @@ class _RouteDrawerState extends State<RouteDrawer> {
         widget.currentLocation.longitude == widget.destination.longitude) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-            content: Text('Punctele de start și destinație sunt identice!')),
+          content: Text('Punctele de start și destinație sunt identice!'),
+        ),
       );
       return;
     }
 
-    final mode = selectedTransportMode.toLowerCase();
+    final mode = transportModes[selectedTransportMode];
 
     final url =
-        'https://router.project-osrm.org/route/v1/$mode/${widget.currentLocation.longitude},${widget.currentLocation.latitude};${widget.destination.longitude},${widget.destination.latitude}?geometries=geojson';
+        'https://router.project-osrm.org/route/v2/$mode/${widget.currentLocation.longitude},${widget.currentLocation.latitude};${widget.destination.longitude},${widget.destination.latitude}?geometries=geojson';
 
     print('Request URL: $url');
 
@@ -147,7 +155,7 @@ class _RouteDrawerState extends State<RouteDrawer> {
                 underline: Container(),
                 dropdownColor: Colors.white,
                 style: const TextStyle(color: Colors.black),
-                items: <String>['Foot', 'Bike', 'Driving']
+                items: transportModes.keys
                     .map<DropdownMenuItem<String>>((String value) {
                   return DropdownMenuItem<String>(
                     value: value,
