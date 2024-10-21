@@ -119,7 +119,7 @@ class MainPageState extends State<MainPage> {
           IconButton(
             icon: const Icon(Icons.settings),
             onPressed: () {
-              print("app bar apasat-------------------------");
+              _onItemTapped(4);
             },
           ),
         ],
