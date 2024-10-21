@@ -54,6 +54,7 @@ dependencies:
   http: ^0.13.6
   latlong2: ^0.8.1
   geolocator: ^13.0.1
+  flutter_map_line_editor: ^5.0.0
 
 dev_dependencies:
   flutter_test:

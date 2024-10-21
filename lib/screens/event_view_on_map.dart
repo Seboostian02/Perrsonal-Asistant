@@ -1,3 +1,7 @@
+import 'dart:convert';
+import 'package:calendar/widgets/route_draw.dart';
+import 'package:http/http.dart' as http;
+
 import 'package:calendar/widgets/event_card.dart';
 import 'package:calendar/widgets/zoom_controls.dart';
 import 'package:flutter/material.dart';
@@ -67,7 +71,6 @@ class EventViewState extends State<EventView> {
     setState(() {
       _currentLocationLatLng = LatLng(position.latitude, position.longitude);
 
-     
       _markers.removeWhere((marker) => marker.point == _currentLocationLatLng);
       _markers.add(
         Marker(
@@ -81,7 +84,6 @@ class EventViewState extends State<EventView> {
         ),
       );
 
-     
       if (widget.events.length > 1) {
         _mapController.move(_currentLocationLatLng!, 15.0);
       }
@@ -91,7 +93,6 @@ class EventViewState extends State<EventView> {
   Future<void> _setMarkers() async {
     _markers.clear();
 
- 
     Position position = await Geolocator.getCurrentPosition();
     _currentLocationLatLng = LatLng(position.latitude, position.longitude);
     _markers.add(
@@ -132,7 +133,6 @@ class EventViewState extends State<EventView> {
                 anchorPos: AnchorPos.align(AnchorAlign.top),
               ),
             );
-
 
             if (widget.events.length == 1) {
               _mapController.move(latLng, 15.0);
@@ -231,33 +231,10 @@ class EventViewState extends State<EventView> {
               ),
             ),
           ),
-        if (_selectedEvent != null && _selectedEventLatLng != null)
-          Positioned(
-            left: (MediaQuery.of(context).size.width - 300) / 2,
-            top: (MediaQuery.of(context).size.height - 200) / 2,
-            child: Stack(
-              children: [
-                EventCard(
-                  event: _selectedEvent != null
-                      ? createNonNullEvent(_selectedEvent)
-                      : createNonNullEvent(null),
-                  showLocation: false,
-                ),
-                Positioned(
-                  top: 0,
-                  right: 0,
-                  child: IconButton(
-                    icon: const Icon(Icons.close),
-                    onPressed: () {
-                      setState(() {
-                        _selectedEvent = null;
-                        _selectedEventLatLng = null;
-                      });
-                    },
-                  ),
-                ),
-              ],
-            ),
+        if (_selectedEventLatLng != null)
+          RouteDrawer(
+            currentLocation: _currentLocationLatLng!,
+            destination: _selectedEventLatLng!,
           ),
       ],
     );
