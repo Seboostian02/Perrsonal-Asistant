@@ -236,6 +236,34 @@ class EventViewState extends State<EventView> {
             currentLocation: _currentLocationLatLng!,
             destination: _selectedEventLatLng!,
           ),
+        if (_selectedEvent != null && widget.events.length > 1)
+          Positioned(
+            left: (MediaQuery.of(context).size.width - 300) / 2,
+            top: (MediaQuery.of(context).size.height - 200) / 2,
+            child: Stack(
+              children: [
+                EventCard(
+                  event: _selectedEvent != null
+                      ? createNonNullEvent(_selectedEvent)
+                      : createNonNullEvent(null),
+                  showLocation: false,
+                ),
+                Positioned(
+                  top: 0,
+                  right: 0,
+                  child: IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: () {
+                      setState(() {
+                        _selectedEvent = null;
+                        _selectedEventLatLng = null;
+                      });
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
       ],
     );
   }
