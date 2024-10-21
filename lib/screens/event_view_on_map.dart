@@ -17,12 +17,14 @@ class EventView extends StatefulWidget {
   final List<calendar.Event> events;
   final bool showBackArrow;
   final bool showCurrLocation;
+  final bool showRoute;
 
   const EventView(
       {Key? key,
       required this.events,
       this.showBackArrow = false,
-      this.showCurrLocation = false})
+      this.showCurrLocation = false,
+      this.showRoute = false})
       : super(key: key);
 
   @override
@@ -231,7 +233,9 @@ class EventViewState extends State<EventView> {
               ),
             ),
           ),
-        if (_selectedEventLatLng != null && widget.events.length == 1)
+        if (_selectedEventLatLng != null &&
+            widget.showRoute == true &&
+            widget.events.length == 1)
           RouteDrawer(
             currentLocation: _currentLocationLatLng!,
             destination: _selectedEventLatLng!,

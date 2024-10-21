@@ -26,6 +26,7 @@ class EventCard extends StatelessWidget {
             child: EventView(
               events: [event],
               showBackArrow: true,
+              showRoute: true,
             ),
           );
         },
