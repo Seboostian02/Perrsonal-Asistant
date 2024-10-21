@@ -46,8 +46,8 @@ class Footer extends StatelessWidget {
             Row(
               children: [
                 IconTextButton(
-                  icon: Icons.settings,
-                  label: 'Settings',
+                  icon: Icons.cloud,
+                  label: 'Weather',
                   onPressed: () {
                     onItemTapped(2);
                   },

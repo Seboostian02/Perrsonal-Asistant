@@ -107,9 +107,22 @@ class MainPageState extends State<MainPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(authProvider.isLoggedIn
-            ? "Hello, ${authProvider.currentUser?.displayName ?? 'User'}"
-            : "Main App"),
+        title: Text(
+          authProvider.isLoggedIn
+              ? "Hello, ${authProvider.currentUser?.displayName ?? 'User'}"
+              : "Main App",
+          style: TextStyle(color: Colors.white),
+        ),
+        backgroundColor: Colors.deepPurple,
+        foregroundColor: Colors.white,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.settings),
+            onPressed: () {
+              print("app bar apasat-------------------------");
+            },
+          ),
+        ],
       ),
       body: IndexedStack(
         index: _selectedIndex,
@@ -126,6 +139,9 @@ class MainPageState extends State<MainPage> {
             events: eventProvider.events,
             showCurrLocation: true,
             showRoute: false,
+          ),
+          NotFoundPage(
+            onBackToHome: () => _onItemTapped(0),
           ),
           NotFoundPage(
             onBackToHome: () => _onItemTapped(0),
