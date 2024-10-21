@@ -124,7 +124,7 @@ class _RouteDrawerState extends State<RouteDrawer> {
                 value: selectedTransportMode,
                 underline: Container(),
                 dropdownColor: Colors.white,
-                style: const TextStyle(color: Colors.black), 
+                style: const TextStyle(color: Colors.black),
                 items: <String>['Walking', 'Bus', 'Cycling', 'Car']
                     .map<DropdownMenuItem<String>>((String value) {
                   return DropdownMenuItem<String>(

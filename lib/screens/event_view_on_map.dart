@@ -8,8 +8,10 @@ import 'package:latlong2/latlong.dart';
 import 'package:googleapis/calendar/v3.dart' as calendar;
 
 import 'package:geocoding/geocoding.dart';
-
 import 'package:geolocator/geolocator.dart';
+
+import 'package:calendar/services/event_service.dart';
+import 'package:calendar/services/location_service.dart';
 
 class EventView extends StatefulWidget {
   final List<calendar.Event> events;
@@ -46,48 +48,32 @@ class EventViewState extends State<EventView> {
   }
 
   Future<void> _getCurrentLocation() async {
-    bool serviceEnabled;
-    LocationPermission permission;
+    try {
+      Position position = await LocationService().getCurrentLocation();
+      setState(() {
+        _currentLocationLatLng = LatLng(position.latitude, position.longitude);
 
-    serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      return Future.error('Serviciul de locație este dezactivat.');
-    }
-
-    permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        return Future.error('Permisiunea de locație a fost refuzată.');
-      }
-    }
-
-    if (permission == LocationPermission.deniedForever) {
-      return Future.error(
-          'Permisiunea de locație este permanent refuzată, nu se poate solicita.');
-    }
-
-    Position position = await Geolocator.getCurrentPosition();
-    setState(() {
-      _currentLocationLatLng = LatLng(position.latitude, position.longitude);
-
-      _markers.removeWhere((marker) => marker.point == _currentLocationLatLng);
-      _markers.add(
-        Marker(
-          point: _currentLocationLatLng!,
-          builder: (context) => const Icon(
-            Icons.my_location,
-            color: Colors.blue,
-            size: 40.0,
+        _markers
+            .removeWhere((marker) => marker.point == _currentLocationLatLng);
+        _markers.add(
+          Marker(
+            point: _currentLocationLatLng!,
+            builder: (context) => const Icon(
+              Icons.my_location,
+              color: Colors.blue,
+              size: 40.0,
+            ),
+            anchorPos: AnchorPos.align(AnchorAlign.top),
           ),
-          anchorPos: AnchorPos.align(AnchorAlign.top),
-        ),
-      );
+        );
 
-      if (widget.events.length > 1) {
-        _mapController.move(_currentLocationLatLng!, 15.0);
-      }
-    });
+        if (widget.events.length > 1) {
+          _mapController.move(_currentLocationLatLng!, 15.0);
+        }
+      });
+    } catch (e) {
+      print(e);
+    }
   }
 
   Future<void> _setMarkers() async {
@@ -152,18 +138,6 @@ class EventViewState extends State<EventView> {
     widget.events.addAll(events);
 
     await _setMarkers();
-  }
-
-  calendar.Event createNonNullEvent(calendar.Event? event) {
-    return calendar.Event(
-      summary: event?.summary ?? "Default Title",
-      location: event?.location ?? "Default Location",
-      description: event?.description ?? "Default Description",
-      start: event?.start ?? calendar.EventDateTime(dateTime: DateTime.now()),
-      end: event?.end ??
-          calendar.EventDateTime(
-              dateTime: DateTime.now().add(const Duration(hours: 1))),
-    );
   }
 
   @override
@@ -231,9 +205,9 @@ class EventViewState extends State<EventView> {
               ),
             ),
           ),
-        if (_selectedEventLatLng != null &&
-            widget.showRoute == true &&
-            widget.events.length == 1)
+        if (widget.showRoute == true &&
+            widget.events.length == 1 &&
+            _selectedEventLatLng != null)
           RouteDrawer(
             currentLocation: _currentLocationLatLng!,
             destination: _selectedEventLatLng!,
@@ -246,8 +220,8 @@ class EventViewState extends State<EventView> {
               children: [
                 EventCard(
                   event: _selectedEvent != null
-                      ? createNonNullEvent(_selectedEvent)
-                      : createNonNullEvent(null),
+                      ? EventService().createNonNullEvent(_selectedEvent)
+                      : EventService().createNonNullEvent(null),
                   showLocation: false,
                 ),
                 Positioned(

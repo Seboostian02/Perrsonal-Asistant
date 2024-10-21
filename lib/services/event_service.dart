@@ -23,4 +23,16 @@ class EventService {
 
     return events;
   }
+
+  calendar.Event createNonNullEvent(calendar.Event? event) {
+    return calendar.Event(
+      summary: event?.summary ?? "Default Title",
+      location: event?.location ?? "Default Location",
+      description: event?.description ?? "Default Description",
+      start: event?.start ?? calendar.EventDateTime(dateTime: DateTime.now()),
+      end: event?.end ??
+          calendar.EventDateTime(
+              dateTime: DateTime.now().add(const Duration(hours: 1))),
+    );
+  }
 }
