@@ -52,7 +52,7 @@ class _RouteDrawerState extends State<RouteDrawer> {
     final mode = transportModes[selectedTransportMode];
 
     final url =
-        'https://router.project-osrm.org/route/v2/$mode/${widget.currentLocation.longitude},${widget.currentLocation.latitude};${widget.destination.longitude},${widget.destination.latitude}?geometries=geojson';
+        'https://router.project-osrm.org/route/v1/$mode/${widget.currentLocation.longitude},${widget.currentLocation.latitude};${widget.destination.longitude},${widget.destination.latitude}?geometries=geojson';
 
     print('Request URL: $url');
 
