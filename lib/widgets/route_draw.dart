@@ -5,7 +5,6 @@ import 'package:latlong2/latlong.dart';
 import 'package:calendar/widgets/zoom_controls.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:envied/envied.dart';
 
 class RouteDrawer extends StatefulWidget {
   final LatLng currentLocation;
