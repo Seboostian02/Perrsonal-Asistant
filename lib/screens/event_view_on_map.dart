@@ -67,6 +67,7 @@ class EventViewState extends State<EventView> {
     setState(() {
       _currentLocationLatLng = LatLng(position.latitude, position.longitude);
 
+     
       _markers.removeWhere((marker) => marker.point == _currentLocationLatLng);
       _markers.add(
         Marker(
@@ -80,16 +81,19 @@ class EventViewState extends State<EventView> {
         ),
       );
 
-      _mapController.move(_currentLocationLatLng!, 15.0);
+     
+      if (widget.events.length > 1) {
+        _mapController.move(_currentLocationLatLng!, 15.0);
+      }
     });
   }
 
   Future<void> _setMarkers() async {
     _markers.clear();
 
+ 
     Position position = await Geolocator.getCurrentPosition();
     _currentLocationLatLng = LatLng(position.latitude, position.longitude);
-
     _markers.add(
       Marker(
         point: _currentLocationLatLng!,
@@ -101,8 +105,6 @@ class EventViewState extends State<EventView> {
         anchorPos: AnchorPos.align(AnchorAlign.top),
       ),
     );
-
-    _mapController.move(_currentLocationLatLng!, 15.0);
 
     for (var event in widget.events) {
       if (event.location != null && event.location!.isNotEmpty) {
@@ -130,6 +132,11 @@ class EventViewState extends State<EventView> {
                 anchorPos: AnchorPos.align(AnchorAlign.top),
               ),
             );
+
+
+            if (widget.events.length == 1) {
+              _mapController.move(latLng, 15.0);
+            }
           }
         } catch (e) {
           print("Error retrieving location for event ${event.summary}: $e");
