@@ -24,7 +24,7 @@ class EventView extends StatefulWidget {
       required this.events,
       this.showBackArrow = false,
       this.showCurrLocation = false,
-      this.showRoute = false})
+      required this.showRoute})
       : super(key: key);
 
   @override
