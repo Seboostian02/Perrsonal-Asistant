@@ -1,6 +1,6 @@
 import 'package:calendar/screens/event_view_on_map.dart';
 import 'package:flutter/material.dart';
-import 'dart:math';
+// import 'dart:math';
 import 'package:intl/intl.dart';
 import 'package:googleapis/calendar/v3.dart' as calendar;
 
@@ -26,6 +26,7 @@ class EventCard extends StatelessWidget {
             child: EventView(
               events: [event],
               showBackArrow: true,
+              showRoute: true,
             ),
           );
         },

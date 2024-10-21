@@ -1,24 +1,31 @@
+import 'package:calendar/widgets/route_draw.dart';
+
 import 'package:calendar/widgets/event_card.dart';
 import 'package:calendar/widgets/zoom_controls.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart' as gm;
 import 'package:latlong2/latlong.dart';
 import 'package:googleapis/calendar/v3.dart' as calendar;
 
 import 'package:geocoding/geocoding.dart';
-
 import 'package:geolocator/geolocator.dart';
+
+import 'package:calendar/services/event_service.dart';
+import 'package:calendar/services/location_service.dart';
 
 class EventView extends StatefulWidget {
   final List<calendar.Event> events;
   final bool showBackArrow;
   final bool showCurrLocation;
+  final bool showRoute;
 
   const EventView(
       {Key? key,
       required this.events,
       this.showBackArrow = false,
-      this.showCurrLocation = false})
+      this.showCurrLocation = false,
+      required this.showRoute})
       : super(key: key);
 
   @override
@@ -42,46 +49,32 @@ class EventViewState extends State<EventView> {
   }
 
   Future<void> _getCurrentLocation() async {
-    bool serviceEnabled;
-    LocationPermission permission;
+    try {
+      Position position = await LocationService().getCurrentLocation();
+      setState(() {
+        _currentLocationLatLng = LatLng(position.latitude, position.longitude);
 
-    serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      return Future.error('Serviciul de locație este dezactivat.');
-    }
-
-    permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        return Future.error('Permisiunea de locație a fost refuzată.');
-      }
-    }
-
-    if (permission == LocationPermission.deniedForever) {
-      return Future.error(
-          'Permisiunea de locație este permanent refuzată, nu se poate solicita.');
-    }
-
-    Position position = await Geolocator.getCurrentPosition();
-    setState(() {
-      _currentLocationLatLng = LatLng(position.latitude, position.longitude);
-
-      _markers.removeWhere((marker) => marker.point == _currentLocationLatLng);
-      _markers.add(
-        Marker(
-          point: _currentLocationLatLng!,
-          builder: (context) => const Icon(
-            Icons.my_location,
-            color: Colors.blue,
-            size: 40.0,
+        _markers
+            .removeWhere((marker) => marker.point == _currentLocationLatLng);
+        _markers.add(
+          Marker(
+            point: _currentLocationLatLng!,
+            builder: (context) => const Icon(
+              Icons.my_location,
+              color: Colors.blue,
+              size: 40.0,
+            ),
+            anchorPos: AnchorPos.align(AnchorAlign.top),
           ),
-          anchorPos: AnchorPos.align(AnchorAlign.top),
-        ),
-      );
+        );
 
-      _mapController.move(_currentLocationLatLng!, 15.0);
-    });
+        if (widget.events.length > 1) {
+          _mapController.move(_currentLocationLatLng!, 15.0);
+        }
+      });
+    } catch (e) {
+      print(e);
+    }
   }
 
   Future<void> _setMarkers() async {
@@ -89,7 +82,6 @@ class EventViewState extends State<EventView> {
 
     Position position = await Geolocator.getCurrentPosition();
     _currentLocationLatLng = LatLng(position.latitude, position.longitude);
-
     _markers.add(
       Marker(
         point: _currentLocationLatLng!,
@@ -101,8 +93,6 @@ class EventViewState extends State<EventView> {
         anchorPos: AnchorPos.align(AnchorAlign.top),
       ),
     );
-
-    _mapController.move(_currentLocationLatLng!, 15.0);
 
     for (var event in widget.events) {
       if (event.location != null && event.location!.isNotEmpty) {
@@ -130,6 +120,11 @@ class EventViewState extends State<EventView> {
                 anchorPos: AnchorPos.align(AnchorAlign.top),
               ),
             );
+
+            if (widget.events.length == 1 && widget.showRoute == true) {
+              _selectedEventLatLng = latLng;
+              _mapController.move(latLng, 15.0);
+            }
           }
         } catch (e) {
           print("Error retrieving location for event ${event.summary}: $e");
@@ -145,18 +140,6 @@ class EventViewState extends State<EventView> {
     widget.events.addAll(events);
 
     await _setMarkers();
-  }
-
-  calendar.Event createNonNullEvent(calendar.Event? event) {
-    return calendar.Event(
-      summary: event?.summary ?? "Default Title",
-      location: event?.location ?? "Default Location",
-      description: event?.description ?? "Default Description",
-      start: event?.start ?? calendar.EventDateTime(dateTime: DateTime.now()),
-      end: event?.end ??
-          calendar.EventDateTime(
-              dateTime: DateTime.now().add(const Duration(hours: 1))),
-    );
   }
 
   @override
@@ -224,7 +207,14 @@ class EventViewState extends State<EventView> {
               ),
             ),
           ),
-        if (_selectedEvent != null && _selectedEventLatLng != null)
+        if (widget.showRoute == true &&
+            widget.events.length == 1 &&
+            _selectedEventLatLng != null)
+          RouteDrawer(
+            currentLocation: _currentLocationLatLng!,
+            destination: _selectedEventLatLng!,
+          ),
+        if (_selectedEvent != null && widget.events.length > 1)
           Positioned(
             left: (MediaQuery.of(context).size.width - 300) / 2,
             top: (MediaQuery.of(context).size.height - 200) / 2,
@@ -232,8 +222,8 @@ class EventViewState extends State<EventView> {
               children: [
                 EventCard(
                   event: _selectedEvent != null
-                      ? createNonNullEvent(_selectedEvent)
-                      : createNonNullEvent(null),
+                      ? EventService().createNonNullEvent(_selectedEvent)
+                      : EventService().createNonNullEvent(null),
                   showLocation: false,
                 ),
                 Positioned(
