@@ -10,7 +10,9 @@ class ZoomControls extends StatelessWidget {
   });
 
   void _zoomIn() {
-    mapController.move(mapController.center, mapController.zoom + 1);
+    if (mapController.zoom < 18) {
+      mapController.move(mapController.center, mapController.zoom + 1);
+    }
   }
 
   void _zoomOut() {
