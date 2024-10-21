@@ -1,9 +1,11 @@
+import 'package:calendar/env.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:calendar/widgets/zoom_controls.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:envied/envied.dart';
 
 class RouteDrawer extends StatefulWidget {
   final LatLng currentLocation;
@@ -24,21 +26,23 @@ class _RouteDrawerState extends State<RouteDrawer> {
   String selectedTransportMode = 'Driving';
   List<LatLng> routePoints = [];
 
-  // Define the mapping of transport modes to API parameters
   final Map<String, String> transportModes = {
-    'Foot': 'walking',
-    'Bike': 'cycling',
-    'Driving': 'driving',
+    'Foot': 'foot-walking',
+    'Bike': 'cycling-regular',
+    'Driving': 'driving-hgv',
   };
 
   @override
   void initState() {
     super.initState();
     mapController = MapController();
-    _fetchRoute();
+    _fetchRoute(); // You can call this directly now
   }
 
   Future<void> _fetchRoute() async {
+    final String? apiKey = Env.opsKey; // Access the environment variable
+    print("-------------------------------------");
+    print(apiKey);
     if (widget.currentLocation.latitude == widget.destination.latitude &&
         widget.currentLocation.longitude == widget.destination.longitude) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -52,26 +56,46 @@ class _RouteDrawerState extends State<RouteDrawer> {
     final mode = transportModes[selectedTransportMode];
 
     final url =
-        'https://router.project-osrm.org/route/v1/$mode/${widget.currentLocation.longitude},${widget.currentLocation.latitude};${widget.destination.longitude},${widget.destination.latitude}?geometries=geojson';
+        'https://api.openrouteservice.org/v2/directions/$mode?api_key=$apiKey&start=${widget.currentLocation.longitude},${widget.currentLocation.latitude}&end=${widget.destination.longitude},${widget.destination.latitude}';
 
     print('Request URL: $url');
 
     try {
-      final response = await http.get(Uri.parse(url));
+      final response = await http.get(
+        Uri.parse(url),
+        headers: {
+          'Accept':
+              'application/json, application/geo+json, application/gpx+xml, img/png; charset=utf-8',
+        },
+      );
+
       print('Response Status Code: ${response.statusCode}');
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         print('Response Data: $data');
 
-        if (data['routes'].isNotEmpty) {
+        if (data['features'] != null && data['features'].isNotEmpty) {
+          final steps =
+              data['features'][0]['properties']['segments'][0]['steps'];
+
+          List<int> waypoints = [];
+          for (var step in steps) {
+            if (step['way_points'] != null) {
+              waypoints.addAll(List<int>.from(step['way_points']));
+            }
+          }
+
+          print('Waypoints: $waypoints');
+
           setState(() {
-            routePoints = (data['routes'][0]['geometry']['coordinates'] as List)
-                .map((coord) => LatLng(coord[1], coord[0]))
-                .toList();
+            routePoints =
+                (data['features'][0]['geometry']['coordinates'] as List)
+                    .map((coord) => LatLng(coord[1], coord[0]))
+                    .toList();
           });
         } else {
-          print('No routes found.');
+          print('No routes found or features is null.');
         }
       } else {
         print('Failed to fetch route: ${response.statusCode}');
