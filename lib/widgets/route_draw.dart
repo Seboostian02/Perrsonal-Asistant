@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:flutter_map_line_editor/flutter_map_line_editor.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:calendar/widgets/zoom_controls.dart';
 import 'package:http/http.dart' as http;
@@ -22,7 +21,7 @@ class RouteDrawer extends StatefulWidget {
 
 class _RouteDrawerState extends State<RouteDrawer> {
   late MapController mapController;
-  String selectedTransportMode = 'Bus';
+  String selectedTransportMode = 'Driving';
   List<LatLng> routePoints = [];
 
   @override
@@ -33,21 +32,44 @@ class _RouteDrawerState extends State<RouteDrawer> {
   }
 
   Future<void> _fetchRoute() async {
+    if (widget.currentLocation.latitude == widget.destination.latitude &&
+        widget.currentLocation.longitude == widget.destination.longitude) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content: Text('Punctele de start și destinație sunt identice!')),
+      );
+      return;
+    }
+
     final mode = selectedTransportMode.toLowerCase();
+
     final url =
         'https://router.project-osrm.org/route/v1/$mode/${widget.currentLocation.longitude},${widget.currentLocation.latitude};${widget.destination.longitude},${widget.destination.latitude}?geometries=geojson';
 
-    final response = await http.get(Uri.parse(url));
+    print('Request URL: $url');
 
-    if (response.statusCode == 200) {
-      final data = json.decode(response.body);
-      setState(() {
-        routePoints = (data['routes'][0]['geometry']['coordinates'] as List)
-            .map((coord) => LatLng(coord[1], coord[0]))
-            .toList();
-      });
-    } else {
-      print('Failed to fetch route: ${response.statusCode}');
+    try {
+      final response = await http.get(Uri.parse(url));
+      print('Response Status Code: ${response.statusCode}');
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        print('Response Data: $data');
+
+        if (data['routes'].isNotEmpty) {
+          setState(() {
+            routePoints = (data['routes'][0]['geometry']['coordinates'] as List)
+                .map((coord) => LatLng(coord[1], coord[0]))
+                .toList();
+          });
+        } else {
+          print('No routes found.');
+        }
+      } else {
+        print('Failed to fetch route: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error fetching route: $e');
     }
   }
 
@@ -125,7 +147,7 @@ class _RouteDrawerState extends State<RouteDrawer> {
                 underline: Container(),
                 dropdownColor: Colors.white,
                 style: const TextStyle(color: Colors.black),
-                items: <String>['Walking', 'Bus', 'Cycling', 'Car']
+                items: <String>['Foot', 'Bike', 'Driving']
                     .map<DropdownMenuItem<String>>((String value) {
                   return DropdownMenuItem<String>(
                     value: value,
@@ -133,10 +155,12 @@ class _RouteDrawerState extends State<RouteDrawer> {
                   );
                 }).toList(),
                 onChanged: (String? newValue) {
-                  setState(() {
-                    selectedTransportMode = newValue!;
-                    _fetchRoute();
-                  });
+                  if (newValue != null) {
+                    setState(() {
+                      selectedTransportMode = newValue;
+                      _fetchRoute();
+                    });
+                  }
                 },
               ),
             ),
