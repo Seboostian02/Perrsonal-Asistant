@@ -120,7 +120,8 @@ class EventViewState extends State<EventView> {
               ),
             );
 
-            if (widget.events.length == 1) {
+            if (widget.events.length == 1 && widget.showRoute == true) {
+              _selectedEventLatLng = latLng;
               _mapController.move(latLng, 15.0);
             }
           }
