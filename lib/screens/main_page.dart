@@ -101,6 +101,10 @@ class MainPageState extends State<MainPage> {
     }
   }
 
+  Future<void> _refreshEvents() async {
+    await _onRefresh();
+  }
+
   @override
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context);
@@ -133,6 +137,7 @@ class MainPageState extends State<MainPage> {
             child: EventList(
               events: eventProvider.events,
               loading: _loading,
+              onRefresh: _refreshEvents,
             ),
           ),
           EventView(

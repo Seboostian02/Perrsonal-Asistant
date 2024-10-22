@@ -1,13 +1,17 @@
 import 'package:calendar/screens/event_view_on_map.dart';
+import 'package:calendar/services/auth_provider.dart';
+import 'package:calendar/services/auth_service.dart';
+import 'package:calendar/services/google_calendar_service.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:googleapis/calendar/v3.dart' as calendar;
+import 'package:provider/provider.dart';
 
 class EventCard extends StatefulWidget {
   final calendar.Event event;
   final bool showLocation;
   final bool expandMode;
-
+  final VoidCallback? onDelete;
   static const Color cardColor = Color(0xFFE1BEE7);
 
   const EventCard({
@@ -15,6 +19,7 @@ class EventCard extends StatefulWidget {
     required this.event,
     this.showLocation = false,
     this.expandMode = false,
+    this.onDelete,
   }) : super(key: key);
 
   @override
@@ -164,14 +169,47 @@ class EventCardState extends State<EventCard> {
                       style: const TextStyle(fontSize: 16),
                     ),
                     const SizedBox(height: 4),
-                    Text(
-                      'Starts at: $startHour',
-                      style: const TextStyle(fontSize: 16),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'Ends at: $endHour',
-                      style: const TextStyle(fontSize: 16),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Starts at: $startHour',
+                              style: const TextStyle(fontSize: 16),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'Ends at: $endHour',
+                              style: const TextStyle(fontSize: 16),
+                            ),
+                          ],
+                        ),
+                        if (!widget.expandMode)
+                          IconButton(
+                            icon: const Icon(Icons.delete, color: Colors.red),
+                            onPressed: () async {
+                              Provider.of<AuthProvider>(context, listen: false);
+                              final accessToken =
+                                  await AuthService().accessToken;
+
+                              if (accessToken != null) {
+                                await GoogleCalendarService.deleteEvent(
+                                  accessToken: accessToken,
+                                  eventId: widget.event.id!,
+                                );
+
+                                if (widget.onDelete != null) {
+                                  widget.onDelete!();
+                                }
+                              } else {
+                                print(
+                                    "Failed to get access token for Google Calendar");
+                              }
+                            },
+                          ),
+                      ],
                     ),
                   ],
                 ),

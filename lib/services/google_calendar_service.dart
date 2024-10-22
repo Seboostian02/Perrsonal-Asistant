@@ -97,4 +97,19 @@ class GoogleCalendarService {
       return [];
     }
   }
+
+  static Future<void> deleteEvent({
+    required String accessToken,
+    required String eventId,
+  }) async {
+    try {
+      final client = await getAuthenticatedClient(accessToken);
+      var calendarApi = calendar.CalendarApi(client);
+
+      await calendarApi.events.delete("primary", eventId);
+      print("Event deleted successfully!");
+    } catch (e) {
+      print("Error deleting event: $e");
+    }
+  }
 }
