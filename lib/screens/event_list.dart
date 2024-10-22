@@ -7,16 +7,18 @@ import 'package:googleapis/calendar/v3.dart' as calendar;
 class EventList extends StatelessWidget {
   final List<calendar.Event> events;
   final bool loading;
+  final VoidCallback onRefresh;
 
   const EventList({
     super.key,
     required this.events,
     required this.loading,
+    required this.onRefresh,
   });
 
   @override
   Widget build(BuildContext context) {
-    final authProvider = Provider.of<AuthProvider>(context);
+    Provider.of<AuthProvider>(context);
     final DateTime today = DateTime.now();
 
     final List<calendar.Event> todayEvents = events.where((event) {
@@ -58,6 +60,7 @@ class EventList extends StatelessWidget {
                 EventCard(
                   event: event,
                   showLocation: true,
+                  onDelete: onRefresh,
                 ),
             const SizedBox(height: 20),
             const Text(
@@ -70,6 +73,7 @@ class EventList extends StatelessWidget {
                 event: event,
                 showLocation: true,
                 key: ValueKey(event.id),
+                onDelete: onRefresh,
               ),
           ],
         ],
