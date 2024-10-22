@@ -169,41 +169,44 @@ class EventCardState extends State<EventCard> {
                       style: const TextStyle(fontSize: 16),
                     ),
                     const SizedBox(height: 4),
-                    Text(
-                      'Starts at: $startHour',
-                      style: const TextStyle(fontSize: 16),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'Ends at: $endHour',
-                      style: const TextStyle(fontSize: 16),
-                    ),
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        if (!widget.expandMode)
-                          IconButton(
-                            icon: const Icon(Icons.delete, color: Colors.red),
-                            onPressed: () async {
-                              Provider.of<AuthProvider>(context, listen: false);
-                              final accessToken =
-                                  await AuthService().accessToken;
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Starts at: $startHour',
+                              style: const TextStyle(fontSize: 16),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'Ends at: $endHour',
+                              style: const TextStyle(fontSize: 16),
+                            ),
+                          ],
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.delete, color: Colors.red),
+                          onPressed: () async {
+                            Provider.of<AuthProvider>(context, listen: false);
+                            final accessToken = await AuthService().accessToken;
 
-                              if (accessToken != null) {
-                                await GoogleCalendarService.deleteEvent(
-                                  accessToken: accessToken,
-                                  eventId: widget.event.id!,
-                                );
+                            if (accessToken != null) {
+                              await GoogleCalendarService.deleteEvent(
+                                accessToken: accessToken,
+                                eventId: widget.event.id!,
+                              );
 
-                                if (widget.onDelete != null) {
-                                  widget.onDelete!();
-                                }
-                              } else {
-                                print(
-                                    "Failed to get access token for Google Calendar");
+                              if (widget.onDelete != null) {
+                                widget.onDelete!();
                               }
-                            },
-                          ),
+                            } else {
+                              print(
+                                  "Failed to get access token for Google Calendar");
+                            }
+                          },
+                        ),
                       ],
                     ),
                   ],
