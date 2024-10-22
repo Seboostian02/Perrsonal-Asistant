@@ -186,27 +186,29 @@ class EventCardState extends State<EventCard> {
                             ),
                           ],
                         ),
-                        IconButton(
-                          icon: const Icon(Icons.delete, color: Colors.red),
-                          onPressed: () async {
-                            Provider.of<AuthProvider>(context, listen: false);
-                            final accessToken = await AuthService().accessToken;
+                        if (!widget.expandMode)
+                          IconButton(
+                            icon: const Icon(Icons.delete, color: Colors.red),
+                            onPressed: () async {
+                              Provider.of<AuthProvider>(context, listen: false);
+                              final accessToken =
+                                  await AuthService().accessToken;
 
-                            if (accessToken != null) {
-                              await GoogleCalendarService.deleteEvent(
-                                accessToken: accessToken,
-                                eventId: widget.event.id!,
-                              );
+                              if (accessToken != null) {
+                                await GoogleCalendarService.deleteEvent(
+                                  accessToken: accessToken,
+                                  eventId: widget.event.id!,
+                                );
 
-                              if (widget.onDelete != null) {
-                                widget.onDelete!();
+                                if (widget.onDelete != null) {
+                                  widget.onDelete!();
+                                }
+                              } else {
+                                print(
+                                    "Failed to get access token for Google Calendar");
                               }
-                            } else {
-                              print(
-                                  "Failed to get access token for Google Calendar");
-                            }
-                          },
-                        ),
+                            },
+                          ),
                       ],
                     ),
                   ],
