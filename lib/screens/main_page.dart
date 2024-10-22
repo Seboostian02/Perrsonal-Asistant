@@ -1,4 +1,5 @@
 import 'package:calendar/screens/event_view_on_map.dart';
+import 'package:calendar/screens/settings.dart';
 import 'package:calendar/services/auth_service.dart';
 import 'package:calendar/services/event_provider.dart';
 import 'package:flutter/material.dart';
@@ -6,7 +7,7 @@ import 'package:provider/provider.dart';
 import '../services/auth_provider.dart';
 import 'footer.dart';
 import '../widgets/event_form.dart';
-import '../widgets/event_list.dart';
+import 'event_list.dart';
 import './not_found_page.dart';
 import '../services/google_calendar_service.dart';
 import 'package:googleapis/calendar/v3.dart' as calendar;
@@ -146,9 +147,7 @@ class MainPageState extends State<MainPage> {
           NotFoundPage(
             onBackToHome: () => _onItemTapped(0),
           ),
-          NotFoundPage(
-            onBackToHome: () => _onItemTapped(0),
-          ),
+          SettingsList(authProvider: authProvider),
         ],
       ),
       bottomNavigationBar: Footer(

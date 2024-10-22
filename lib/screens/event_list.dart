@@ -31,19 +31,6 @@ class EventList extends StatelessWidget {
       padding: const EdgeInsets.all(16.0),
       child: ListView(
         children: [
-          const Text(
-            "Your events are here:",
-            style: TextStyle(fontSize: 24),
-          ),
-          const SizedBox(height: 20),
-          if (authProvider.isLoggedIn)
-            ElevatedButton(
-              onPressed: authProvider.signOut,
-              child: const Text('Log Out'),
-            )
-          else
-            const Text("Not logged in"),
-          const SizedBox(height: 20),
           if (loading)
             const Center(child: CircularProgressIndicator())
           else if (events.isEmpty)

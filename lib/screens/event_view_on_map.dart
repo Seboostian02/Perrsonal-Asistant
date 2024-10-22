@@ -224,6 +224,7 @@ class EventViewState extends State<EventView> {
                       ? EventService().createNonNullEvent(_selectedEvent)
                       : EventService().createNonNullEvent(null),
                   showLocation: false,
+                  expandMode: true,
                 ),
                 Positioned(
                   top: 0,
