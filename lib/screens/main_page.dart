@@ -1,7 +1,9 @@
 import 'package:calendar/screens/event_view_on_map.dart';
 import 'package:calendar/screens/settings.dart';
+import 'package:calendar/screens/weather_view.dart';
 import 'package:calendar/services/auth_service.dart';
 import 'package:calendar/services/event_provider.dart';
+import 'package:calendar/services/location_service.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/auth_provider.dart';
@@ -11,6 +13,7 @@ import 'event_list.dart';
 import './not_found_page.dart';
 import '../services/google_calendar_service.dart';
 import 'package:googleapis/calendar/v3.dart' as calendar;
+import 'package:geolocator/geolocator.dart';
 
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
@@ -23,11 +26,24 @@ class MainPageState extends State<MainPage> {
   bool _loading = true;
   int _selectedIndex = 0;
   final GlobalKey<EventViewState> _eventViewKey = GlobalKey<EventViewState>();
+  Position? _currentPosition;
 
   @override
   void initState() {
     super.initState();
     _fetchEvents();
+    _getCurrentLocation();
+  }
+
+  Future<void> _getCurrentLocation() async {
+    try {
+      _currentPosition = await LocationService().getCurrentLocation();
+      setState(() {});
+      print("curr position--------------------------------");
+      print(_currentPosition);
+    } catch (e) {
+      print('Error getting location: $e');
+    }
   }
 
   Future<void> _fetchEvents() async {
@@ -111,6 +127,7 @@ class MainPageState extends State<MainPage> {
     final eventProvider = Provider.of<EventProvider>(context);
 
     return Scaffold(
+      extendBody: true,
       appBar: AppBar(
         title: Text(
           authProvider.isLoggedIn
@@ -140,15 +157,17 @@ class MainPageState extends State<MainPage> {
               onRefresh: _refreshEvents,
             ),
           ),
-          EventView(
-            key: _eventViewKey,
-            events: eventProvider.events,
-            showCurrLocation: true,
-            showRoute: false,
-          ),
-          NotFoundPage(
-            onBackToHome: () => _onItemTapped(0),
-          ),
+          _eventViewKey != null
+              ? EventView(
+                  key: _eventViewKey,
+                  events: eventProvider.events,
+                  showCurrLocation: true,
+                  showRoute: false,
+                )
+              : const Center(child: CircularProgressIndicator()),
+          _currentPosition != null
+              ? WeatherView(location: _currentPosition!)
+              : const Center(child: CircularProgressIndicator()),
           NotFoundPage(
             onBackToHome: () => _onItemTapped(0),
           ),
