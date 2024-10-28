@@ -59,6 +59,7 @@ dependencies:
   envied: ^0.5.4+1
   envied_generator: ^0.5.4+1
   build_runner: ^2.4.11
+  weather_icons: ^3.0.0
 
 dev_dependencies:
   flutter_test:

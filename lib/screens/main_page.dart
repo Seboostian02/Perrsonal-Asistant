@@ -157,7 +157,7 @@ class MainPageState extends State<MainPage> {
               onRefresh: _refreshEvents,
             ),
           ),
-          _eventViewKey != null
+          eventProvider.events != null
               ? EventView(
                   key: _eventViewKey,
                   events: eventProvider.events,
@@ -166,7 +166,9 @@ class MainPageState extends State<MainPage> {
                 )
               : const Center(child: CircularProgressIndicator()),
           _currentPosition != null
-              ? WeatherView(location: _currentPosition!)
+              ? WeatherView(
+                  location: _currentPosition!,
+                )
               : const Center(child: CircularProgressIndicator()),
           NotFoundPage(
             onBackToHome: () => _onItemTapped(0),
