@@ -26,8 +26,6 @@ class WeatherService {
       headers: {'accept': 'application/json'},
     );
 
-    print("Response: ${response.body}");
-
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
 
@@ -36,12 +34,66 @@ class WeatherService {
 
         for (var day in data['timelines']['daily']) {
           final date = day['time'];
+          final values = day['values'];
+
           weeklyForecast[date] = {
             'temperature': {
-              'max': day['values']['temperatureMax'],
-              'min': day['values']['temperatureMin'],
+              'avg': values['temperatureAvg'],
+              'max': values['temperatureMax'],
+              'min': values['temperatureMin'],
             },
-            'weather_descriptions': day['values']['weatherCode'],
+            'temperatureApparent': {
+              'avg': values['temperatureApparentAvg'],
+              'max': values['temperatureApparentMax'],
+              'min': values['temperatureApparentMin'],
+            },
+            'cloudCover': {
+              'avg': values['cloudCoverAvg'],
+              'max': values['cloudCoverMax'],
+              'min': values['cloudCoverMin'],
+            },
+            'humidity': {
+              'avg': values['humidityAvg'],
+              'max': values['humidityMax'],
+              'min': values['humidityMin'],
+            },
+            'precipitationProbability': {
+              'avg': values['precipitationProbabilityAvg'],
+              'max': values['precipitationProbabilityMax'],
+              'min': values['precipitationProbabilityMin'],
+            },
+            'pressureSurfaceLevel': {
+              'avg': values['pressureSurfaceLevelAvg'],
+              'max': values['pressureSurfaceLevelMax'],
+              'min': values['pressureSurfaceLevelMin'],
+            },
+            'wind': {
+              'speedAvg': values['windSpeedAvg'],
+              'speedMax': values['windSpeedMax'],
+              'speedMin': values['windSpeedMin'],
+              'gustAvg': values['windGustAvg'],
+              'gustMax': values['windGustMax'],
+              'gustMin': values['windGustMin'],
+              'directionAvg': values['windDirectionAvg'],
+            },
+            'uvIndex': {
+              'avg': values['uvIndexAvg'],
+              'max': values['uvIndexMax'],
+              'min': values['uvIndexMin'],
+            },
+            'sunriseTime': values['sunriseTime'],
+            'sunsetTime': values['sunsetTime'],
+            'moonriseTime': values['moonriseTime'],
+            'moonsetTime': values['moonsetTime'],
+            'visibility': {
+              'avg': values['visibilityAvg'],
+              'max': values['visibilityMax'],
+              'min': values['visibilityMin'],
+            },
+            'weatherCode': {
+              'max': values['weatherCodeMax'],
+              'min': values['weatherCodeMin'],
+            },
           };
         }
         return weeklyForecast;

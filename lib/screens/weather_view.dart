@@ -45,32 +45,6 @@ class WeatherViewState extends State<WeatherView> {
     "8000": WeatherIcons.thunderstorm,
   };
 
-  final Map<String, String> weatherDescriptions = {
-    "1000": "Sunny",
-    "1100": "Partly Cloudy",
-    "1101": "Cloudy",
-    "1102": "Overcast",
-    "1001": "Cloudy",
-    "2000": "Fog",
-    "2100": "Fog",
-    "4000": "Rain Mix",
-    "4001": "Rain",
-    "4200": "Rain",
-    "4201": "Rain",
-    "5000": "Snow",
-    "5001": "Snow",
-    "5100": "Snow Shower",
-    "5101": "Snow Shower",
-    "6000": "Rain",
-    "6001": "Rain",
-    "6200": "Rain",
-    "6201": "Rain",
-    "7000": "Snow",
-    "7101": "Snow",
-    "7102": "Snow",
-    "8000": "Thunderstorm",
-  };
-
   @override
   void initState() {
     super.initState();
@@ -93,6 +67,10 @@ class WeatherViewState extends State<WeatherView> {
         weeklyWeatherData = weeklyWeather;
         isLoading = false;
       });
+      print("Current weather data:");
+      print(currentWeatherData);
+      print("\nWeekly weather data:");
+      print(weeklyWeatherData);
     } catch (e) {
       setState(() {
         isLoading = false;
@@ -101,10 +79,6 @@ class WeatherViewState extends State<WeatherView> {
       });
       print('Error while fetching weather data: $e');
     }
-  }
-
-  String getWeatherDescription(String code) {
-    return weatherDescriptions[code] ?? "Unknown Weather";
   }
 
   @override
@@ -151,11 +125,7 @@ class WeatherViewState extends State<WeatherView> {
                                     ),
                                   ),
                                   Text(
-                                    getWeatherDescription(
-                                        currentWeatherData!['timelines']
-                                                    ['minutely'][0]['values']
-                                                ['weatherCode']
-                                            .toString()),
+                                    "Current Weather",
                                     style: const TextStyle(
                                       fontSize: 24,
                                       color: Colors.white,
@@ -206,6 +176,11 @@ class WeatherViewState extends State<WeatherView> {
                                     DateFormat('EEEE, MMM d, yyyy')
                                         .format(DateTime.parse(date));
 
+                                final weatherCode = dayWeather['weatherCode']
+                                            ['max']
+                                        ?.toString() ??
+                                    '1001';
+
                                 return Card(
                                   color: Colors.white.withOpacity(0.15),
                                   shape: RoundedRectangleBorder(
@@ -233,9 +208,11 @@ class WeatherViewState extends State<WeatherView> {
                                             fontWeight: FontWeight.w500,
                                           ),
                                         ),
-                                        const Icon(
-                                          Icons.cloud,
+                                        Icon(
+                                          weatherIcons[weatherCode] ??
+                                              Icons.error,
                                           color: Colors.white,
+                                          size: 30,
                                         ),
                                       ],
                                     ),
@@ -245,8 +222,7 @@ class WeatherViewState extends State<WeatherView> {
                             ),
                           ),
                         ],
-                      ),
-                    )
+                      ))
                   : const Center(
                       child: Text(
                         'Failed to load weather data',
