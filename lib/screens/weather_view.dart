@@ -113,25 +113,36 @@ class WeatherViewState extends State<WeatherView> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    '${currentWeatherData!['timelines']['minutely'][0]['values']['temperature']}°C',
-                                    style: const TextStyle(
-                                      fontSize: 60,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white,
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      '${currentWeatherData!['timelines']['minutely'][0]['values']['temperature']}°C',
+                                      style: const TextStyle(
+                                        fontSize: 60,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white,
+                                      ),
                                     ),
-                                  ),
-                                  Text(
-                                    "Current Weather",
-                                    style: const TextStyle(
-                                      fontSize: 24,
-                                      color: Colors.white,
+                                    Text(
+                                      "Cloudy with ${currentWeatherData!['timelines']['minutely'][0]['values']['precipitationProbability']}% chance of precipitation",
+                                      style: const TextStyle(
+                                        fontSize: 18,
+                                        color: Colors.white,
+                                      ),
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
                                     ),
-                                  ),
-                                ],
+                                    Text(
+                                      'Wind: ${currentWeatherData!['timelines']['minutely'][0]['values']['windSpeed']} km/h',
+                                      style: const TextStyle(
+                                        fontSize: 18,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
                               Column(
                                 children: [
@@ -222,7 +233,8 @@ class WeatherViewState extends State<WeatherView> {
                             ),
                           ),
                         ],
-                      ))
+                      ),
+                    )
                   : const Center(
                       child: Text(
                         'Failed to load weather data',
