@@ -40,8 +40,7 @@ class _RouteDrawerState extends State<RouteDrawer> {
 
   Future<void> _fetchRoute() async {
     final String? apiKey = Env.opsKey;
-    print("-------------------------------------");
-    print(apiKey);
+
     if (widget.currentLocation.latitude == widget.destination.latitude &&
         widget.currentLocation.longitude == widget.destination.longitude) {
       ScaffoldMessenger.of(context).showSnackBar(
