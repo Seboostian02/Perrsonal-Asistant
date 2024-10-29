@@ -48,6 +48,7 @@ class GoogleCalendarService {
           dateTime: startDateTime,
           timeZone: 'GMT+3',
         );
+
         event.end = calendar.EventDateTime(
           dateTime: endDateTime,
           timeZone: 'GMT+3',

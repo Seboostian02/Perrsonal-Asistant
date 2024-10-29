@@ -35,11 +35,11 @@ class _RouteDrawerState extends State<RouteDrawer> {
   void initState() {
     super.initState();
     mapController = MapController();
-    _fetchRoute(); // You can call this directly now
+    _fetchRoute();
   }
 
   Future<void> _fetchRoute() async {
-    final String? apiKey = Env.opsKey; // Access the environment variable
+    final String? apiKey = Env.opsKey;
     print("-------------------------------------");
     print(apiKey);
     if (widget.currentLocation.latitude == widget.destination.latitude &&

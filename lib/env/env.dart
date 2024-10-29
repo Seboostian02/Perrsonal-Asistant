@@ -6,4 +6,7 @@ part 'env.g.dart';
 abstract class Env {
   @EnviedField(varName: 'OPS_KEY')
   static const String opsKey = _Env.opsKey;
+
+  @EnviedField(varName: 'OPS_KEY')
+  static const String weatherKey = _Env.weatherKey;
 }
