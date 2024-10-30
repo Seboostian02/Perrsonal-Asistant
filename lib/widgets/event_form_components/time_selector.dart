@@ -12,34 +12,79 @@ class TimeSelector extends StatelessWidget {
     required this.onTimeSelected,
   }) : super(key: key);
 
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Text(
-          'Start time: ${_formatTime(startTime)}',
-          style: const TextStyle(fontSize: 24),
-        ),
-        ElevatedButton(
-          onPressed: () => onTimeSelected(context, true),
-          child: const Text('Pick Start Time'),
-        ),
-        const SizedBox(height: 20),
-        Text(
-          'End time: ${_formatTime(endTime)}',
-          style: const TextStyle(fontSize: 24),
-        ),
-        ElevatedButton(
-          onPressed: () => onTimeSelected(context, false),
-          child: const Text('Pick End Time'),
-        ),
-      ],
-    );
-  }
-
   String _formatTime(TimeOfDay time) {
     final hour = time.hour.toString().padLeft(2, '0');
     final minute = time.minute.toString().padLeft(2, '0');
     return '$hour:$minute';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Expanded(
+          child: InkWell(
+            onTap: () => onTimeSelected(context, true),
+            child: Container(
+              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+              decoration: BoxDecoration(
+                color: Colors.deepPurple.shade50,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Column(
+                children: [
+                  const Text(
+                    'Start Time',
+                    style: TextStyle(fontSize: 14, color: Colors.deepPurple),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    _formatTime(startTime),
+                    style: const TextStyle(
+                      fontSize: 28,
+                      fontFamily: 'Courier',
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 16),
+        Expanded(
+          child: InkWell(
+            onTap: () => onTimeSelected(context, false),
+            child: Container(
+              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+              decoration: BoxDecoration(
+                color: Colors.deepPurple.shade50,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Column(
+                children: [
+                  const Text(
+                    'End Time',
+                    style: TextStyle(fontSize: 14, color: Colors.deepPurple),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    _formatTime(endTime),
+                    style: const TextStyle(
+                      fontSize: 28,
+                      fontFamily: 'Courier',
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
   }
 }

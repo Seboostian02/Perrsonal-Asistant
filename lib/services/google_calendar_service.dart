@@ -15,6 +15,7 @@ class GoogleCalendarService {
     required TimeOfDay endTime,
     String? location,
     required String location_name,
+    DateTime? recurrenceEndDate, // adăugat parametrul recurenței
   }) async {
     try {
       String? accessToken = await AuthService().accessToken;
@@ -53,6 +54,13 @@ class GoogleCalendarService {
           dateTime: endDateTime,
           timeZone: 'GMT+3',
         );
+
+        // Setează recurența dacă există o dată de final pentru recurență
+        if (recurrenceEndDate != null) {
+          event.recurrence = [
+            'RRULE:FREQ=WEEKLY;UNTIL=${recurrenceEndDate.toUtc().toIso8601String().replaceAll('-', '').split('T').first}'
+          ];
+        }
 
         await calendarApi.events.insert(event, "primary");
         print("Event created successfully!");

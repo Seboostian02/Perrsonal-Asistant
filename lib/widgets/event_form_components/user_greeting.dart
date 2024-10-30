@@ -12,7 +12,7 @@ class UserGreeting extends StatelessWidget {
     return Center(
       child: authProvider.isLoggedIn
           ? Text(
-              "Time to schedule something important, ${authProvider.currentUser?.displayName ?? ''}! ",
+              "On your way to be more organized, ${authProvider.currentUser?.displayName ?? ''}! ",
               textAlign: TextAlign.center,
             )
           : ElevatedButton(

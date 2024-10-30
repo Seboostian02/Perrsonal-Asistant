@@ -23,11 +23,12 @@ class EventFormState extends State<EventForm> {
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
   LatLng? _selectedLocation;
-
+  bool _isRecurring = false;
   DateTime _selectedDate = DateTime.now();
   late TimeOfDay _startTime;
   late TimeOfDay _endTime;
 
+  DateTime? _recurrenceEndDate;
   @override
   void initState() {
     super.initState();
@@ -37,13 +38,27 @@ class EventFormState extends State<EventForm> {
     _endTime = TimeOfDay(hour: (now.hour + 1) % 24, minute: now.minute);
   }
 
+  Future<void> _selectRecurrenceEndDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: _selectedDate,
+      firstDate: _selectedDate,
+      lastDate: DateTime(2101),
+    );
+    if (picked != null && picked != _recurrenceEndDate) {
+      setState(() {
+        _recurrenceEndDate = picked;
+      });
+    }
+  }
+
   Future<void> _createEvent() async {
     final now = DateTime.now();
     final currentDate = DateTime(now.year, now.month, now.day);
     final selectedDate =
         DateTime(_selectedDate.year, _selectedDate.month, _selectedDate.day);
 
-    if (selectedDate == currentDate) {
+    if (!_isRecurring && selectedDate == currentDate) {
       final nowTime = TimeOfDay.fromDateTime(now);
 
       if (_startTime.hour < nowTime.hour ||
@@ -70,25 +85,27 @@ class EventFormState extends State<EventForm> {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     if (authProvider.currentUser != null) {
       final accessToken = await AuthService().accessToken;
-      if (accessToken != null) {
-        await GoogleCalendarService.createEvent(
-          accessToken: accessToken,
-          title: _titleController.text,
-          description: _descriptionController.text,
-          location: _selectedLocation != null
-              ? '${_selectedLocation!.latitude}, ${_selectedLocation!.longitude}'
-              : 'No location selected',
-          date: _selectedDate,
-          startTime: _startTime,
-          endTime: _endTime,
-          location_name: '',
-        );
-
-        _showTopSnackBar(context, 'Event created successfully');
-        Navigator.pop(context);
-      } else {
+      if (accessToken == null) {
         print("Failed to get access token");
+        return;
       }
+
+      await GoogleCalendarService.createEvent(
+        accessToken: accessToken,
+        title: _titleController.text,
+        description: _descriptionController.text,
+        location: _selectedLocation != null
+            ? '${_selectedLocation!.latitude}, ${_selectedLocation!.longitude}'
+            : 'No location selected',
+        date: _selectedDate,
+        startTime: _startTime,
+        endTime: _endTime,
+        location_name: '',
+        recurrenceEndDate: _recurrenceEndDate,
+      );
+
+      _showTopSnackBar(context, 'Event created successfully');
+      Navigator.pop(context);
     } else {
       print("User is not logged in.");
     }
@@ -196,35 +213,71 @@ class EventFormState extends State<EventForm> {
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(30.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const UserGreeting(),
-              EventTitleField(controller: _titleController),
-              EventDescriptionField(controller: _descriptionController),
-              LocationSelector(
-                selectedLocation: _selectedLocation,
-                onLocationSelected: (LatLng location) {
-                  setState(() {
-                    _selectedLocation = location;
-                  });
-                },
-                selectedLocationName: '',
-              ),
-              const SizedBox(height: 20),
-              DateSelector(
-                selectedDate: _selectedDate,
-                onDateSelected: _selectDate,
-              ),
-              const SizedBox(height: 20),
-              TimeSelector(
-                startTime: _startTime,
-                endTime: _endTime,
-                onTimeSelected: _selectTime,
-              ),
-              const SizedBox(height: 40),
-              CreateEventButton(onPressed: _createEvent),
-            ],
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const UserGreeting(),
+                EventTitleField(controller: _titleController),
+                EventDescriptionField(controller: _descriptionController),
+                DateSelector(
+                  selectedDate: _selectedDate,
+                  onDateSelected: _selectDate,
+                ),
+                const SizedBox(height: 20),
+                TimeSelector(
+                  startTime: _startTime,
+                  endTime: _endTime,
+                  onTimeSelected: _selectTime,
+                ),
+                const SizedBox(height: 20),
+                CheckboxListTile(
+                  title: const Text('Add a location for this event?'),
+                  value: _selectedLocation != null,
+                  onChanged: (bool? value) {
+                    setState(() {
+                      if (value == true) {
+                        _selectedLocation = LatLng(0, 0);
+                      } else {
+                        _selectedLocation = null;
+                      }
+                    });
+                  },
+                ),
+                if (_selectedLocation != null)
+                  LocationSelector(
+                    selectedLocation: _selectedLocation,
+                    onLocationSelected: (LatLng location) {
+                      setState(() {
+                        _selectedLocation = location;
+                      });
+                    },
+                    selectedLocationName: '',
+                  ),
+                const SizedBox(height: 20),
+                CheckboxListTile(
+                  title: const Text('Should this event be recurring?'),
+                  value: _isRecurring,
+                  onChanged: (bool? value) {
+                    setState(() {
+                      _isRecurring = value ?? false;
+                    });
+                  },
+                ),
+                if (_isRecurring)
+                  ElevatedButton(
+                    onPressed: () => _selectRecurrenceEndDate(context),
+                    child: Text(
+                      _recurrenceEndDate == null
+                          ? 'Select Recurrence End Date'
+                          : 'Recurrence Ends: ${_recurrenceEndDate!.toLocal()}'
+                              .split(' ')[0],
+                    ),
+                  ),
+                const SizedBox(height: 20),
+                CreateEventButton(onPressed: _createEvent),
+              ],
+            ),
           ),
         ),
       ),
