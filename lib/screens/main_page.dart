@@ -39,8 +39,6 @@ class MainPageState extends State<MainPage> {
     try {
       _currentPosition = await LocationService().getCurrentLocation();
       setState(() {});
-      print("curr position--------------------------------");
-      print(_currentPosition);
     } catch (e) {
       print('Error getting location: $e');
     }
@@ -87,8 +85,7 @@ class MainPageState extends State<MainPage> {
 
   Future<void> _setMarkersOnMap() async {
     final events = Provider.of<EventProvider>(context, listen: false).events;
-    print("Set markers called. Events count: ${events.length}");
-    print("-----------------");
+
     if (events.isNotEmpty && _eventViewKey.currentState != null) {
       await _eventViewKey.currentState!.setMarkers(events);
     }
