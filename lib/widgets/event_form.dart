@@ -24,11 +24,13 @@ class EventFormState extends State<EventForm> {
   final TextEditingController _descriptionController = TextEditingController();
   LatLng? _selectedLocation;
   bool _isRecurring = false;
+  bool _isOnlineMeeting = false;
   DateTime _selectedDate = DateTime.now();
   late TimeOfDay _startTime;
   late TimeOfDay _endTime;
 
   DateTime? _recurrenceEndDate;
+
   @override
   void initState() {
     super.initState();
@@ -94,9 +96,11 @@ class EventFormState extends State<EventForm> {
         accessToken: accessToken,
         title: _titleController.text,
         description: _descriptionController.text,
-        location: _selectedLocation != null
-            ? '${_selectedLocation!.latitude}, ${_selectedLocation!.longitude}'
-            : 'No location selected',
+        location: _isOnlineMeeting
+            ? 'Event is online'
+            : _selectedLocation != null
+                ? '${_selectedLocation!.latitude}, ${_selectedLocation!.longitude}'
+                : 'No location specified',
         date: _selectedDate,
         startTime: _startTime,
         endTime: _endTime,
@@ -192,15 +196,35 @@ class EventFormState extends State<EventForm> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Date & Time Picker',
-          style: TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-          ),
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text(
+              'New Event',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            InkWell(
+              onTap: _createEvent,
+              child: Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Icon(
+                  Icons.check,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ],
         ),
         centerTitle: true,
-        toolbarHeight: 80,
+        toolbarHeight: 90,
         shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.only(
             bottomRight: Radius.circular(25),
@@ -212,7 +236,7 @@ class EventFormState extends State<EventForm> {
       ),
       body: Center(
         child: Padding(
-          padding: const EdgeInsets.all(30.0),
+          padding: const EdgeInsets.all(20.0),
           child: SingleChildScrollView(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -232,18 +256,32 @@ class EventFormState extends State<EventForm> {
                 ),
                 const SizedBox(height: 20),
                 CheckboxListTile(
-                  title: const Text('Add a location for this event?'),
-                  value: _selectedLocation != null,
+                  title: const Text('Online meeting?'),
+                  value: _isOnlineMeeting,
                   onChanged: (bool? value) {
                     setState(() {
-                      if (value == true) {
-                        _selectedLocation = LatLng(0, 0);
-                      } else {
+                      _isOnlineMeeting = value ?? false;
+
+                      if (_isOnlineMeeting) {
                         _selectedLocation = null;
                       }
                     });
                   },
                 ),
+                if (!_isOnlineMeeting)
+                  CheckboxListTile(
+                    title: const Text('Add a location for this event?'),
+                    value: _selectedLocation != null,
+                    onChanged: (bool? value) {
+                      setState(() {
+                        if (value == true) {
+                          _selectedLocation = LatLng(0, 0);
+                        } else {
+                          _selectedLocation = null;
+                        }
+                      });
+                    },
+                  ),
                 if (_selectedLocation != null)
                   LocationSelector(
                     selectedLocation: _selectedLocation,
@@ -274,8 +312,6 @@ class EventFormState extends State<EventForm> {
                               .split(' ')[0],
                     ),
                   ),
-                const SizedBox(height: 20),
-                CreateEventButton(onPressed: _createEvent),
               ],
             ),
           ),
