@@ -64,6 +64,8 @@ class MainPageState extends State<MainPage> {
 
       if (events.isNotEmpty) {
         Provider.of<EventProvider>(context, listen: false).setEvents(events);
+      } else {
+        Provider.of<EventProvider>(context, listen: false).clearEvents();
       }
 
       setState(() {
