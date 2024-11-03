@@ -1,5 +1,5 @@
 import 'package:calendar/services/auth_service.dart';
-import 'package:calendar/widgets/event_form_components/create_event_button.dart';
+// import 'package:calendar/widgets/event_form_components/create_event_button.dart';
 import 'package:calendar/widgets/event_form_components/date_selector.dart';
 import 'package:calendar/widgets/event_form_components/event_description_field.dart';
 import 'package:calendar/widgets/event_form_components/event_title_field.dart';
@@ -8,9 +8,12 @@ import 'package:calendar/widgets/event_form_components/time_selector.dart';
 import 'package:calendar/widgets/event_form_components/user_greeting.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:calendar/services/google_calendar_service.dart';
 import '../services/auth_provider.dart';
+
+enum RecurrenceType { none, daily, weekly, monthly }
 
 class EventForm extends StatefulWidget {
   const EventForm({super.key});
@@ -23,18 +26,17 @@ class EventFormState extends State<EventForm> {
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
   LatLng? _selectedLocation;
-  bool _isRecurring = false;
   bool _isOnlineMeeting = false;
   DateTime _selectedDate = DateTime.now();
   late TimeOfDay _startTime;
   late TimeOfDay _endTime;
 
+  RecurrenceType _recurrenceType = RecurrenceType.none;
   DateTime? _recurrenceEndDate;
 
   @override
   void initState() {
     super.initState();
-
     final now = TimeOfDay.now();
     _startTime = TimeOfDay(hour: now.hour, minute: (now.minute + 15) % 60);
     _endTime = TimeOfDay(hour: (now.hour + 1) % 24, minute: now.minute);
@@ -60,9 +62,8 @@ class EventFormState extends State<EventForm> {
     final selectedDate =
         DateTime(_selectedDate.year, _selectedDate.month, _selectedDate.day);
 
-    if (!_isRecurring && selectedDate == currentDate) {
+    if (selectedDate == currentDate) {
       final nowTime = TimeOfDay.fromDateTime(now);
-
       if (_startTime.hour < nowTime.hour ||
           (_startTime.hour == nowTime.hour &&
               _startTime.minute <= nowTime.minute)) {
@@ -106,6 +107,7 @@ class EventFormState extends State<EventForm> {
         endTime: _endTime,
         location_name: '',
         recurrenceEndDate: _recurrenceEndDate,
+        recurrenceType: _recurrenceType,
       );
 
       _showTopSnackBar(context, 'Event created successfully');
@@ -261,7 +263,6 @@ class EventFormState extends State<EventForm> {
                   onChanged: (bool? value) {
                     setState(() {
                       _isOnlineMeeting = value ?? false;
-
                       if (_isOnlineMeeting) {
                         _selectedLocation = null;
                       }
@@ -293,24 +294,32 @@ class EventFormState extends State<EventForm> {
                     selectedLocationName: '',
                   ),
                 const SizedBox(height: 20),
-                CheckboxListTile(
-                  title: const Text('Should this event be recurring?'),
-                  value: _isRecurring,
-                  onChanged: (bool? value) {
+                DropdownButtonFormField<RecurrenceType>(
+                  value: _recurrenceType,
+                  onChanged: (RecurrenceType? newValue) {
                     setState(() {
-                      _isRecurring = value ?? false;
+                      _recurrenceType = newValue!;
+                      _recurrenceEndDate = null;
                     });
                   },
+                  items: RecurrenceType.values.map((RecurrenceType recurrence) {
+                    return DropdownMenuItem<RecurrenceType>(
+                      value: recurrence,
+                      child: Text(recurrence
+                          .toString()
+                          .split('.')
+                          .last
+                          .replaceAll('_', ' ')
+                          .toUpperCase()),
+                    );
+                  }).toList(),
                 ),
-                if (_isRecurring)
+                if (_recurrenceType != RecurrenceType.none)
                   ElevatedButton(
                     onPressed: () => _selectRecurrenceEndDate(context),
-                    child: Text(
-                      _recurrenceEndDate == null
-                          ? 'Select Recurrence End Date'
-                          : 'Recurrence Ends: ${_recurrenceEndDate!.toLocal()}'
-                              .split(' ')[0],
-                    ),
+                    child: Text(_recurrenceEndDate == null
+                        ? 'Select Recurrence End Date'
+                        : 'Recurrence set to: ${DateFormat('dd MMM yyyy').format(_recurrenceEndDate!)}'),
                   ),
               ],
             ),

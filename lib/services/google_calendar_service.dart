@@ -1,4 +1,5 @@
 import 'package:calendar/services/auth_service.dart';
+import 'package:calendar/widgets/event_form.dart';
 import 'package:googleapis_auth/googleapis_auth.dart';
 import 'package:googleapis/calendar/v3.dart' as calendar;
 import 'package:googleapis_auth/auth_io.dart';
@@ -15,7 +16,8 @@ class GoogleCalendarService {
     required TimeOfDay endTime,
     String? location,
     required String location_name,
-    DateTime? recurrenceEndDate, // adăugat parametrul recurenței
+    DateTime? recurrenceEndDate,
+    required RecurrenceType recurrenceType,
   }) async {
     try {
       String? accessToken = await AuthService().accessToken;
@@ -55,11 +57,20 @@ class GoogleCalendarService {
           timeZone: 'GMT+3',
         );
 
-        // Setează recurența dacă există o dată de final pentru recurență
-        if (recurrenceEndDate != null) {
-          event.recurrence = [
-            'RRULE:FREQ=WEEKLY;UNTIL=${recurrenceEndDate.toUtc().toIso8601String().replaceAll('-', '').split('T').first}'
-          ];
+        if (recurrenceType != RecurrenceType.none) {
+          String rrule = 'RRULE:';
+          if (recurrenceType == RecurrenceType.daily) {
+            rrule += 'FREQ=DAILY';
+          } else if (recurrenceType == RecurrenceType.weekly) {
+            rrule += 'FREQ=WEEKLY';
+          } else if (recurrenceType == RecurrenceType.monthly) {
+            rrule += 'FREQ=MONTHLY';
+          }
+          if (recurrenceEndDate != null) {
+            rrule +=
+                ';UNTIL=${recurrenceEndDate.toUtc().toIso8601String().replaceAll('-', '').split('T').first}';
+          }
+          event.recurrence = [rrule];
         }
 
         await calendarApi.events.insert(event, "primary");
@@ -95,7 +106,7 @@ class GoogleCalendarService {
       var events = await calendarApi.events.list(
         'primary',
         timeMin: startTime.toUtc(),
-        timeMax: endTime.toUtc(),
+        // timeMax: endTime.toUtc(),
         singleEvents: true,
         orderBy: 'startTime',
       );
