@@ -202,9 +202,36 @@ class EventCardState extends State<EventCard> {
                                     await AuthService().accessToken;
 
                                 if (accessToken != null) {
+                                  bool deleteSeries = await showDialog(
+                                    context: context,
+                                    builder: (context) {
+                                      return AlertDialog(
+                                        title: const Text("Delete Event"),
+                                        content: const Text(
+                                          "Do you want to delete this event or the entire series?",
+                                        ),
+                                        actions: [
+                                          TextButton(
+                                            onPressed: () {
+                                              Navigator.of(context).pop(false);
+                                            },
+                                            child: const Text("This Event"),
+                                          ),
+                                          TextButton(
+                                            onPressed: () {
+                                              Navigator.of(context).pop(true);
+                                            },
+                                            child: const Text("Entire Series"),
+                                          ),
+                                        ],
+                                      );
+                                    },
+                                  );
+
                                   await GoogleCalendarService.deleteEvent(
                                     accessToken: accessToken,
                                     eventId: widget.event.id!,
+                                    deleteRecurrence: deleteSeries,
                                   );
 
                                   if (widget.onDelete != null) {

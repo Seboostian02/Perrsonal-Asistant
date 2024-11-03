@@ -121,15 +121,55 @@ class GoogleCalendarService {
   static Future<void> deleteEvent({
     required String accessToken,
     required String eventId,
+    bool deleteRecurrence = false,
   }) async {
     try {
       final client = await getAuthenticatedClient(accessToken);
       var calendarApi = calendar.CalendarApi(client);
 
-      await calendarApi.events.delete("primary", eventId);
-      print("Event deleted successfully!");
+      if (deleteRecurrence) {
+        List<String> recurringEventIds =
+            await _getRecurringEventIds(calendarApi, accessToken, eventId);
+
+        for (String id in recurringEventIds) {
+          await calendarApi.events.delete("primary", id);
+          print("Eveniment recurrentă eliminat: $id");
+        }
+        print("Successfully removed event series!");
+      } else {
+        await calendarApi.events.delete("primary", eventId);
+        print("Eveniment eliminat cu succes!");
+      }
     } catch (e) {
-      print("Error deleting event: $e");
+      print("Eroare la eliminarea evenimentului: $e");
     }
+  }
+
+  static Future<List<String>> _getRecurringEventIds(
+      calendar.CalendarApi calendarApi,
+      String mainEventId,
+      String eventId) async {
+    List<String> recurringEventIds = [];
+    var pageToken = null;
+
+    do {
+      var events = await calendarApi.events.list(
+        'primary',
+        pageToken: pageToken,
+      );
+
+      for (var event in events.items!) {
+        if (event.id != mainEventId &&
+            event.recurrence != null &&
+            event.recurrence!.isNotEmpty) {
+          recurringEventIds.add(event.id!);
+        }
+      }
+
+      pageToken = events.nextPageToken;
+    } while (pageToken != null);
+
+    print("Recurring event IDs found: $recurringEventIds");
+    return recurringEventIds;
   }
 }
