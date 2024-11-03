@@ -32,7 +32,6 @@ class EventCardState extends State<EventCard> {
   @override
   void initState() {
     super.initState();
-
     _isExpanded = widget.expandMode;
   }
 
@@ -52,6 +51,51 @@ class EventCardState extends State<EventCard> {
           );
         },
       );
+    }
+  }
+
+  Future<void> _deleteEvent(BuildContext context) async {
+    Provider.of<AuthProvider>(context, listen: false);
+    final accessToken = await AuthService().accessToken;
+
+    if (accessToken != null) {
+      bool deleteSeries = await showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: const Text("Delete Event"),
+            content: const Text(
+              "Do you want to delete this event or the entire series?",
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop(false);
+                },
+                child: const Text("This Event"),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop(true);
+                },
+                child: const Text("Entire Series"),
+              ),
+            ],
+          );
+        },
+      );
+
+      await GoogleCalendarService.deleteEvent(
+        accessToken: accessToken,
+        eventId: widget.event.id!,
+        deleteRecurrence: deleteSeries,
+      );
+
+      if (widget.onDelete != null) {
+        widget.onDelete!();
+      }
+    } else {
+      print("Failed to get access token for Google Calendar");
     }
   }
 
@@ -195,26 +239,7 @@ class EventCardState extends State<EventCard> {
                             child: IconButton(
                               icon:
                                   const Icon(Icons.delete, color: Colors.white),
-                              onPressed: () async {
-                                Provider.of<AuthProvider>(context,
-                                    listen: false);
-                                final accessToken =
-                                    await AuthService().accessToken;
-
-                                if (accessToken != null) {
-                                  await GoogleCalendarService.deleteEvent(
-                                    accessToken: accessToken,
-                                    eventId: widget.event.id!,
-                                  );
-
-                                  if (widget.onDelete != null) {
-                                    widget.onDelete!();
-                                  }
-                                } else {
-                                  print(
-                                      "Failed to get access token for Google Calendar");
-                                }
-                              },
+                              onPressed: () => _deleteEvent(context),
                             ),
                           )
                       ],

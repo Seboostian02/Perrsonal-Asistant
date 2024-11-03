@@ -34,25 +34,43 @@ class EventList extends StatelessWidget {
       padding: const EdgeInsets.all(16.0),
       child: Column(
         children: [
-          ElevatedButton(
-            onPressed: () {
-              showDialog(
-                context: context,
-                builder: (context) {
-                  return Dialog(
-                    insetPadding: EdgeInsets.all(0),
-                    child: EventCalendar(
-                      events: events,
-                      onRefresh: () {
-                        onRefresh();
-                        Navigator.pop(context);
-                      },
-                    ),
-                  );
-                },
-              );
-            },
-            child: const Text('View Events Calendar'),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder: (context) {
+                    return Dialog(
+                      insetPadding: EdgeInsets.all(0),
+                      child: EventCalendar(
+                        events: events,
+                        onRefresh: () {
+                          onRefresh();
+                          Navigator.pop(context);
+                        },
+                      ),
+                    );
+                  },
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 16.0),
+                backgroundColor: Colors.deepPurple,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(50.0),
+                ),
+                elevation: 4,
+              ),
+              child: const Text(
+                'View Events in Calendar Format',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+            ),
           ),
           const SizedBox(height: 16),
           Expanded(

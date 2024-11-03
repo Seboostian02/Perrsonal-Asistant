@@ -1,4 +1,5 @@
 import 'package:calendar/services/auth_service.dart';
+import 'package:calendar/widgets/event_form.dart';
 import 'package:googleapis_auth/googleapis_auth.dart';
 import 'package:googleapis/calendar/v3.dart' as calendar;
 import 'package:googleapis_auth/auth_io.dart';
@@ -15,6 +16,8 @@ class GoogleCalendarService {
     required TimeOfDay endTime,
     String? location,
     required String location_name,
+    DateTime? recurrenceEndDate,
+    required RecurrenceType recurrenceType,
   }) async {
     try {
       String? accessToken = await AuthService().accessToken;
@@ -54,6 +57,22 @@ class GoogleCalendarService {
           timeZone: 'GMT+3',
         );
 
+        if (recurrenceType != RecurrenceType.none) {
+          String rrule = 'RRULE:';
+          if (recurrenceType == RecurrenceType.daily) {
+            rrule += 'FREQ=DAILY';
+          } else if (recurrenceType == RecurrenceType.weekly) {
+            rrule += 'FREQ=WEEKLY';
+          } else if (recurrenceType == RecurrenceType.monthly) {
+            rrule += 'FREQ=MONTHLY';
+          }
+          if (recurrenceEndDate != null) {
+            rrule +=
+                ';UNTIL=${recurrenceEndDate.toUtc().toIso8601String().replaceAll('-', '').split('T').first}';
+          }
+          event.recurrence = [rrule];
+        }
+
         await calendarApi.events.insert(event, "primary");
         print("Event created successfully!");
       } else {
@@ -87,7 +106,7 @@ class GoogleCalendarService {
       var events = await calendarApi.events.list(
         'primary',
         timeMin: startTime.toUtc(),
-        timeMax: endTime.toUtc(),
+        // timeMax: endTime.toUtc(),
         singleEvents: true,
         orderBy: 'startTime',
       );
@@ -102,15 +121,55 @@ class GoogleCalendarService {
   static Future<void> deleteEvent({
     required String accessToken,
     required String eventId,
+    bool deleteRecurrence = false,
   }) async {
     try {
       final client = await getAuthenticatedClient(accessToken);
       var calendarApi = calendar.CalendarApi(client);
 
-      await calendarApi.events.delete("primary", eventId);
-      print("Event deleted successfully!");
+      if (deleteRecurrence) {
+        List<String> recurringEventIds =
+            await _getRecurringEventIds(calendarApi, accessToken, eventId);
+
+        for (String id in recurringEventIds) {
+          await calendarApi.events.delete("primary", id);
+          print("Eveniment recurrentă eliminat: $id");
+        }
+        print("Successfully removed event series!");
+      } else {
+        await calendarApi.events.delete("primary", eventId);
+        print("Eveniment eliminat cu succes!");
+      }
     } catch (e) {
-      print("Error deleting event: $e");
+      print("Eroare la eliminarea evenimentului: $e");
     }
+  }
+
+  static Future<List<String>> _getRecurringEventIds(
+      calendar.CalendarApi calendarApi,
+      String mainEventId,
+      String eventId) async {
+    List<String> recurringEventIds = [];
+    var pageToken = null;
+
+    do {
+      var events = await calendarApi.events.list(
+        'primary',
+        pageToken: pageToken,
+      );
+
+      for (var event in events.items!) {
+        if (event.id != mainEventId &&
+            event.recurrence != null &&
+            event.recurrence!.isNotEmpty) {
+          recurringEventIds.add(event.id!);
+        }
+      }
+
+      pageToken = events.nextPageToken;
+    } while (pageToken != null);
+
+    print("Recurring event IDs found: $recurringEventIds");
+    return recurringEventIds;
   }
 }

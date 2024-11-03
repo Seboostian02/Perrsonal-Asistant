@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 
 class NotFoundPage extends StatelessWidget {
-  final VoidCallback
-      onBackToHome; // Callback pentru a reveni la pagina principală
+  final VoidCallback onBackToHome;
 
-  const NotFoundPage(
-      {super.key, required this.onBackToHome}); // Adaugă parametrul
+  const NotFoundPage({super.key, required this.onBackToHome});
 
   @override
   Widget build(BuildContext context) {
