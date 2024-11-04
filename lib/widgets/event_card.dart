@@ -59,40 +59,84 @@ class EventCardState extends State<EventCard> {
     final accessToken = await AuthService().accessToken;
 
     if (accessToken != null) {
-      bool deleteSeries = await showDialog(
+      final client =
+          await GoogleCalendarService.getAuthenticatedClient(accessToken);
+      final calendarApi = calendar.CalendarApi(client);
+
+      String mainEventId = widget.event.id!.split('_')[0];
+
+      final recurringEventIds =
+          await GoogleCalendarService.getRecurringEventIds(
+        calendarApi,
+        widget.event.id!,
+        widget.event.id!,
+      );
+
+      print("rec events-----------");
+      print("Event ID: ${widget.event.id}");
+      print("Recurring IDs: $recurringEventIds");
+      print("Contains main ID: ${recurringEventIds.contains(mainEventId)}");
+
+      bool isRecurring = recurringEventIds.contains(mainEventId);
+      bool deleteSeries = false;
+
+      bool confirmedDelete = await showDialog(
         context: context,
         builder: (context) {
           return AlertDialog(
             title: const Text("Delete Event"),
-            content: const Text(
-              "Do you want to delete this event or the entire series?",
-            ),
+            content: isRecurring
+                ? const Text(
+                    "Do you want to delete this event or the entire series?")
+                : const Text("Are you sure you want to delete this event?"),
             actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop(false);
-                },
-                child: const Text("This Event"),
-              ),
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop(true);
-                },
-                child: const Text("Entire Series"),
-              ),
+              if (isRecurring) ...[
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop(true);
+                  },
+                  child: const Text("This Event"),
+                ),
+                TextButton(
+                  onPressed: () {
+                    deleteSeries = true;
+                    Navigator.of(context).pop(true);
+                  },
+                  child: const Text("Entire Series"),
+                ),
+              ] else ...[
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(false),
+                  child: const Text("No"),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(true),
+                  child: const Text("Yes"),
+                ),
+              ],
             ],
           );
         },
       );
 
-      await GoogleCalendarService.deleteEvent(
-        accessToken: accessToken,
-        eventId: widget.event.id!,
-        deleteRecurrence: deleteSeries,
-      );
+      if (confirmedDelete) {
+        if (deleteSeries) {
+          await GoogleCalendarService.deleteEvent(
+            accessToken: accessToken,
+            eventId: mainEventId,
+            deleteRecurrence: true,
+          );
+        } else {
+          await GoogleCalendarService.deleteEvent(
+            accessToken: accessToken,
+            eventId: widget.event.id!,
+            deleteRecurrence: false,
+          );
+        }
 
-      if (widget.onDelete != null) {
-        widget.onDelete!();
+        if (widget.onDelete != null) {
+          widget.onDelete!();
+        }
       }
     } else {
       print("Failed to get access token for Google Calendar");

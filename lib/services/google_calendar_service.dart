@@ -121,24 +121,29 @@ class GoogleCalendarService {
   static Future<void> deleteEvent({
     required String accessToken,
     required String eventId,
-    bool deleteRecurrence = false,
+    required bool deleteRecurrence,
   }) async {
     try {
+      print("del reccurence in service----------");
+      print(deleteRecurrence);
       final client = await getAuthenticatedClient(accessToken);
       var calendarApi = calendar.CalendarApi(client);
 
       if (deleteRecurrence) {
-        List<String> recurringEventIds =
-            await getRecurringEventIds(calendarApi, accessToken, eventId);
+        List<String> recurringEventIds = await getRecurringEventIds(
+          calendarApi,
+          accessToken,
+          eventId,
+        );
 
         for (String id in recurringEventIds) {
           await calendarApi.events.delete("primary", id);
-          print("Eveniment recurrentă eliminat: $id");
+          print("Recurring event removed: $id");
         }
-        print("Successfully removed event series!");
+        print("Recurring event streak successfully removed!");
       } else {
         await calendarApi.events.delete("primary", eventId);
-        print("Eveniment eliminat cu succes!");
+        print("The event was successfully removed!");
       }
     } catch (e) {
       print("Eroare la eliminarea evenimentului: $e");
