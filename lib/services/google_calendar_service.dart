@@ -124,8 +124,6 @@ class GoogleCalendarService {
     required bool deleteRecurrence,
   }) async {
     try {
-      print("del reccurence in service----------");
-      print(deleteRecurrence);
       final client = await getAuthenticatedClient(accessToken);
       var calendarApi = calendar.CalendarApi(client);
 
