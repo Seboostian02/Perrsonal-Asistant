@@ -127,6 +127,8 @@ class GoogleCalendarService {
       final client = await getAuthenticatedClient(accessToken);
       var calendarApi = calendar.CalendarApi(client);
 
+      String mainEventId = eventId.split('_')[0];
+
       if (deleteRecurrence) {
         List<String> recurringEventIds = await getRecurringEventIds(
           calendarApi,
@@ -135,8 +137,15 @@ class GoogleCalendarService {
         );
 
         for (String id in recurringEventIds) {
-          await calendarApi.events.delete("primary", id);
-          print("Recurring event removed: $id");
+          if (id.startsWith(mainEventId)) {
+            print("Attempting to delete recurring event: $id");
+            try {
+              await calendarApi.events.delete("primary", id);
+              print("Recurring event removed: $id");
+            } catch (e) {
+              print("Failed to delete recurring event: $id - Error: $e");
+            }
+          }
         }
         print("Recurring event streak successfully removed!");
       } else {
@@ -144,7 +153,7 @@ class GoogleCalendarService {
         print("The event was successfully removed!");
       }
     } catch (e) {
-      print("Eroare la eliminarea evenimentului: $e");
+      print("Error deleting the event: $e");
     }
   }
 
