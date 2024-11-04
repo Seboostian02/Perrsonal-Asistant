@@ -72,11 +72,6 @@ class EventCardState extends State<EventCard> {
         widget.event.id!,
       );
 
-      print("rec events-----------");
-      print("Event ID: ${widget.event.id}");
-      print("Recurring IDs: $recurringEventIds");
-      print("Contains main ID: ${recurringEventIds.contains(mainEventId)}");
-
       bool isRecurring = recurringEventIds.contains(mainEventId);
       bool deleteSeries = false;
 
