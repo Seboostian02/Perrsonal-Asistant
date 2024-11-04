@@ -129,7 +129,7 @@ class GoogleCalendarService {
 
       if (deleteRecurrence) {
         List<String> recurringEventIds =
-            await _getRecurringEventIds(calendarApi, accessToken, eventId);
+            await getRecurringEventIds(calendarApi, accessToken, eventId);
 
         for (String id in recurringEventIds) {
           await calendarApi.events.delete("primary", id);
@@ -145,7 +145,7 @@ class GoogleCalendarService {
     }
   }
 
-  static Future<List<String>> _getRecurringEventIds(
+  static Future<List<String>> getRecurringEventIds(
       calendar.CalendarApi calendarApi,
       String mainEventId,
       String eventId) async {
