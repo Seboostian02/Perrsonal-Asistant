@@ -61,6 +61,7 @@ dependencies:
   build_runner: ^2.4.11
   weather_icons: ^3.0.0
   table_calendar: ^3.1.2
+  webview_flutter: ^4.8.0
 
 dev_dependencies:
   flutter_test:
