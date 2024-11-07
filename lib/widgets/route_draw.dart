@@ -24,7 +24,6 @@ class _RouteDrawerState extends State<RouteDrawer> {
   late MapController mapController;
   String selectedTransportMode = 'Driving';
   List<LatLng> routePoints = [];
-
   final Map<String, String> transportModes = {
     'Foot': 'foot-walking',
     'Bike': 'cycling-regular',
@@ -39,7 +38,7 @@ class _RouteDrawerState extends State<RouteDrawer> {
   }
 
   Future<void> _fetchRoute() async {
-    final String? apiKey = Env.opsKey;
+    final String? apiKey = Env.opsKey; // OpenRouteService key
 
     if (widget.currentLocation.latitude == widget.destination.latitude &&
         widget.currentLocation.longitude == widget.destination.longitude) {
@@ -53,53 +52,58 @@ class _RouteDrawerState extends State<RouteDrawer> {
 
     final mode = transportModes[selectedTransportMode];
 
-    final url =
+    final routeUrl =
         'https://api.openrouteservice.org/v2/directions/$mode?api_key=$apiKey&start=${widget.currentLocation.longitude},${widget.currentLocation.latitude}&end=${widget.destination.longitude},${widget.destination.latitude}';
 
-    print('Request URL: $url');
+    // HERE Traffic API URL
+    String your_api_key = "JExNxMop8Ape0rFQ54bzD_FUSih2_QKSGuM3cNT-m2k";
 
+    final trafficUrl =
+        'https://traffic.ls.hereapi.com/traffic/6.2/flow.json?apiKey=${your_api_key}&bbox=${widget.currentLocation.latitude},${widget.currentLocation.longitude},${widget.destination.latitude},${widget.destination.longitude}'; //traffic.ls.hereapi.com/traffic/6.2/flow.json?apiKey=JExNxMop8Ape0rFQ54bzD_FUSih2_QKSGuM3cNT-m2k&bbox=${widget.currentLocation.latitude},${widget.currentLocation.longitude},${widget.destination.latitude},${widget.destination.longitude}';
+    print("traffic url----------");
+    print(trafficUrl);
     try {
-      final response = await http.get(
-        Uri.parse(url),
+      // Request route data
+      final routeResponse = await http.get(
+        Uri.parse(routeUrl),
         headers: {
           'Accept':
               'application/json, application/geo+json, application/gpx+xml, img/png; charset=utf-8',
         },
       );
 
-      print('Response Status Code: ${response.statusCode}');
-
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        print('Response Data: $data');
-
-        if (data['features'] != null && data['features'].isNotEmpty) {
-          final steps =
-              data['features'][0]['properties']['segments'][0]['steps'];
-
-          List<int> waypoints = [];
-          for (var step in steps) {
-            if (step['way_points'] != null) {
-              waypoints.addAll(List<int>.from(step['way_points']));
-            }
-          }
-
-          print('Waypoints: $waypoints');
+      if (routeResponse.statusCode == 200) {
+        final routeData = json.decode(routeResponse.body);
+        if (routeData['features'] != null && routeData['features'].isNotEmpty) {
+          final coordinates =
+              (routeData['features'][0]['geometry']['coordinates'] as List)
+                  .map((coord) => LatLng(coord[1], coord[0]))
+                  .toList();
 
           setState(() {
-            routePoints =
-                (data['features'][0]['geometry']['coordinates'] as List)
-                    .map((coord) => LatLng(coord[1], coord[0]))
-                    .toList();
+            routePoints = coordinates;
           });
-        } else {
-          print('No routes found or features is null.');
         }
       } else {
-        print('Failed to fetch route: ${response.statusCode}');
+        print('Failed to fetch route data: ${routeResponse.statusCode}');
+      }
+
+      // Request traffic data from HERE API
+      final trafficResponse = await http.get(Uri.parse(trafficUrl));
+      if (trafficResponse.statusCode == 200) {
+        final trafficData = json.decode(trafficResponse.body);
+        print('Traffic Data: $trafficData');
+
+        // Procesăm datele de trafic pentru a vizualiza aglomerația, dacă este necesar
+        if (trafficData['flow'] != null) {
+          // Puteți să utilizați datele de trafic pentru a vizualiza congestia pe traseu
+          // De exemplu, actualizează traseul sau colorează traseul pe baza condițiilor de trafic
+        }
+      } else {
+        print('Failed to fetch traffic data: ${trafficResponse.statusCode}');
       }
     } catch (e) {
-      print('Error fetching route: $e');
+      print('Error fetching route or traffic data: $e');
     }
   }
 
@@ -125,7 +129,8 @@ class _RouteDrawerState extends State<RouteDrawer> {
           ),
           children: [
             TileLayer(
-              urlTemplate: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+              urlTemplate:
+                  'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', // Use OpenStreetMap tiles
               subdomains: ['a', 'b', 'c'],
             ),
             MarkerLayer(
