@@ -1,11 +1,10 @@
+import 'package:calendar/env/env.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:calendar/widgets/zoom_controls.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-
-import 'package:calendar/env/env.dart';
-import 'package:calendar/widgets/zoom_controls.dart';
 
 class RouteDrawer extends StatefulWidget {
   final LatLng currentLocation;
@@ -23,16 +22,14 @@ class RouteDrawer extends StatefulWidget {
 
 class _RouteDrawerState extends State<RouteDrawer> {
   late MapController mapController;
-  String selectedTransportMode = 'Driving';
+  String selectedTransportMode = 'Walking';
   List<LatLng> routePoints = [];
-  bool isTrafficLayerVisible = false;
-  List<Marker> incidentMarkers = [];
   List<Polyline> trafficFlowPolylines = [];
 
   final Map<String, String> transportModes = {
-    'Walking': 'pedestrian',
-    'Bike': 'bicycle',
-    'Driving': 'car'
+    'Walking': 'foot-walking',
+    'Bike': 'cycling-regular',
+    'Driving': 'driving-hgv',
   };
 
   @override
@@ -40,41 +37,49 @@ class _RouteDrawerState extends State<RouteDrawer> {
     super.initState();
     mapController = MapController();
     _fetchRoute();
-    _fetchTrafficIncidents();
-    _fetchTrafficFlow();
+    if (selectedTransportMode == 'Driving') {
+      _fetchTrafficFlow();
+    }
   }
 
   Future<void> _fetchRoute() async {
-    final String? apiKey = Env.tomTomKey;
-    final mode = transportModes[selectedTransportMode] ?? 'car';
+    final String? apiKey = Env.opsKey;
 
-    if (widget.currentLocation == widget.destination) {
+    if (widget.currentLocation.latitude == widget.destination.latitude &&
+        widget.currentLocation.longitude == widget.destination.longitude) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-            content: Text('Start and destination points are the same!')),
+        SnackBar(
+          content: Text('Punctele de start și destinație sunt identice!'),
+        ),
       );
       return;
     }
 
-    final url = 'https://api.tomtom.com/routing/1/calculateRoute/'
-        '${widget.currentLocation.latitude},${widget.currentLocation.longitude}:'
-        '${widget.destination.latitude},${widget.destination.longitude}/json?'
-        'travelMode=$mode&traffic=true&key=$apiKey';
+    final mode = transportModes[selectedTransportMode];
+
+    final url =
+        'https://api.openrouteservice.org/v2/directions/$mode?api_key=$apiKey&start=${widget.currentLocation.longitude},${widget.currentLocation.latitude}&end=${widget.destination.longitude},${widget.destination.latitude}';
 
     try {
-      final response = await http.get(Uri.parse(url));
+      final response = await http.get(
+        Uri.parse(url),
+        headers: {
+          'Accept':
+              'application/json, application/geo+json, application/gpx+xml, img/png; charset=utf-8',
+        },
+      );
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        final coordinates = data['routes'][0]['legs'][0]['points'];
 
-        setState(() {
-          routePoints = coordinates
-              .map<LatLng>(
-                  (point) => LatLng(point['latitude'], point['longitude']))
-              .toList();
-          isTrafficLayerVisible = (mode == 'car');
-        });
+        if (data['features'] != null && data['features'].isNotEmpty) {
+          setState(() {
+            routePoints =
+                (data['features'][0]['geometry']['coordinates'] as List)
+                    .map((coord) => LatLng(coord[1], coord[0]))
+                    .toList();
+          });
+        }
       } else {
         print('Failed to fetch route: ${response.statusCode}');
       }
@@ -83,94 +88,72 @@ class _RouteDrawerState extends State<RouteDrawer> {
     }
   }
 
-  Future<void> _fetchTrafficIncidents() async {
-    final String? apiKey = Env.tomTomKey;
+  Future<void> _fetchTrafficFlow() async {
+    final String apiKey = Env.tomTomKey;
+    final bounds = mapController.bounds;
 
-    final String bbox =
-        '4.8854592519716675,52.36934334773164,4.897883244144765,52.37496348620152';
-    final String fields =
-        '{incidents{type,geometry{type,coordinates},properties{iconCategory}}}';
+    final centerPoint = bounds?.center;
+    if (centerPoint == null) {
+      print('Map bounds not available.');
+      return;
+    }
 
     final url =
-        'https://api.tomtom.com/traffic/services/5/incidentDetails?key=$apiKey&bbox=$bbox&fields=$fields&language=en-GB&t=1111&timeValidityFilter=present';
-    print("url--------");
+        'https://api.tomtom.com/traffic/services/4/flowSegmentData/absolute/10/json?key=$apiKey&point=${centerPoint.latitude},${centerPoint.longitude}';
+
+    print("Request URL for traffic flow:");
     print(url);
+
     try {
       final response = await http.get(Uri.parse(url));
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
 
-        List<Marker> markers = [];
-        for (var incident in data['incidents']) {
-          final coordinates = incident['geometry']['coordinates'];
-
-          if (coordinates is List && coordinates.isNotEmpty) {
-            final incidentLon = coordinates[0][0];
-            final incidentLat = coordinates[0][1];
-
-            markers.add(Marker(
-              point: LatLng(incidentLat, incidentLon),
-              builder: (context) =>
-                  Icon(Icons.warning, color: Colors.red, size: 40.0),
-            ));
-          }
-        }
-
         setState(() {
-          incidentMarkers = markers;
+          if (data['flowSegmentData'] != null) {
+            final List<LatLng> trafficPoints = (data['flowSegmentData']
+                    ['coordinates']['coordinate'] as List)
+                .map((coord) => LatLng(coord['latitude'], coord['longitude']))
+                .toList();
+
+            trafficFlowPolylines = [
+              Polyline(
+                points: trafficPoints,
+                strokeWidth: 13.0,
+                color: _getTrafficColor(
+                        (data['flowSegmentData']['currentSpeed'] as num)
+                            .toDouble(),
+                        (data['flowSegmentData']['freeFlowSpeed'] as num)
+                            .toDouble())
+                    .withOpacity(0.9),
+              ),
+              Polyline(
+                points: trafficPoints,
+                strokeWidth: 8.0,
+                color: _getTrafficColor(
+                    (data['flowSegmentData']['currentSpeed'] as num).toDouble(),
+                    (data['flowSegmentData']['freeFlowSpeed'] as num)
+                        .toDouble()),
+              ),
+            ];
+          } else {
+            trafficFlowPolylines.clear();
+          }
         });
       } else {
-        print('Failed to fetch traffic incidents: ${response.statusCode}');
+        print('Failed to fetch traffic flow data: ${response.statusCode}');
       }
     } catch (e) {
-      print('Error fetching incidents: $e');
+      print('Error fetching traffic flow data: $e');
     }
   }
 
-  Future<void> _fetchTrafficFlow() async {
-    final String? apiKey = Env.tomTomKey;
-
-    // Bounding box for the area of interest (you can adjust this dynamically)
-    final String bbox =
-        '4.8854592519716675,52.36934334773164,4.897883244144765,52.37496348620152';
-
-    // Fetching traffic flow tiles as polylines
-    final url =
-        'https://api.tomtom.com/traffic/services/5/trafficFlowTiles?key=$apiKey&bbox=$bbox';
-
-    try {
-      final response = await http.get(Uri.parse(url));
-
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-
-        List<Polyline> trafficPolylines = [];
-        for (var flow in data['flowData']) {
-          final coordinates = flow['geometry']['coordinates'];
-
-          // Converting coordinates to LatLng
-          List<LatLng> flowPoints = coordinates
-              .map<LatLng>((point) =>
-                  LatLng(point[1], point[0])) // reverse lat/lng order
-              .toList();
-
-          trafficPolylines.add(Polyline(
-            points: flowPoints,
-            strokeWidth: 3.0,
-            color: Colors.orange,
-          ));
-        }
-
-        setState(() {
-          trafficFlowPolylines = trafficPolylines;
-        });
-      } else {
-        print('Failed to fetch traffic flow: ${response.statusCode}');
-      }
-    } catch (e) {
-      print('Error fetching traffic flow: $e');
-    }
+  Color _getTrafficColor(double currentSpeed, double freeFlowSpeed) {
+    double congestionLevel = currentSpeed / freeFlowSpeed;
+    if (congestionLevel > 0.8) return Colors.green;
+    if (congestionLevel > 0.5) return Colors.yellow;
+    return Colors.red;
   }
 
   List<Polyline> _generateRoutes() {
@@ -195,62 +178,38 @@ class _RouteDrawerState extends State<RouteDrawer> {
           ),
           children: [
             TileLayer(
-              urlTemplate:
-                  'https://api.tomtom.com/map/1/tile/basic/main/{z}/{x}/{y}.png?key=${Env.tomTomKey}',
+              urlTemplate: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
               subdomains: ['a', 'b', 'c'],
             ),
-            if (isTrafficLayerVisible)
-              TileLayer(
-                urlTemplate:
-                    'https://api.tomtom.com/traffic/map/4/tile/flow/relative0/{z}/{x}/{y}.png?key=${Env.tomTomKey}',
-              ),
             MarkerLayer(
               markers: [
                 Marker(
                   point: widget.currentLocation,
-                  builder: (context) => const Icon(Icons.my_location,
-                      color: Colors.blue, size: 40.0),
+                  builder: (context) => const Icon(
+                    Icons.my_location,
+                    color: Colors.blue,
+                    size: 40.0,
+                  ),
                 ),
                 Marker(
                   point: widget.destination,
-                  builder: (context) => const Icon(Icons.location_on,
-                      color: Colors.red, size: 40.0),
+                  builder: (context) => const Icon(
+                    Icons.location_on,
+                    color: Colors.red,
+                    size: 40.0,
+                  ),
                 ),
-              ]..addAll(incidentMarkers),
+              ],
             ),
             PolylineLayer(
-              polylines: _generateRoutes() +
-                  trafficFlowPolylines, // Adding traffic flow polylines
+              polylines: [
+                ...trafficFlowPolylines,
+                ..._generateRoutes(),
+              ],
             ),
           ],
         ),
         ZoomControls(mapController: mapController),
-        Positioned(
-          top: 50,
-          left: 20,
-          child: Material(
-            elevation: 6,
-            shape: const CircleBorder(),
-            child: InkWell(
-              onTap: () {
-                Navigator.of(context).pop();
-              },
-              child: Container(
-                width: 56,
-                height: 56,
-                decoration: const BoxDecoration(
-                  color: Colors.deepPurple,
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(
-                  Icons.arrow_back,
-                  color: Colors.white,
-                  size: 30,
-                ),
-              ),
-            ),
-          ),
-        ),
         Positioned(
           bottom: 20,
           left: 0,
@@ -277,16 +236,49 @@ class _RouteDrawerState extends State<RouteDrawer> {
                 items: transportModes.keys
                     .map<DropdownMenuItem<String>>((String value) {
                   return DropdownMenuItem<String>(
-                      value: value, child: Text(value));
+                    value: value,
+                    child: Text(value),
+                  );
                 }).toList(),
                 onChanged: (String? newValue) {
                   if (newValue != null) {
                     setState(() {
                       selectedTransportMode = newValue;
                       _fetchRoute();
+                      if (newValue == 'Driving') {
+                        _fetchTrafficFlow();
+                      } else {
+                        trafficFlowPolylines.clear();
+                      }
                     });
                   }
                 },
+              ),
+            ),
+          ),
+        ),
+        Positioned(
+          top: 50,
+          left: 20,
+          child: Material(
+            elevation: 6,
+            shape: const CircleBorder(),
+            child: InkWell(
+              onTap: () {
+                Navigator.of(context).pop();
+              },
+              child: Container(
+                width: 56,
+                height: 56,
+                decoration: const BoxDecoration(
+                  color: Colors.deepPurple,
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.arrow_back,
+                  color: Colors.white,
+                  size: 30,
+                ),
               ),
             ),
           ),
