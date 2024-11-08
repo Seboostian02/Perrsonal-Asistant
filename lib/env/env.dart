@@ -11,4 +11,6 @@ abstract class Env {
   static const String weatherKey = _Env.weatherKey;
   @EnviedField(varName: 'TOM_TOM_KEY')
   static const String tomTomKey = _Env.tomTomKey;
+  @EnviedField(varName: 'MP_Q_KEY')
+  static const String mapQuestKey = _Env.mapQuestKey;
 }

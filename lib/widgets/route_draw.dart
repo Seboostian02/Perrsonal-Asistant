@@ -1,10 +1,10 @@
+import 'package:calendar/env/env.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:calendar/widgets/zoom_controls.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:calendar/env/env.dart';
-import 'package:calendar/widgets/zoom_controls.dart';
 
 class RouteDrawer extends StatefulWidget {
   final LatLng currentLocation;
@@ -22,11 +22,13 @@ class RouteDrawer extends StatefulWidget {
 
 class _RouteDrawerState extends State<RouteDrawer> {
   late MapController mapController;
-  String selectedTransportMode = 'Driving';
+  String selectedTransportMode = 'Walking';
   List<LatLng> routePoints = [];
+  List<Polyline> trafficFlowPolylines = [];
+  bool hasFetchedTraffic = false; // Variabilă pentru a preveni fetch-ul repetat
 
   final Map<String, String> transportModes = {
-    'Foot': 'foot-walking',
+    'Walking': 'foot-walking',
     'Bike': 'cycling-regular',
     'Driving': 'driving-hgv',
   };
@@ -69,27 +71,100 @@ class _RouteDrawerState extends State<RouteDrawer> {
         final data = json.decode(response.body);
 
         if (data['features'] != null && data['features'].isNotEmpty) {
-          final steps =
-              data['features'][0]['properties']['segments'][0]['steps'];
-
-          List<int> waypoints = [];
-          for (var step in steps) {
-            if (step['way_points'] != null) {
-              waypoints.addAll(List<int>.from(step['way_points']));
-            }
-          }
-
           setState(() {
             routePoints =
                 (data['features'][0]['geometry']['coordinates'] as List)
                     .map((coord) => LatLng(coord[1], coord[0]))
                     .toList();
           });
+          // Fetch traffic flow if the selected mode is "Driving"
+          if (selectedTransportMode == 'Driving' && !hasFetchedTraffic) {
+            _fetchTrafficFlow();
+          }
         }
+      } else {
+        print('Failed to fetch route: ${response.statusCode}');
       }
     } catch (e) {
       print('Error fetching route: $e');
     }
+  }
+
+  Future<void> _fetchTrafficFlow() async {
+    final String apiKey = Env.mapQuestKey;
+
+    if (routePoints.isEmpty) {
+      print('No route points available to fetch traffic data.');
+      return;
+    }
+
+    // Clear previous traffic data
+    trafficFlowPolylines.clear();
+
+    try {
+      List<Future<void>> trafficRequests = [];
+
+      for (int i = 0; i < routePoints.length - 1; i++) {
+        final LatLng start = routePoints[i];
+        final LatLng end = routePoints[i + 1];
+
+        final url =
+            'https://www.mapquestapi.com/traffic/v2/flow?key=$apiKey&boundingBox=${start.latitude},${start.longitude},${end.latitude},${end.longitude}';
+
+        print("Requesting traffic flow for segment: $start to $end");
+
+        trafficRequests.add(_fetchTrafficForSegment(url));
+      }
+
+      await Future.wait(trafficRequests);
+
+      setState(() {
+        hasFetchedTraffic = true;
+      });
+    } catch (e) {
+      print('Error fetching traffic flow data: $e');
+    }
+  }
+
+  Future<void> _fetchTrafficForSegment(String url) async {
+    try {
+      final response = await http.get(Uri.parse(url));
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+
+        if (data['flowSegments'] != null) {
+          final List<LatLng> trafficPoints =
+              (data['flowSegments'][0]['coordinates'] as List)
+                  .map((coord) => LatLng(coord[1], coord[0]))
+                  .toList();
+
+          setState(() {
+            trafficFlowPolylines.add(
+              Polyline(
+                points: trafficPoints,
+                strokeWidth: 8.0,
+                color: _getTrafficColor(
+                  (data['flowSegments'][0]['currentSpeed'] as num).toDouble(),
+                  (data['flowSegments'][0]['freeFlowSpeed'] as num).toDouble(),
+                ),
+              ),
+            );
+          });
+        }
+      } else {
+        print('Failed to fetch traffic flow data: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error fetching traffic flow for segment: $e');
+    }
+  }
+
+  Color _getTrafficColor(double currentSpeed, double freeFlowSpeed) {
+    double congestionLevel = currentSpeed / freeFlowSpeed;
+    if (congestionLevel > 0.8) return Colors.green;
+    if (congestionLevel > 0.5) return Colors.yellow;
+    return Colors.red;
   }
 
   List<Polyline> _generateRoutes() {
@@ -115,7 +190,7 @@ class _RouteDrawerState extends State<RouteDrawer> {
           children: [
             TileLayer(
               urlTemplate:
-                  'https://api.tomtom.com/map/tiles/road/maps?key=${Env.tomTomKey}&tileSize=256&zoom={z}&x={x}&y={y}',
+                  'https://api.tomtom.com/map/1/tile/basic/main/{z}/{x}/{y}.png?key=${Env.tomTomKey}',
               subdomains: ['a', 'b', 'c'],
             ),
             MarkerLayer(
@@ -139,7 +214,10 @@ class _RouteDrawerState extends State<RouteDrawer> {
               ],
             ),
             PolylineLayer(
-              polylines: _generateRoutes(),
+              polylines: [
+                ...trafficFlowPolylines, // Show traffic flow only if available
+                ..._generateRoutes(),
+              ],
             ),
           ],
         ),
@@ -179,6 +257,12 @@ class _RouteDrawerState extends State<RouteDrawer> {
                     setState(() {
                       selectedTransportMode = newValue;
                       _fetchRoute();
+                      // Clear traffic flow if mode changes away from Driving
+                      if (newValue == 'Driving' && !hasFetchedTraffic) {
+                        _fetchTrafficFlow();
+                      } else {
+                        trafficFlowPolylines.clear();
+                      }
                     });
                   }
                 },
