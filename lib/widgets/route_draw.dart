@@ -25,6 +25,7 @@ class _RouteDrawerState extends State<RouteDrawer> {
   String selectedTransportMode = 'Walking';
   List<LatLng> routePoints = [];
   List<Polyline> trafficFlowPolylines = [];
+  bool hasFetchedTraffic = false; // Variabilă pentru a preveni fetch-ul repetat
 
   final Map<String, String> transportModes = {
     'Walking': 'foot-walking',
@@ -37,10 +38,6 @@ class _RouteDrawerState extends State<RouteDrawer> {
     super.initState();
     mapController = MapController();
     _fetchRoute();
-    // Fetch traffic flow only if driving mode is selected
-    if (selectedTransportMode == 'Driving') {
-      _fetchTrafficFlow();
-    }
   }
 
   Future<void> _fetchRoute() async {
@@ -80,8 +77,8 @@ class _RouteDrawerState extends State<RouteDrawer> {
                     .map((coord) => LatLng(coord[1], coord[0]))
                     .toList();
           });
-          // Re-fetch traffic flow if in "Driving" mode after the route is fetched
-          if (selectedTransportMode == 'Driving') {
+          // Fetch traffic flow if the selected mode is "Driving"
+          if (selectedTransportMode == 'Driving' && !hasFetchedTraffic) {
             _fetchTrafficFlow();
           }
         }
@@ -125,7 +122,9 @@ class _RouteDrawerState extends State<RouteDrawer> {
       await Future.wait(trafficRequests);
 
       // After all requests are complete, update the UI
-      setState(() {});
+      setState(() {
+        hasFetchedTraffic = true; // Marcare pentru a preveni re-fetch-ul
+      });
     } catch (e) {
       print('Error fetching traffic flow data: $e');
     }
@@ -195,7 +194,7 @@ class _RouteDrawerState extends State<RouteDrawer> {
           children: [
             TileLayer(
               urlTemplate:
-                  'https://{s}.api.tomtom.com/map/1/tile/basic/{z}/{x}/{y}.png?key=${Env.tomTomKey}&view=Unified&language=en',
+                  'https://api.tomtom.com/map/1/tile/basic/main/{z}/{x}/{y}.png?key=${Env.tomTomKey}',
               subdomains: ['a', 'b', 'c'],
             ),
             MarkerLayer(
@@ -262,11 +261,11 @@ class _RouteDrawerState extends State<RouteDrawer> {
                     setState(() {
                       selectedTransportMode = newValue;
                       _fetchRoute();
-                      if (newValue == 'Driving') {
+                      // Clear traffic flow if mode changes away from Driving
+                      if (newValue == 'Driving' && !hasFetchedTraffic) {
                         _fetchTrafficFlow();
                       } else {
-                        trafficFlowPolylines
-                            .clear(); // Hide traffic flow on non-driving modes
+                        trafficFlowPolylines.clear();
                       }
                     });
                   }

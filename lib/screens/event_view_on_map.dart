@@ -12,6 +12,7 @@ import 'package:geolocator/geolocator.dart';
 
 import 'package:calendar/services/event_service.dart';
 import 'package:calendar/services/location_service.dart';
+import 'package:calendar/env/env.dart';
 
 class EventView extends StatefulWidget {
   final List<calendar.Event> events;
@@ -158,7 +159,7 @@ class EventViewState extends State<EventView> {
                 children: [
                   TileLayer(
                     urlTemplate:
-                        "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+                        'https://api.tomtom.com/map/1/tile/basic/main/{z}/{x}/{y}.png?key=${Env.tomTomKey}',
                     subdomains: ['a', 'b', 'c'],
                   ),
                   MarkerLayer(markers: _markers),
