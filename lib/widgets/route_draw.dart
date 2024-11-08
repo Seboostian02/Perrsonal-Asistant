@@ -38,6 +38,9 @@ class _RouteDrawerState extends State<RouteDrawer> {
     super.initState();
     mapController = MapController();
     _fetchRoute();
+    if (selectedTransportMode == 'Driving') {
+      _fetchTrafficFlow();
+    }
   }
 
   Future<void> _fetchRoute() async {
@@ -77,7 +80,6 @@ class _RouteDrawerState extends State<RouteDrawer> {
                     .map((coord) => LatLng(coord[1], coord[0]))
                     .toList();
           });
-          // Fetch traffic flow if the selected mode is "Driving"
           if (selectedTransportMode == 'Driving' && !hasFetchedTraffic) {
             _fetchTrafficFlow();
           }
@@ -91,6 +93,8 @@ class _RouteDrawerState extends State<RouteDrawer> {
   }
 
   Future<void> _fetchTrafficFlow() async {
+    if (hasFetchedTraffic || selectedTransportMode != 'Driving') return;
+
     final String apiKey = Env.tomTomKey;
 
     if (routePoints.isEmpty) {
@@ -98,11 +102,9 @@ class _RouteDrawerState extends State<RouteDrawer> {
       return;
     }
 
-    // Clear previous traffic data
     trafficFlowPolylines.clear();
 
     try {
-      // Create a list of futures for each segment
       List<Future<void>> trafficRequests = [];
 
       for (int i = 0; i < routePoints.length - 1; i++) {
@@ -112,18 +114,13 @@ class _RouteDrawerState extends State<RouteDrawer> {
         final url =
             'https://api.tomtom.com/traffic/services/4/flowSegmentData/absolute/10/json?key=$apiKey&point=${start.latitude},${start.longitude}';
 
-        print("Requesting traffic flow for segment: $start to $end");
-
-        // Add each request as a Future
         trafficRequests.add(_fetchTrafficForSegment(url));
       }
 
-      // Wait for all requests to complete
       await Future.wait(trafficRequests);
 
-      // After all requests are complete, update the UI
       setState(() {
-        hasFetchedTraffic = true; // Marcare pentru a preveni re-fetch-ul
+        hasFetchedTraffic = true;
       });
     } catch (e) {
       print('Error fetching traffic flow data: $e');
@@ -219,7 +216,7 @@ class _RouteDrawerState extends State<RouteDrawer> {
             ),
             PolylineLayer(
               polylines: [
-                ...trafficFlowPolylines, // Show traffic flow only if available
+                if (selectedTransportMode == 'Driving') ...trafficFlowPolylines,
                 ..._generateRoutes(),
               ],
             ),
@@ -261,11 +258,8 @@ class _RouteDrawerState extends State<RouteDrawer> {
                     setState(() {
                       selectedTransportMode = newValue;
                       _fetchRoute();
-                      // Clear traffic flow if mode changes away from Driving
-                      if (newValue == 'Driving' && !hasFetchedTraffic) {
-                        _fetchTrafficFlow();
-                      } else {
-                        trafficFlowPolylines.clear();
+                      if (newValue != 'Driving') {
+                        // trafficFlowPolylines.clear();
                       }
                     });
                   }
