@@ -37,6 +37,7 @@ class _RouteDrawerState extends State<RouteDrawer> {
     super.initState();
     mapController = MapController();
     _fetchRoute();
+    // Fetch traffic flow only if driving mode is selected
     if (selectedTransportMode == 'Driving') {
       _fetchTrafficFlow();
     }
@@ -79,6 +80,10 @@ class _RouteDrawerState extends State<RouteDrawer> {
                     .map((coord) => LatLng(coord[1], coord[0]))
                     .toList();
           });
+          // Re-fetch traffic flow if in "Driving" mode after the route is fetched
+          if (selectedTransportMode == 'Driving') {
+            _fetchTrafficFlow();
+          }
         }
       } else {
         print('Failed to fetch route: ${response.statusCode}');
@@ -90,62 +95,73 @@ class _RouteDrawerState extends State<RouteDrawer> {
 
   Future<void> _fetchTrafficFlow() async {
     final String apiKey = Env.tomTomKey;
-    final bounds = mapController.bounds;
 
-    final centerPoint = bounds?.center;
-    if (centerPoint == null) {
-      print('Map bounds not available.');
+    if (routePoints.isEmpty) {
+      print('No route points available to fetch traffic data.');
       return;
     }
 
-    final url =
-        'https://api.tomtom.com/traffic/services/4/flowSegmentData/absolute/10/json?key=$apiKey&point=${centerPoint.latitude},${centerPoint.longitude}';
+    // Clear previous traffic data
+    trafficFlowPolylines.clear();
 
-    print("Request URL for traffic flow:");
-    print(url);
+    try {
+      // Create a list of futures for each segment
+      List<Future<void>> trafficRequests = [];
 
+      for (int i = 0; i < routePoints.length - 1; i++) {
+        final LatLng start = routePoints[i];
+        final LatLng end = routePoints[i + 1];
+
+        final url =
+            'https://api.tomtom.com/traffic/services/4/flowSegmentData/absolute/10/json?key=$apiKey&point=${start.latitude},${start.longitude}';
+
+        print("Requesting traffic flow for segment: $start to $end");
+
+        // Add each request as a Future
+        trafficRequests.add(_fetchTrafficForSegment(url));
+      }
+
+      // Wait for all requests to complete
+      await Future.wait(trafficRequests);
+
+      // After all requests are complete, update the UI
+      setState(() {});
+    } catch (e) {
+      print('Error fetching traffic flow data: $e');
+    }
+  }
+
+  Future<void> _fetchTrafficForSegment(String url) async {
     try {
       final response = await http.get(Uri.parse(url));
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
 
-        setState(() {
-          if (data['flowSegmentData'] != null) {
-            final List<LatLng> trafficPoints = (data['flowSegmentData']
-                    ['coordinates']['coordinate'] as List)
-                .map((coord) => LatLng(coord['latitude'], coord['longitude']))
-                .toList();
+        if (data['flowSegmentData'] != null) {
+          final List<LatLng> trafficPoints =
+              (data['flowSegmentData']['coordinates']['coordinate'] as List)
+                  .map((coord) => LatLng(coord['latitude'], coord['longitude']))
+                  .toList();
 
-            trafficFlowPolylines = [
-              Polyline(
-                points: trafficPoints,
-                strokeWidth: 13.0,
-                color: _getTrafficColor(
-                        (data['flowSegmentData']['currentSpeed'] as num)
-                            .toDouble(),
-                        (data['flowSegmentData']['freeFlowSpeed'] as num)
-                            .toDouble())
-                    .withOpacity(0.9),
-              ),
+          setState(() {
+            trafficFlowPolylines.add(
               Polyline(
                 points: trafficPoints,
                 strokeWidth: 8.0,
                 color: _getTrafficColor(
-                    (data['flowSegmentData']['currentSpeed'] as num).toDouble(),
-                    (data['flowSegmentData']['freeFlowSpeed'] as num)
-                        .toDouble()),
+                  (data['flowSegmentData']['currentSpeed'] as num).toDouble(),
+                  (data['flowSegmentData']['freeFlowSpeed'] as num).toDouble(),
+                ),
               ),
-            ];
-          } else {
-            trafficFlowPolylines.clear();
-          }
-        });
+            );
+          });
+        }
       } else {
         print('Failed to fetch traffic flow data: ${response.statusCode}');
       }
     } catch (e) {
-      print('Error fetching traffic flow data: $e');
+      print('Error fetching traffic flow for segment: $e');
     }
   }
 
@@ -178,7 +194,8 @@ class _RouteDrawerState extends State<RouteDrawer> {
           ),
           children: [
             TileLayer(
-              urlTemplate: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+              urlTemplate:
+                  'https://{s}.api.tomtom.com/map/1/tile/basic/{z}/{x}/{y}.png?key=${Env.tomTomKey}&view=Unified&language=en',
               subdomains: ['a', 'b', 'c'],
             ),
             MarkerLayer(
@@ -203,7 +220,7 @@ class _RouteDrawerState extends State<RouteDrawer> {
             ),
             PolylineLayer(
               polylines: [
-                ...trafficFlowPolylines,
+                ...trafficFlowPolylines, // Show traffic flow only if available
                 ..._generateRoutes(),
               ],
             ),
@@ -248,7 +265,8 @@ class _RouteDrawerState extends State<RouteDrawer> {
                       if (newValue == 'Driving') {
                         _fetchTrafficFlow();
                       } else {
-                        trafficFlowPolylines.clear();
+                        trafficFlowPolylines
+                            .clear(); // Hide traffic flow on non-driving modes
                       }
                     });
                   }
