@@ -9,21 +9,29 @@ class WeeklyForecast extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-      itemCount: weeklyWeatherData!.keys.length,
-      itemBuilder: (context, index) {
-        final date = weeklyWeatherData!.keys.elementAt(index);
-        final dayWeather = weeklyWeatherData![date];
-        final formattedDate =
-            DateFormat('EEEE, MMM d, yyyy').format(DateTime.parse(date));
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: weeklyWeatherData!.entries.map((entry) {
+          final date = entry.key;
+          final dayWeather = entry.value;
+          final formattedDate =
+              DateFormat('EEEE, MMM d, yyyy').format(DateTime.parse(date));
 
-        return WeatherCard(
-          date: formattedDate,
-          maxTemperature: dayWeather['temperature']['max']?.toString() ?? 'N/A',
-          minTemperature: dayWeather['temperature']['min']?.toString() ?? 'N/A',
-          weatherCode: dayWeather['weatherCode']['max']?.toString() ?? '1001',
-        );
-      },
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+            child: WeatherCard(
+              date: formattedDate,
+              maxTemperature:
+                  dayWeather['temperature']['max']?.toString() ?? 'N/A',
+              minTemperature:
+                  dayWeather['temperature']['min']?.toString() ?? 'N/A',
+              weatherCode:
+                  dayWeather['weatherCode']['max']?.toString() ?? '1001',
+            ),
+          );
+        }).toList(),
+      ),
     );
   }
 }

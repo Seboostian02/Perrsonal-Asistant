@@ -42,37 +42,42 @@ class WeatherCard extends StatelessWidget {
       "8000": WeatherIcons.thunderstorm,
     };
 
-    return Card(
-      color: Colors.white.withOpacity(0.15),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-      margin: const EdgeInsets.symmetric(vertical: 6.0),
-      child: Padding(
-        padding: const EdgeInsets.all(12.0),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              date,
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.w600,
+    return Container(
+      height: 150,
+      child: Card(
+        color: Colors.white.withOpacity(0.15),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        margin: const EdgeInsets.symmetric(horizontal: 6.0, vertical: 4.0),
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                date,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
-            ),
-            Text(
-              '$maxTemperature° / $minTemperature°C',
-              style: const TextStyle(
+              Icon(
+                weatherIcons[weatherCode] ?? Icons.error,
                 color: Colors.white,
-                fontWeight: FontWeight.w500,
+                size: 30,
               ),
-            ),
-            Icon(
-              weatherIcons[weatherCode] ?? Icons.error,
-              color: Colors.white,
-              size: 30,
-            ),
-          ],
+              const SizedBox(height: 8),
+              Text(
+                '$maxTemperature° / $minTemperature°C',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w500,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
         ),
       ),
     );

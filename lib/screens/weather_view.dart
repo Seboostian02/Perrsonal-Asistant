@@ -91,7 +91,8 @@ class WeatherViewState extends State<WeatherView> {
                                 color: Colors.white),
                           ),
                           const SizedBox(height: 15),
-                          Expanded(
+                          SizedBox(
+                            height: 150,
                             child: WeeklyForecast(
                               weeklyWeatherData: weeklyWeatherData,
                             ),
