@@ -43,7 +43,8 @@ class WeatherCard extends StatelessWidget {
     };
 
     return Container(
-      height: 150,
+      // width: 150,
+      // height: 30,
       child: Card(
         color: Colors.white.withOpacity(0.15),
         shape: RoundedRectangleBorder(
@@ -62,14 +63,15 @@ class WeatherCard extends StatelessWidget {
                   fontWeight: FontWeight.w600,
                 ),
               ),
+              const SizedBox(height: 20),
               Icon(
                 weatherIcons[weatherCode] ?? Icons.error,
                 color: Colors.white,
                 size: 30,
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 20),
               Text(
-                '$maxTemperature° / $minTemperature°C',
+                '${double.parse(maxTemperature).toStringAsFixed(0)}° / ${double.parse(minTemperature).toStringAsFixed(0)}°C',
                 style: const TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.w500,

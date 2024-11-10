@@ -103,4 +103,46 @@ class WeatherService {
       throw Exception('Failed to load weekly weather data');
     }
   }
+
+  Future<Map<String, dynamic>?> getHourlyWeather(String location) async {
+    final response = await http.get(
+      Uri.parse(
+          '$forecastBaseUrl?location=$location&apikey=$apiKey&timesteps=1h&units=metric'),
+      headers: {'accept': 'application/json'},
+    );
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+
+      if (data['timelines'] != null && data['timelines']['hourly'] != null) {
+        Map<String, dynamic> hourlyForecast = {};
+
+        for (var hour in data['timelines']['hourly']) {
+          final dateTime = hour['time'];
+          final values = hour['values'];
+
+          hourlyForecast[dateTime] = {
+            'temperature': values['temperature'],
+            'temperatureApparent': values['temperatureApparent'],
+            'cloudCover': values['cloudCover'],
+            'humidity': values['humidity'],
+            'precipitationProbability': values['precipitationProbability'],
+            'pressureSurfaceLevel': values['pressureSurfaceLevel'],
+            'wind': {
+              'speed': values['windSpeed'],
+              'gust': values['windGust'],
+              'direction': values['windDirection'],
+            },
+            'visibility': values['visibility'],
+            'uvIndex': values['uvIndex'],
+            'weatherCode': values['weatherCode'],
+          };
+        }
+        return hourlyForecast;
+      }
+      throw Exception('Hourly forecast data is not available');
+    } else {
+      throw Exception('Failed to load hourly weather data');
+    }
+  }
 }
