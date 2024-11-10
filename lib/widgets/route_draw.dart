@@ -25,7 +25,7 @@ class _RouteDrawerState extends State<RouteDrawer> {
   String selectedTransportMode = 'Walking';
   List<LatLng> routePoints = [];
   List<Polyline> trafficFlowPolylines = [];
-  bool hasFetchedTraffic = false; // Variabilă pentru a preveni fetch-ul repetat
+  bool showTrafficTiles = false;
 
   final Map<String, String> transportModes = {
     'Walking': 'foot-walking',
@@ -38,9 +38,6 @@ class _RouteDrawerState extends State<RouteDrawer> {
     super.initState();
     mapController = MapController();
     _fetchRoute();
-    if (selectedTransportMode == 'Driving') {
-      _fetchTrafficFlow();
-    }
   }
 
   Future<void> _fetchRoute() async {
@@ -80,9 +77,6 @@ class _RouteDrawerState extends State<RouteDrawer> {
                     .map((coord) => LatLng(coord[1], coord[0]))
                     .toList();
           });
-          if (selectedTransportMode == 'Driving' && !hasFetchedTraffic) {
-            _fetchTrafficFlow();
-          }
         }
       } else {
         print('Failed to fetch route: ${response.statusCode}');
@@ -90,82 +84,6 @@ class _RouteDrawerState extends State<RouteDrawer> {
     } catch (e) {
       print('Error fetching route: $e');
     }
-  }
-
-  Future<void> _fetchTrafficFlow() async {
-    if (hasFetchedTraffic || selectedTransportMode != 'Driving') return;
-
-    final String apiKey = Env.tomTomKey;
-
-    if (routePoints.isEmpty) {
-      print('No route points available to fetch traffic data.');
-      return;
-    }
-
-    trafficFlowPolylines.clear();
-
-    try {
-      List<Future<void>> trafficRequests = [];
-
-      for (int i = 0; i < routePoints.length - 1; i++) {
-        final LatLng start = routePoints[i];
-        final LatLng end = routePoints[i + 1];
-
-        final url =
-            'https://api.tomtom.com/traffic/services/4/flowSegmentData/absolute/10/json?key=$apiKey&point=${start.latitude},${start.longitude}';
-
-        trafficRequests.add(_fetchTrafficForSegment(url));
-      }
-
-      await Future.wait(trafficRequests);
-
-      setState(() {
-        hasFetchedTraffic = true;
-      });
-    } catch (e) {
-      print('Error fetching traffic flow data: $e');
-    }
-  }
-
-  Future<void> _fetchTrafficForSegment(String url) async {
-    try {
-      final response = await http.get(Uri.parse(url));
-
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-
-        if (data['flowSegmentData'] != null) {
-          final List<LatLng> trafficPoints =
-              (data['flowSegmentData']['coordinates']['coordinate'] as List)
-                  .map((coord) => LatLng(coord['latitude'], coord['longitude']))
-                  .toList();
-
-          setState(() {
-            trafficFlowPolylines.add(
-              Polyline(
-                points: trafficPoints,
-                strokeWidth: 8.0,
-                color: _getTrafficColor(
-                  (data['flowSegmentData']['currentSpeed'] as num).toDouble(),
-                  (data['flowSegmentData']['freeFlowSpeed'] as num).toDouble(),
-                ),
-              ),
-            );
-          });
-        }
-      } else {
-        print('Failed to fetch traffic flow data: ${response.statusCode}');
-      }
-    } catch (e) {
-      print('Error fetching traffic flow for segment: $e');
-    }
-  }
-
-  Color _getTrafficColor(double currentSpeed, double freeFlowSpeed) {
-    double congestionLevel = currentSpeed / freeFlowSpeed;
-    if (congestionLevel > 0.8) return Colors.green;
-    if (congestionLevel > 0.5) return Colors.yellow;
-    return Colors.red;
   }
 
   List<Polyline> _generateRoutes() {
@@ -194,6 +112,15 @@ class _RouteDrawerState extends State<RouteDrawer> {
                   'https://api.tomtom.com/map/1/tile/basic/main/{z}/{x}/{y}.png?key=${Env.tomTomKey}',
               subdomains: ['a', 'b', 'c'],
             ),
+            if (showTrafficTiles)
+              Opacity(
+                opacity: 0.5,
+                child: TileLayer(
+                  urlTemplate:
+                      'https://api.tomtom.com/traffic/map/4/tile/flow/relative0/{z}/{x}/{y}.png?key=${Env.tomTomKey}',
+                  subdomains: ['a', 'b', 'c'],
+                ),
+              ),
             MarkerLayer(
               markers: [
                 Marker(
@@ -216,13 +143,24 @@ class _RouteDrawerState extends State<RouteDrawer> {
             ),
             PolylineLayer(
               polylines: [
-                if (selectedTransportMode == 'Driving') ...trafficFlowPolylines,
                 ..._generateRoutes(),
               ],
             ),
           ],
         ),
         ZoomControls(mapController: mapController),
+        Positioned(
+          bottom: 80,
+          left: 20,
+          child: ElevatedButton(
+            onPressed: () {
+              setState(() {
+                showTrafficTiles = !showTrafficTiles;
+              });
+            },
+            child: Text(showTrafficTiles ? 'Hide Traffic' : 'Show Traffic'),
+          ),
+        ),
         Positioned(
           bottom: 20,
           left: 0,
@@ -258,9 +196,6 @@ class _RouteDrawerState extends State<RouteDrawer> {
                     setState(() {
                       selectedTransportMode = newValue;
                       _fetchRoute();
-                      if (newValue != 'Driving') {
-                        // trafficFlowPolylines.clear();
-                      }
                     });
                   }
                 },
