@@ -42,7 +42,7 @@ class CurrentWeather extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                '${weatherData!['timelines']['minutely'][0]['values']['temperature']}°C',
+                '${double.parse(weatherData!['timelines']['minutely'][0]['values']['temperature'].toString()).toStringAsFixed(0)}°C',
                 style: const TextStyle(
                   fontSize: 60,
                   fontWeight: FontWeight.bold,

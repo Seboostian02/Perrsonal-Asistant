@@ -2,18 +2,35 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'weather_card.dart';
 
-class WeeklyForecast extends StatelessWidget {
+class WeeklyForecast extends StatefulWidget {
   final Map<String, dynamic>? weeklyWeatherData;
 
   WeeklyForecast({required this.weeklyWeatherData});
 
   @override
+  _WeeklyForecastState createState() => _WeeklyForecastState();
+}
+
+class _WeeklyForecastState extends State<WeeklyForecast> {
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _scrollController.jumpTo(50.0);
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     return ListView.builder(
-      itemCount: weeklyWeatherData!.keys.length,
+      scrollDirection: Axis.horizontal,
+      controller: _scrollController,
+      itemCount: widget.weeklyWeatherData!.keys.length,
       itemBuilder: (context, index) {
-        final date = weeklyWeatherData!.keys.elementAt(index);
-        final dayWeather = weeklyWeatherData![date];
+        final date = widget.weeklyWeatherData!.keys.elementAt(index);
+        final dayWeather = widget.weeklyWeatherData![date];
         final formattedDate =
             DateFormat('EEEE, MMM d, yyyy').format(DateTime.parse(date));
 
@@ -25,5 +42,11 @@ class WeeklyForecast extends StatelessWidget {
         );
       },
     );
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
   }
 }

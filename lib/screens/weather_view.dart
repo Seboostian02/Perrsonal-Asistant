@@ -1,4 +1,5 @@
 import 'package:calendar/screens/weather_view_components/current_weather.dart';
+import 'package:calendar/screens/weather_view_components/hourly_forecast.dart';
 import 'package:calendar/screens/weather_view_components/weekly_forecast.dart';
 import 'package:flutter/material.dart';
 import 'package:calendar/services/weather_service.dart';
@@ -17,6 +18,7 @@ class WeatherViewState extends State<WeatherView> {
   WeatherService weatherService = WeatherService();
   Map<String, dynamic>? currentWeatherData;
   Map<String, dynamic>? weeklyWeatherData;
+  Map<String, dynamic>? hourlyWeatherData;
   bool isLoading = true;
 
   @override
@@ -35,10 +37,14 @@ class WeatherViewState extends State<WeatherView> {
       final currentWeather = await weatherService.getWeather(locationString);
       final weeklyWeather =
           await weatherService.getWeeklyWeather(locationString);
-
+      final hourlyWeather =
+          await weatherService.getHourlyWeather(locationString);
+      print("hourly---------");
+      print(hourlyWeather);
       setState(() {
         currentWeatherData = currentWeather;
         weeklyWeatherData = weeklyWeather;
+        hourlyWeatherData = hourlyWeather;
         isLoading = false;
       });
     } catch (e) {
@@ -46,6 +52,7 @@ class WeatherViewState extends State<WeatherView> {
         isLoading = false;
         currentWeatherData = null;
         weeklyWeatherData = null;
+        hourlyWeatherData = null;
       });
     }
   }
@@ -78,11 +85,24 @@ class WeatherViewState extends State<WeatherView> {
                                 fontWeight: FontWeight.bold,
                                 color: Colors.white),
                           ),
-                          const SizedBox(height: 15),
                           CurrentWeather(
                             weatherData: currentWeatherData,
                           ),
                           const SizedBox(height: 20),
+                          const Text(
+                            'Hourly Forecast',
+                            style: TextStyle(
+                                fontSize: 22,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white),
+                          ),
+                          SizedBox(
+                            height: 150,
+                            child: HourlyForecast(
+                              hourlyWeatherData: hourlyWeatherData,
+                            ),
+                          ),
+                          const SizedBox(height: 15),
                           const Text(
                             'Weekly Forecast',
                             style: TextStyle(
@@ -91,7 +111,8 @@ class WeatherViewState extends State<WeatherView> {
                                 color: Colors.white),
                           ),
                           const SizedBox(height: 15),
-                          Expanded(
+                          SizedBox(
+                            height: 150,
                             child: WeeklyForecast(
                               weeklyWeatherData: weeklyWeatherData,
                             ),
