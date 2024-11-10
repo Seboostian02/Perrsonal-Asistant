@@ -22,11 +22,13 @@ class RouteDrawer extends StatefulWidget {
 
 class _RouteDrawerState extends State<RouteDrawer> {
   late MapController mapController;
-  String selectedTransportMode = 'Driving';
+  String selectedTransportMode = 'Walking';
   List<LatLng> routePoints = [];
+  List<Polyline> trafficFlowPolylines = [];
+  bool showTrafficTiles = false;
 
   final Map<String, String> transportModes = {
-    'Foot': 'foot-walking',
+    'Walking': 'foot-walking',
     'Bike': 'cycling-regular',
     'Driving': 'driving-hgv',
   };
@@ -56,8 +58,6 @@ class _RouteDrawerState extends State<RouteDrawer> {
     final url =
         'https://api.openrouteservice.org/v2/directions/$mode?api_key=$apiKey&start=${widget.currentLocation.longitude},${widget.currentLocation.latitude}&end=${widget.destination.longitude},${widget.destination.latitude}';
 
-    print('Request URL: $url');
-
     try {
       final response = await http.get(
         Uri.parse(url),
@@ -67,33 +67,16 @@ class _RouteDrawerState extends State<RouteDrawer> {
         },
       );
 
-      print('Response Status Code: ${response.statusCode}');
-
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        print('Response Data: $data');
 
         if (data['features'] != null && data['features'].isNotEmpty) {
-          final steps =
-              data['features'][0]['properties']['segments'][0]['steps'];
-
-          List<int> waypoints = [];
-          for (var step in steps) {
-            if (step['way_points'] != null) {
-              waypoints.addAll(List<int>.from(step['way_points']));
-            }
-          }
-
-          print('Waypoints: $waypoints');
-
           setState(() {
             routePoints =
                 (data['features'][0]['geometry']['coordinates'] as List)
                     .map((coord) => LatLng(coord[1], coord[0]))
                     .toList();
           });
-        } else {
-          print('No routes found or features is null.');
         }
       } else {
         print('Failed to fetch route: ${response.statusCode}');
@@ -125,9 +108,19 @@ class _RouteDrawerState extends State<RouteDrawer> {
           ),
           children: [
             TileLayer(
-              urlTemplate: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+              urlTemplate:
+                  'https://api.tomtom.com/map/1/tile/basic/main/{z}/{x}/{y}.png?key=${Env.tomTomKey}',
               subdomains: ['a', 'b', 'c'],
             ),
+            if (showTrafficTiles)
+              Opacity(
+                opacity: 0.5,
+                child: TileLayer(
+                  urlTemplate:
+                      'https://api.tomtom.com/traffic/map/4/tile/flow/relative0/{z}/{x}/{y}.png?key=${Env.tomTomKey}',
+                  subdomains: ['a', 'b', 'c'],
+                ),
+              ),
             MarkerLayer(
               markers: [
                 Marker(
@@ -149,11 +142,25 @@ class _RouteDrawerState extends State<RouteDrawer> {
               ],
             ),
             PolylineLayer(
-              polylines: _generateRoutes(),
+              polylines: [
+                ..._generateRoutes(),
+              ],
             ),
           ],
         ),
         ZoomControls(mapController: mapController),
+        Positioned(
+          bottom: 80,
+          left: 20,
+          child: ElevatedButton(
+            onPressed: () {
+              setState(() {
+                showTrafficTiles = !showTrafficTiles;
+              });
+            },
+            child: Text(showTrafficTiles ? 'Hide Traffic' : 'Show Traffic'),
+          ),
+        ),
         Positioned(
           bottom: 20,
           left: 0,
