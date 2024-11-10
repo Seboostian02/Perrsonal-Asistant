@@ -39,8 +39,7 @@ class WeatherViewState extends State<WeatherView> {
           await weatherService.getWeeklyWeather(locationString);
       final hourlyWeather =
           await weatherService.getHourlyWeather(locationString);
-      print("hourly---------");
-      print(hourlyWeather);
+
       setState(() {
         currentWeatherData = currentWeather;
         weeklyWeatherData = weeklyWeather;
