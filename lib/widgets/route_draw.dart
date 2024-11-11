@@ -90,7 +90,7 @@ class _RouteDrawerState extends State<RouteDrawer> {
     return [
       Polyline(
         points: routePoints,
-        strokeWidth: 4.0,
+        strokeWidth: 5.0,
         color: Colors.blue,
       ),
     ];
