@@ -5,6 +5,9 @@ import 'package:googleapis/calendar/v3.dart' as calendar;
 import 'package:googleapis_auth/auth_io.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'notification_service.dart';
+
+final NotificationService notificationService = NotificationService();
 
 class GoogleCalendarService {
   static Future<void> createEvent({
@@ -20,64 +23,76 @@ class GoogleCalendarService {
     required RecurrenceType recurrenceType,
   }) async {
     try {
-      String? accessToken = await AuthService().accessToken;
+      final client = await getAuthenticatedClient(accessToken);
+      var calendarApi = calendar.CalendarApi(client);
 
-      if (accessToken != null) {
-        final client = await getAuthenticatedClient(accessToken);
-        var calendarApi = calendar.CalendarApi(client);
+      var event = calendar.Event();
+      event.summary = title;
+      event.description = description;
+      event.location = location;
 
-        var event = calendar.Event();
-        event.summary = title;
-        event.description = description;
-        event.location = location;
+      var startDateTime = DateTime(
+        date.year,
+        date.month,
+        date.day,
+        startTime.hour,
+        startTime.minute,
+      );
 
-        var startDateTime = DateTime(
-          date.year,
-          date.month,
-          date.day,
-          startTime.hour,
-          startTime.minute,
-        );
+      var endDateTime = DateTime(
+        date.year,
+        date.month,
+        date.day,
+        endTime.hour,
+        endTime.minute,
+      );
 
-        var endDateTime = DateTime(
-          date.year,
-          date.month,
-          date.day,
-          endTime.hour,
-          endTime.minute,
-        );
+      event.start = calendar.EventDateTime(
+        dateTime: startDateTime,
+        timeZone: 'GMT+3',
+      );
 
-        event.start = calendar.EventDateTime(
-          dateTime: startDateTime,
-          timeZone: 'GMT+3',
-        );
+      event.end = calendar.EventDateTime(
+        dateTime: endDateTime,
+        timeZone: 'GMT+3',
+      );
 
-        event.end = calendar.EventDateTime(
-          dateTime: endDateTime,
-          timeZone: 'GMT+3',
-        );
-
-        if (recurrenceType != RecurrenceType.none) {
-          String rrule = 'RRULE:';
-          if (recurrenceType == RecurrenceType.daily) {
-            rrule += 'FREQ=DAILY';
-          } else if (recurrenceType == RecurrenceType.weekly) {
-            rrule += 'FREQ=WEEKLY';
-          } else if (recurrenceType == RecurrenceType.monthly) {
-            rrule += 'FREQ=MONTHLY';
-          }
-          if (recurrenceEndDate != null) {
-            rrule +=
-                ';UNTIL=${recurrenceEndDate.toUtc().toIso8601String().replaceAll('-', '').split('T').first}';
-          }
-          event.recurrence = [rrule];
+      if (recurrenceType != RecurrenceType.none) {
+        String rrule = 'RRULE:';
+        if (recurrenceType == RecurrenceType.daily) {
+          rrule += 'FREQ=DAILY';
+        } else if (recurrenceType == RecurrenceType.weekly) {
+          rrule += 'FREQ=WEEKLY';
+        } else if (recurrenceType == RecurrenceType.monthly) {
+          rrule += 'FREQ=MONTHLY';
         }
-
-        await calendarApi.events.insert(event, "primary");
-        print("Event created successfully!");
-      } else {
-        print("Failed to get access token for Google Calendar");
+        if (recurrenceEndDate != null) {
+          rrule +=
+              ';UNTIL=${recurrenceEndDate.toUtc().toIso8601String().replaceAll('-', '').split('T').first}';
+        }
+        event.recurrence = [rrule];
       }
+
+      var createdEvent = await calendarApi.events.insert(event, "primary");
+      print("Event created successfully!");
+
+      // Schedule a notification for the event
+      // await notificationService.scheduleNotification(
+      //   id: createdEvent.id.hashCode,
+      //   title: title,
+      //   description: description,
+      //   scheduledTime: startDateTime,
+      // );
+      print("Scheduling notification with ID: ${createdEvent.id.hashCode}");
+      final DateTime notificationTime =
+          startDateTime.subtract(const Duration(minutes: 30));
+      await notificationService.scheduleNotification(
+        id: createdEvent.id.hashCode,
+        title: title,
+        description: description,
+        scheduledTime: startDateTime,
+      );
+      print("Scheduled time for event notification: $notificationTime");
     } catch (e) {
       print("Error creating event: $e");
     }
@@ -106,7 +121,7 @@ class GoogleCalendarService {
       var events = await calendarApi.events.list(
         'primary',
         timeMin: startTime.toUtc(),
-        // timeMax: endTime.toUtc(),
+        timeMax: endTime.toUtc(),
         singleEvents: true,
         orderBy: 'startTime',
       );
@@ -162,7 +177,7 @@ class GoogleCalendarService {
       String mainEventId,
       String eventId) async {
     List<String> recurringEventIds = [];
-    var pageToken = null;
+    String? pageToken;
 
     do {
       var events = await calendarApi.events.list(
