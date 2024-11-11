@@ -169,15 +169,13 @@ class _MainPageState extends State<MainPage> {
         if (event.start?.dateTime != null) {
           // Calculăm ora de notificare (30 de minute înainte de start)
           final DateTime eventStartTime = event.start!.dateTime!;
-          final DateTime notificationTime =
-              eventStartTime.subtract(const Duration(minutes: 30));
 
           // Planificăm notificarea
           await notificationService.scheduleNotification(
             id: event.id.hashCode,
             title: event.summary ?? 'No title',
             description: event.description ?? 'No description',
-            scheduledTime: notificationTime,
+            scheduledTime: eventStartTime,
           );
 
           print("Scheduled notification for event: ${event.summary}");

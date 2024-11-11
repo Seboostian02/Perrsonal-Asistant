@@ -61,17 +61,26 @@ class NotificationService {
     const NotificationDetails platformChannelSpecifics =
         NotificationDetails(android: androidPlatformChannelSpecifics);
 
-    final scheduledDateTime =
-        tz.TZDateTime.from(scheduledTime.toUtc(), tz.local);
+    // Verificăm dacă `scheduledTime` este în UTC
+    print("Original scheduled time (UTC): $scheduledTime");
 
-    print("Scheduled notification time at: $scheduledDateTime");
+    // Dacă `scheduledTime` este în UTC, îl convertește în fusul orar local
+    final localScheduledTime = tz.TZDateTime.from(
+      scheduledTime.isUtc
+          ? scheduledTime
+          : scheduledTime.toUtc(), // Asigură-te că timpul este în UTC
+      tz.local,
+    );
+
+    // Verificăm rezultatul conversiei
+    print("Scheduled time converted to local time: $localScheduledTime");
 
     try {
       await _notificationsPlugin.zonedSchedule(
         id,
         title,
         description,
-        scheduledDateTime,
+        localScheduledTime,
         platformChannelSpecifics,
         uiLocalNotificationDateInterpretation:
             UILocalNotificationDateInterpretation.absoluteTime,
