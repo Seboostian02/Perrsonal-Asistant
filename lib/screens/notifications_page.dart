@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:calendar/services/notification_service.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
+// Modificăm structura datelor în NotificationService.dart
 class NotificationsPage extends StatefulWidget {
   const NotificationsPage({super.key});
 
@@ -45,7 +46,16 @@ class _NotificationsPageState extends State<NotificationsPage> {
                 return ListTile(
                   title: Text(notification.title ?? 'No Title'),
                   subtitle: Text(notification.body ?? 'No Description'),
-                  trailing: Text('ID: ${notification.id}'),
+                  trailing: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text('ID: ${notification.id}'),
+                      SizedBox(height: 4),
+                      Text('timp progrmat ${notification.body}')
+                      // 'Timp programat: ${_formatDateTime(notification.scheduledTime)}'),
+                    ],
+                  ),
                 );
               },
             );
@@ -53,5 +63,9 @@ class _NotificationsPageState extends State<NotificationsPage> {
         },
       ),
     );
+  }
+
+  String _formatDateTime(DateTime dateTime) {
+    return '${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
   }
 }

@@ -42,6 +42,20 @@ class MainPageState extends State<MainPage> {
 
   Future<void> _scheduleNotifications() async {
     final events = Provider.of<EventProvider>(context, listen: false).events;
+    final pendingNotifications =
+        await notificationService.getPendingNotifications();
+
+    // Verificăm fiecare notificare programată
+    for (var notification in pendingNotifications) {
+      // Verifică dacă notificarea nu mai există în evenimente
+      if (!events.any((event) => event.id.hashCode == notification.id)) {
+        // Dacă notificarea nu există în lista de evenimente, o ștergem
+        await notificationService.cancelNotification(notification.id);
+        print("Notification for event with ID ${notification.id} canceled.");
+      }
+    }
+
+    // Programăm notificările pentru evenimentele curente
     for (var event in events) {
       if (event.start?.dateTime != null) {
         final DateTime eventStartTime =

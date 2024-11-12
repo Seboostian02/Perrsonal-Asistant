@@ -91,4 +91,13 @@ class NotificationService {
       return [];
     }
   }
+
+  Future<void> cancelNotification(int id) async {
+    try {
+      await _notificationsPlugin.cancel(id);
+      print("Notification with ID $id canceled.");
+    } catch (e) {
+      print("Error canceling notification with ID $id: $e");
+    }
+  }
 }
