@@ -47,11 +47,16 @@ class MainPageState extends State<MainPage> {
 
     // Verificăm fiecare notificare programată
     for (var notification in pendingNotifications) {
+      // Generăm ID-ul modificat pentru evenimentul curent
+      int modifiedEventId = notification
+          .id; // Presupunem că notification.id este deja generat corect
+
       // Verifică dacă notificarea nu mai există în evenimente
-      if (!events.any((event) => event.id.hashCode == notification.id)) {
+      if (!events.any(
+          (event) => event.id.hashCode.abs() % 10000000 == modifiedEventId)) {
         // Dacă notificarea nu există în lista de evenimente, o ștergem
-        await notificationService.cancelNotification(notification.id);
-        print("Notification for event with ID ${notification.id} canceled.");
+        await notificationService.cancelNotification(modifiedEventId);
+        print("Notification for event with ID $modifiedEventId canceled.");
       }
     }
 
@@ -60,8 +65,13 @@ class MainPageState extends State<MainPage> {
       if (event.start?.dateTime != null) {
         final DateTime eventStartTime =
             event.start!.dateTime!.subtract(const Duration(minutes: 30));
+
+        // Generăm ID-ul notificării pentru eveniment folosind ID-ul modificat
+        int notificationId = event.id.hashCode.abs() % 10000000;
+
+        // Programăm notificarea
         await notificationService.scheduleNotification(
-          id: event.id.hashCode,
+          id: notificationId,
           title: event.summary ?? 'No title',
           description: event.description ?? 'No description',
           scheduledTime: eventStartTime,
@@ -206,6 +216,7 @@ class MainPageState extends State<MainPage> {
               : const Center(child: CircularProgressIndicator()),
           NotFoundPage(
             onBackToHome: () => _onItemTapped(0),
+            notificationService: notificationService,
           ),
           SettingsList(authProvider: authProvider),
         ],

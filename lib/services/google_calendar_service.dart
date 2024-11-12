@@ -1,4 +1,3 @@
-import 'package:calendar/services/auth_service.dart';
 import 'package:calendar/widgets/event_form.dart';
 import 'package:googleapis_auth/googleapis_auth.dart';
 import 'package:googleapis/calendar/v3.dart' as calendar;
@@ -49,12 +48,12 @@ class GoogleCalendarService {
 
       event.start = calendar.EventDateTime(
         dateTime: startDateTime,
-        timeZone: 'GMT+3',
+        timeZone: 'Europe/Bucharest',
       );
 
       event.end = calendar.EventDateTime(
         dateTime: endDateTime,
-        timeZone: 'GMT+3',
+        timeZone: 'Europe/Bucharest',
       );
 
       if (recurrenceType != RecurrenceType.none) {
@@ -74,23 +73,23 @@ class GoogleCalendarService {
       }
 
       var createdEvent = await calendarApi.events.insert(event, "primary");
+      print("---------------");
       print("Event created successfully!");
 
-      // Schedule a notification for the event
-      // await notificationService.scheduleNotification(
-      //   id: createdEvent.id.hashCode,
-      //   title: title,
-      //   description: description,
-      //   scheduledTime: startDateTime,
-      // );
-      print("Scheduling notification with ID: ${createdEvent.id.hashCode}");
+      // Calculate notification time
       final DateTime notificationTime =
           startDateTime.subtract(const Duration(minutes: 30));
-      await notificationService.scheduleNotification(
-        id: createdEvent.id.hashCode,
+
+      final now = DateTime.now();
+      final scheduledTime = now.add(const Duration(seconds: 5));
+
+      // Schedule the notification
+      print("Scheduling notification with ID: ${createdEvent.id.hashCode}");
+      notificationService.scheduleNotification(
+        id: createdEvent.id.hashCode.abs() % 10000000,
         title: title,
         description: description,
-        scheduledTime: startDateTime,
+        scheduledTime: notificationTime,
       );
       print("Scheduled time for event notification: $notificationTime");
     } catch (e) {

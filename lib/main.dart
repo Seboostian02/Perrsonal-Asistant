@@ -1,20 +1,21 @@
-import 'package:calendar/services/auth_service.dart';
 import 'package:calendar/services/event_provider.dart';
 import 'package:flutter/material.dart';
-import 'package:googleapis/calendar/v3.dart' as calendar;
 import 'package:provider/provider.dart';
 import 'screens/main_page.dart';
 import 'screens/login_page.dart';
 import 'services/auth_provider.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:calendar/services/google_calendar_service.dart';
-import 'package:calendar/services/notification_service.dart'; // Import NotificationService
+
+import 'package:timezone/data/latest.dart' as tz;
+import 'package:timezone/timezone.dart' as tz;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-
+  tz.initializeTimeZones();
+  tz.setLocalLocation(tz.getLocation(
+      'Europe/Bucharest')); // Setează fusul orar local (exemplu pentru București)
   final hasPermission = await _checkLocationPermission();
   final hasNotificationPermission = await _checkNotificationPermission();
   final hasExactAlarmPermission = await _checkExactAlarmPermission();

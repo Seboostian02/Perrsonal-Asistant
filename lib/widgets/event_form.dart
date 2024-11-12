@@ -1,4 +1,5 @@
 import 'package:calendar/services/auth_service.dart';
+import 'package:calendar/services/notification_service.dart';
 // import 'package:calendar/widgets/event_form_components/create_event_button.dart';
 import 'package:calendar/widgets/event_form_components/date_selector.dart';
 import 'package:calendar/widgets/event_form_components/event_description_field.dart';
@@ -25,6 +26,9 @@ class EventForm extends StatefulWidget {
 class EventFormState extends State<EventForm> {
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
+  final NotificationService _notificationService =
+      NotificationService(); // Create instance
+
   LatLng? _selectedLocation;
   bool _isOnlineMeeting = false;
   DateTime _selectedDate = DateTime.now();
