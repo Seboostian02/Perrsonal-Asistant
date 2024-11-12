@@ -66,7 +66,8 @@ class EventFormState extends State<EventForm> {
     final selectedDate =
         DateTime(_selectedDate.year, _selectedDate.month, _selectedDate.day);
 
-    if (selectedDate == currentDate) {
+    // Verifică validitatea orei de start doar dacă nu există recurență
+    if (_recurrenceType == RecurrenceType.none && selectedDate == currentDate) {
       final nowTime = TimeOfDay.fromDateTime(now);
       if (_startTime.hour < nowTime.hour ||
           (_startTime.hour == nowTime.hour &&
@@ -80,6 +81,7 @@ class EventFormState extends State<EventForm> {
       }
     }
 
+    // Verifică validitatea orei de end
     if (_endTime.hour < _startTime.hour ||
         (_endTime.hour == _startTime.hour &&
             _endTime.minute <= _startTime.minute)) {

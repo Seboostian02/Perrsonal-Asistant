@@ -36,7 +36,7 @@ class GoogleCalendarService {
         date.day,
         startTime.hour,
         startTime.minute,
-      );
+      ).toUtc();
 
       var endDateTime = DateTime(
         date.year,
@@ -44,7 +44,7 @@ class GoogleCalendarService {
         date.day,
         endTime.hour,
         endTime.minute,
-      );
+      ).toUtc();
 
       event.start = calendar.EventDateTime(
         dateTime: startDateTime,
@@ -73,6 +73,7 @@ class GoogleCalendarService {
       }
 
       var createdEvent = await calendarApi.events.insert(event, "primary");
+
       print("---------------");
       print("Event created successfully!");
 
