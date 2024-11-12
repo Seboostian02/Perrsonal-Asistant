@@ -48,13 +48,17 @@ class GoogleCalendarService {
         );
 
         event.start = calendar.EventDateTime(
-          dateTime: startDateTime,
-          timeZone: 'GMT+3',
+          // dateTime: startDateTime,
+          // timeZone: 'GMT+3',
+          dateTime: startDateTime.toUtc(),
+          timeZone: 'UTC',
         );
 
         event.end = calendar.EventDateTime(
-          dateTime: endDateTime,
-          timeZone: 'GMT+3',
+          // dateTime: endDateTime,
+          // timeZone: 'GMT+3',
+          dateTime: endDateTime.toUtc(),
+          timeZone: 'utc',
         );
 
         if (recurrenceType != RecurrenceType.none) {

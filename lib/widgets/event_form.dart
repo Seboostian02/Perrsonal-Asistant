@@ -27,7 +27,7 @@ class EventFormState extends State<EventForm> {
   final TextEditingController _descriptionController = TextEditingController();
   LatLng? _selectedLocation;
   bool _isOnlineMeeting = false;
-  DateTime _selectedDate = DateTime.now();
+  DateTime _selectedDate = DateTime.now().toUtc();
   late TimeOfDay _startTime;
   late TimeOfDay _endTime;
 
@@ -57,7 +57,7 @@ class EventFormState extends State<EventForm> {
   }
 
   Future<void> _createEvent() async {
-    final now = DateTime.now();
+    final now = DateTime.now().toUtc();
     final currentDate = DateTime(now.year, now.month, now.day);
     final selectedDate =
         DateTime(_selectedDate.year, _selectedDate.month, _selectedDate.day);
