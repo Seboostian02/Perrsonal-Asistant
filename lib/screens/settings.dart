@@ -1,9 +1,9 @@
+import 'package:calendar/screens/notifications_page.dart';
 import 'package:flutter/material.dart';
 import '../services/auth_provider.dart';
 
 class SettingsList extends StatelessWidget {
-  final AuthProvider
-      authProvider; // Trebuie să primești AuthProvider pentru verificare
+  final AuthProvider authProvider;
 
   const SettingsList({Key? key, required this.authProvider}) : super(key: key);
 
@@ -28,7 +28,12 @@ class SettingsList extends StatelessWidget {
             leading: const Icon(Icons.notifications),
             title: const Text('Notifications'),
             onTap: () {
-              print("notifications -----------");
+              showDialog(
+                context: context,
+                builder: (context) => Dialog.fullscreen(
+                  child: const NotificationsPage(),
+                ),
+              );
             },
           ),
           const Divider(),

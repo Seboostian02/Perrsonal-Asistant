@@ -29,21 +29,17 @@ class NotificationService {
     required String description,
     required DateTime scheduledTime,
   }) async {
-    // Verifică dacă permisiunea pentru alarme exacte este acordată
     final permissionStatus = await Permission.notification.status;
     if (!permissionStatus.isGranted) {
       await Permission.notification.request();
-      if (await Permission.notification.isGranted == false) {
+      if (!await Permission.notification.isGranted) {
         print("Notification permission not granted.");
         return;
       }
     }
 
-    // Verifică permisiunea exactă pentru alarme
     final exactAlarmPermissionStatus = await Permission.notification.isGranted;
-    if (exactAlarmPermissionStatus) {
-      print("Exact alarm permission granted.");
-    } else {
+    if (!exactAlarmPermissionStatus) {
       print("Exact alarm permission not granted. Please enable it manually.");
       return;
     }
@@ -61,19 +57,10 @@ class NotificationService {
     const NotificationDetails platformChannelSpecifics =
         NotificationDetails(android: androidPlatformChannelSpecifics);
 
-    // Verificăm dacă `scheduledTime` este în UTC
-    print("Original scheduled time (UTC): $scheduledTime");
-
-    // Dacă `scheduledTime` este în UTC, îl convertește în fusul orar local
     final localScheduledTime = tz.TZDateTime.from(
-      scheduledTime.isUtc
-          ? scheduledTime
-          : scheduledTime.toUtc(), // Asigură-te că timpul este în UTC
+      scheduledTime.isUtc ? scheduledTime : scheduledTime.toUtc(),
       tz.local,
     );
-
-    // Verificăm rezultatul conversiei
-    print("Scheduled time converted to local time: $localScheduledTime");
 
     try {
       await _notificationsPlugin.zonedSchedule(
@@ -94,5 +81,14 @@ class NotificationService {
 
     print(
         "Notification details - ID: $id, Title: $title, Description: $description, ScheduledTime: $scheduledTime");
+  }
+
+  Future<List<PendingNotificationRequest>> getPendingNotifications() async {
+    try {
+      return await _notificationsPlugin.pendingNotificationRequests();
+    } catch (e) {
+      print("Error fetching pending notifications: $e");
+      return [];
+    }
   }
 }

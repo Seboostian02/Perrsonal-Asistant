@@ -31,8 +31,29 @@ class MainPageState extends State<MainPage> {
   @override
   void initState() {
     super.initState();
-    _fetchEvents();
+    _fetchAndScheduleNotifications();
     _getCurrentLocation();
+  }
+
+  Future<void> _fetchAndScheduleNotifications() async {
+    await _fetchEvents();
+    await _scheduleNotifications();
+  }
+
+  Future<void> _scheduleNotifications() async {
+    final events = Provider.of<EventProvider>(context, listen: false).events;
+    for (var event in events) {
+      if (event.start?.dateTime != null) {
+        final DateTime eventStartTime =
+            event.start!.dateTime!.subtract(const Duration(minutes: 30));
+        await notificationService.scheduleNotification(
+          id: event.id.hashCode,
+          title: event.summary ?? 'No title',
+          description: event.description ?? 'No description',
+          scheduledTime: eventStartTime,
+        );
+      }
+    }
   }
 
   Future<void> _getCurrentLocation() async {
@@ -79,7 +100,7 @@ class MainPageState extends State<MainPage> {
   }
 
   Future<void> _onRefresh() async {
-    await _fetchEvents();
+    await _fetchAndScheduleNotifications();
     if (_selectedIndex == 1) {
       await _setMarkersOnMap();
     }
