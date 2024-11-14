@@ -51,9 +51,6 @@ class _NotificationsPageState extends State<NotificationsPage> {
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       Text('ID: ${notification.id}'),
-                      SizedBox(height: 4),
-                      Text('timp progrmat ${notification.body}')
-                      // 'Timp programat: ${_formatDateTime(notification.scheduledTime)}'),
                     ],
                   ),
                 );

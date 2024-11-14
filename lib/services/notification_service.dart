@@ -18,7 +18,7 @@ class NotificationService {
         InitializationSettings(android: initializationSettingsAndroid);
 
     await _notificationsPlugin.initialize(initializationSettings);
-    tz.initializeTimeZones(); // Initialize time zones
+    tz.initializeTimeZones();
 
     print("Notification plugin initialized successfully.");
   }
@@ -29,6 +29,7 @@ class NotificationService {
     required String description,
     required DateTime scheduledTime,
   }) async {
+    print("notification time ----------- $scheduledTime");
     final permissionStatus = await Permission.notification.status;
     if (!permissionStatus.isGranted) {
       await Permission.notification.request();
@@ -81,6 +82,42 @@ class NotificationService {
 
     print(
         "Notification details - ID: $id, Title: $title, Description: $description, ScheduledTime: $scheduledTime");
+  }
+
+  Future<void> scheduleEventNotifications({
+    required int id,
+    required String title,
+    required String description,
+    required DateTime eventStartTime,
+  }) async {
+    final List<Map<String, dynamic>> notificationTimes = [
+      {
+        "time": eventStartTime.subtract(const Duration(hours: 24)),
+        "suffix": " - 24 hours before"
+      },
+      {
+        "time": eventStartTime.subtract(const Duration(hours: 1)),
+        "suffix": " - 1 hour before"
+      },
+      {
+        "time": eventStartTime.subtract(const Duration(minutes: 30)),
+        "suffix": " - 30 minutes before"
+      },
+      {"time": eventStartTime, "suffix": " - Event start time"},
+    ];
+
+    for (int i = 0; i < notificationTimes.length; i++) {
+      final notificationTime = notificationTimes[i]["time"] as DateTime;
+      final suffix = notificationTimes[i]["suffix"] as String;
+      final notificationTitle = "$title$suffix";
+
+      await scheduleNotification(
+        id: id + i,
+        title: notificationTitle,
+        description: description,
+        scheduledTime: notificationTime,
+      );
+    }
   }
 
   Future<List<PendingNotificationRequest>> getPendingNotifications() async {

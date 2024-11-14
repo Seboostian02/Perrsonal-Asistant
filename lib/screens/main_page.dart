@@ -5,6 +5,7 @@ import 'package:calendar/services/auth_service.dart';
 import 'package:calendar/services/event_provider.dart';
 import 'package:calendar/services/location_service.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../services/auth_provider.dart';
 import 'footer.dart';
@@ -45,36 +46,31 @@ class MainPageState extends State<MainPage> {
     final pendingNotifications =
         await notificationService.getPendingNotifications();
 
-    // Verificăm fiecare notificare programată
     for (var notification in pendingNotifications) {
-      // Generăm ID-ul modificat pentru evenimentul curent
-      int modifiedEventId = notification
-          .id; // Presupunem că notification.id este deja generat corect
-
-      // Verifică dacă notificarea nu mai există în evenimente
+      int modifiedEventId = notification.id;
       if (!events.any(
           (event) => event.id.hashCode.abs() % 10000000 == modifiedEventId)) {
-        // Dacă notificarea nu există în lista de evenimente, o ștergem
         await notificationService.cancelNotification(modifiedEventId);
         print("Notification for event with ID $modifiedEventId canceled.");
       }
     }
 
-    // Programăm notificările pentru evenimentele curente
     for (var event in events) {
       if (event.start?.dateTime != null) {
-        final DateTime eventStartTime =
-            event.start!.dateTime!.subtract(const Duration(minutes: 30));
+        final DateTime eventStartTime = event.start!.dateTime!.toLocal();
+        print("event start time ----- $eventStartTime");
 
-        // Generăm ID-ul notificării pentru eveniment folosind ID-ul modificat
         int notificationId = event.id.hashCode.abs() % 10000000;
 
-        // Programăm notificarea
-        await notificationService.scheduleNotification(
+        final String formattedStartTime =
+            DateFormat('HH:mm').format(eventStartTime);
+
+        await notificationService.scheduleEventNotifications(
           id: notificationId,
-          title: event.summary ?? 'No title',
+          title:
+              '${event.summary ?? 'No title'} - starting at $formattedStartTime',
           description: event.description ?? 'No description',
-          scheduledTime: eventStartTime,
+          eventStartTime: eventStartTime,
         );
       }
     }

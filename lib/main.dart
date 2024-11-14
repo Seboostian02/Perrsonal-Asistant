@@ -14,8 +14,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
   tz.initializeTimeZones();
-  tz.setLocalLocation(tz.getLocation(
-      'Europe/Bucharest')); // Setează fusul orar local (exemplu pentru București)
+  tz.setLocalLocation(tz.getLocation('Europe/Bucharest'));
   final hasPermission = await _checkLocationPermission();
   final hasNotificationPermission = await _checkNotificationPermission();
   final hasExactAlarmPermission = await _checkExactAlarmPermission();

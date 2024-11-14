@@ -76,23 +76,6 @@ class GoogleCalendarService {
 
       print("---------------");
       print("Event created successfully!");
-
-      // Calculate notification time
-      final DateTime notificationTime =
-          startDateTime.subtract(const Duration(minutes: 30));
-
-      final now = DateTime.now();
-      final scheduledTime = now.add(const Duration(seconds: 5));
-
-      // Schedule the notification
-      print("Scheduling notification with ID: ${createdEvent.id.hashCode}");
-      notificationService.scheduleNotification(
-        id: createdEvent.id.hashCode.abs() % 10000000,
-        title: title,
-        description: description,
-        scheduledTime: notificationTime,
-      );
-      print("Scheduled time for event notification: $notificationTime");
     } catch (e) {
       print("Error creating event: $e");
     }
