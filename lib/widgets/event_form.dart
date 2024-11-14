@@ -1,5 +1,5 @@
 import 'package:calendar/services/auth_service.dart';
-// import 'package:calendar/widgets/event_form_components/create_event_button.dart';
+import 'package:calendar/services/notification_service.dart';
 import 'package:calendar/widgets/event_form_components/date_selector.dart';
 import 'package:calendar/widgets/event_form_components/event_description_field.dart';
 import 'package:calendar/widgets/event_form_components/event_title_field.dart';
@@ -25,6 +25,8 @@ class EventForm extends StatefulWidget {
 class EventFormState extends State<EventForm> {
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
+  final NotificationService _notificationService = NotificationService();
+
   LatLng? _selectedLocation;
   bool _isOnlineMeeting = false;
   DateTime _selectedDate = DateTime.now().toUtc();
@@ -62,7 +64,7 @@ class EventFormState extends State<EventForm> {
     final selectedDate =
         DateTime(_selectedDate.year, _selectedDate.month, _selectedDate.day);
 
-    if (selectedDate == currentDate) {
+    if (_recurrenceType == RecurrenceType.none && selectedDate == currentDate) {
       final nowTime = TimeOfDay.fromDateTime(now);
       if (_startTime.hour < nowTime.hour ||
           (_startTime.hour == nowTime.hour &&
@@ -167,6 +169,7 @@ class EventFormState extends State<EventForm> {
     final TimeOfDay? picked = await showTimePicker(
       context: context,
       initialTime: isStartTime ? _startTime : _endTime,
+      initialEntryMode: TimePickerEntryMode.input,
     );
     if (picked != null) {
       setState(() {

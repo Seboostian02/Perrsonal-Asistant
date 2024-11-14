@@ -141,8 +141,9 @@ class EventCardState extends State<EventCard> {
   @override
   Widget build(BuildContext context) {
     final startDateTime =
-        DateTime.parse(widget.event.start!.dateTime!.toString());
-    final endDateTime = DateTime.parse(widget.event.end!.dateTime!.toString());
+        DateTime.parse(widget.event.start!.dateTime!.toString()).toLocal();
+    final endDateTime =
+        DateTime.parse(widget.event.end!.dateTime!.toString()).toLocal();
     final String startHour =
         "${startDateTime.hour}:${startDateTime.minute.toString().padLeft(2, '0')}";
     final String endHour =

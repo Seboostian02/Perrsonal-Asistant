@@ -5,6 +5,7 @@ import 'package:calendar/services/auth_service.dart';
 import 'package:calendar/services/event_provider.dart';
 import 'package:calendar/services/location_service.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../services/auth_provider.dart';
 import 'footer.dart';
@@ -31,8 +32,48 @@ class MainPageState extends State<MainPage> {
   @override
   void initState() {
     super.initState();
-    _fetchEvents();
+    _fetchAndScheduleNotifications();
     _getCurrentLocation();
+  }
+
+  Future<void> _fetchAndScheduleNotifications() async {
+    await _fetchEvents();
+    await _scheduleNotifications();
+  }
+
+  Future<void> _scheduleNotifications() async {
+    final events = Provider.of<EventProvider>(context, listen: false).events;
+    final pendingNotifications =
+        await notificationService.getPendingNotifications();
+
+    for (var notification in pendingNotifications) {
+      int modifiedEventId = notification.id;
+      if (!events.any(
+          (event) => event.id.hashCode.abs() % 10000000 == modifiedEventId)) {
+        await notificationService.cancelNotification(modifiedEventId);
+        print("Notification for event with ID $modifiedEventId canceled.");
+      }
+    }
+
+    for (var event in events) {
+      if (event.start?.dateTime != null) {
+        final DateTime eventStartTime = event.start!.dateTime!.toLocal();
+        print("event start time ----- $eventStartTime");
+
+        int notificationId = event.id.hashCode.abs() % 10000000;
+
+        final String formattedStartTime =
+            DateFormat('HH:mm').format(eventStartTime);
+
+        await notificationService.scheduleEventNotifications(
+          id: notificationId,
+          title:
+              '${event.summary ?? 'No title'} - starting at $formattedStartTime',
+          description: event.description ?? 'No description',
+          eventStartTime: eventStartTime,
+        );
+      }
+    }
   }
 
   Future<void> _getCurrentLocation() async {
@@ -79,7 +120,7 @@ class MainPageState extends State<MainPage> {
   }
 
   Future<void> _onRefresh() async {
-    await _fetchEvents();
+    await _fetchAndScheduleNotifications();
     if (_selectedIndex == 1) {
       await _setMarkersOnMap();
     }
@@ -171,6 +212,7 @@ class MainPageState extends State<MainPage> {
               : const Center(child: CircularProgressIndicator()),
           NotFoundPage(
             onBackToHome: () => _onItemTapped(0),
+            notificationService: notificationService,
           ),
           SettingsList(authProvider: authProvider),
         ],
