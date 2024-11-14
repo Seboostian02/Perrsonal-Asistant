@@ -1,3 +1,4 @@
+import 'package:calendar/utils/colors.dart';
 import 'package:flutter/material.dart';
 
 class DateSelector extends StatelessWidget {
@@ -41,8 +42,8 @@ class DateSelector extends StatelessWidget {
                   ElevatedButton(
                     onPressed: () => onDateSelected(context),
                     style: ElevatedButton.styleFrom(
-                      foregroundColor: Colors.white,
-                      backgroundColor: Colors.deepPurple,
+                      foregroundColor: AppColors.textColor,
+                      backgroundColor: AppColors.primaryColor,
                       padding: const EdgeInsets.symmetric(
                           horizontal: 20, vertical: 12),
                       shape: RoundedRectangleBorder(

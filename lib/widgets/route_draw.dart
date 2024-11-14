@@ -1,4 +1,5 @@
 import 'package:calendar/env/env.dart';
+import 'package:calendar/utils/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
@@ -127,7 +128,7 @@ class _RouteDrawerState extends State<RouteDrawer> {
                   point: widget.currentLocation,
                   builder: (context) => const Icon(
                     Icons.my_location,
-                    color: Colors.blue,
+                    color: AppColors.primaryColor,
                     size: 40.0,
                   ),
                 ),
@@ -135,7 +136,7 @@ class _RouteDrawerState extends State<RouteDrawer> {
                   point: widget.destination,
                   builder: (context) => const Icon(
                     Icons.location_on,
-                    color: Colors.red,
+                    color: AppColors.locationMarkerColor,
                     size: 40.0,
                   ),
                 ),

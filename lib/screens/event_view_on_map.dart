@@ -1,3 +1,4 @@
+import 'package:calendar/utils/colors.dart';
 import 'package:calendar/widgets/route_draw.dart';
 
 import 'package:calendar/widgets/event_card.dart';
@@ -113,7 +114,7 @@ class EventViewState extends State<EventView> {
                   },
                   child: const Icon(
                     Icons.location_on,
-                    color: Colors.red,
+                    color: AppColors.locationMarkerColor,
                     size: 40.0,
                   ),
                 ),
