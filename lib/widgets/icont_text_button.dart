@@ -1,3 +1,4 @@
+import 'package:calendar/utils/colors.dart';
 import 'package:flutter/material.dart';
 
 class IconTextButton extends StatelessWidget {
@@ -14,8 +15,8 @@ class IconTextButton extends StatelessWidget {
     this.isPressed = false,
   });
 
-  static Color isPressedColor = Colors.yellow;
-  static Color isNotPressedColor = Colors.white;
+  static Color isPressedColor = AppColors.iconPressedColor;
+  static Color isNotPressedColor = AppColors.iconColor;
   static FontWeight isPressedText = FontWeight.w900;
   static FontWeight isNotPressedText = FontWeight.normal;
 

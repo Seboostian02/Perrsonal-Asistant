@@ -1,4 +1,5 @@
 import 'package:calendar/screens/notifications_page.dart';
+import 'package:calendar/screens/profile_page.dart';
 import 'package:flutter/material.dart';
 import '../services/auth_provider.dart';
 
@@ -20,7 +21,12 @@ class SettingsList extends StatelessWidget {
             leading: const Icon(Icons.account_circle),
             title: const Text('Profile'),
             onTap: () {
-              print("profile -----------");
+              showDialog(
+                context: context,
+                builder: (context) => Dialog.fullscreen(
+                  child: const ProfilePage(),
+                ),
+              );
             },
           ),
           const Divider(),
