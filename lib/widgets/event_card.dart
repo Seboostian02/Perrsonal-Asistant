@@ -2,6 +2,7 @@ import 'package:calendar/screens/event_view_on_map.dart';
 import 'package:calendar/services/auth_provider.dart';
 import 'package:calendar/services/auth_service.dart';
 import 'package:calendar/services/google_calendar_service.dart';
+import 'package:calendar/utils/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:googleapis/calendar/v3.dart' as calendar;
@@ -12,7 +13,7 @@ class EventCard extends StatefulWidget {
   final bool showLocation;
   final bool expandMode;
   final VoidCallback? onDelete;
-  static const Color cardColor = Color(0xFFE1BEE7);
+  static const Color cardColor = AppColors.primaryLightColor;
 
   const EventCard({
     Key? key,

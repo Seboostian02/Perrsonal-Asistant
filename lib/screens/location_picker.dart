@@ -1,3 +1,4 @@
+import 'package:calendar/utils/colors.dart';
 import 'package:calendar/widgets/location_search_bar.dart';
 import 'package:calendar/widgets/zoom_controls.dart';
 import 'package:flutter/material.dart';
@@ -76,10 +77,10 @@ class _LocationPickerPageState extends State<LocationPickerPage> {
       appBar: AppBar(
         title: const Text(
           'Pick a Location',
-          style: TextStyle(color: Colors.white),
+          style: TextStyle(color: AppColors.textColor),
         ),
-        backgroundColor: Colors.deepPurple,
-        iconTheme: const IconThemeData(color: Colors.white),
+        backgroundColor: AppColors.primaryColor,
+        iconTheme: const IconThemeData(color: AppColors.iconColor),
       ),
       body: Stack(
         children: [
@@ -103,8 +104,8 @@ class _LocationPickerPageState extends State<LocationPickerPage> {
                           width: 80.0,
                           height: 80.0,
                           point: _selectedLocation!,
-                          builder: (ctx) =>
-                              const Icon(Icons.location_pin, color: Colors.red),
+                          builder: (ctx) => const Icon(Icons.location_pin,
+                              color: AppColors.locationMarkerColor),
                         ),
                       ]
                     : [],
@@ -141,12 +142,15 @@ class _LocationPickerPageState extends State<LocationPickerPage> {
                   },
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 12),
-                    backgroundColor: Colors.white,
+                    backgroundColor: AppColors.primaryColor,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20),
                     ),
                   ),
-                  child: const Text("Choose this location"),
+                  child: Text(
+                    "Choose this location",
+                    style: TextStyle(color: AppColors.textColor),
+                  ),
                 ),
               ),
             ),

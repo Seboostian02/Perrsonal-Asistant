@@ -1,3 +1,4 @@
+import 'package:calendar/utils/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:googleapis/calendar/v3.dart' as calendar;
 import 'package:table_calendar/table_calendar.dart';
@@ -78,19 +79,19 @@ class _EventCalendarState extends State<EventCalendar> {
                     ),
                     calendarStyle: const CalendarStyle(
                       todayDecoration: BoxDecoration(
-                        color: Colors.deepPurple,
+                        color: AppColors.primaryColor,
                         shape: BoxShape.circle,
                       ),
                       selectedDecoration: BoxDecoration(
-                        color: Colors.blue,
+                        color: AppColors.primaryLightColor,
                         shape: BoxShape.circle,
                       ),
                       holidayDecoration: BoxDecoration(
-                        color: Color(0xFFE1BEE7),
+                        color: AppColors.secondaryLightColor,
                         shape: BoxShape.circle,
                       ),
                       holidayTextStyle: TextStyle(
-                        color: Colors.black,
+                        color: Colors.white,
                         fontWeight: FontWeight.bold,
                       ),
                       cellMargin: EdgeInsets.all(4.0),

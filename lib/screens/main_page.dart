@@ -4,6 +4,7 @@ import 'package:calendar/screens/weather_view.dart';
 import 'package:calendar/services/auth_service.dart';
 import 'package:calendar/services/event_provider.dart';
 import 'package:calendar/services/location_service.dart';
+import 'package:calendar/utils/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -173,10 +174,10 @@ class MainPageState extends State<MainPage> {
           authProvider.isLoggedIn
               ? "Hello, ${authProvider.currentUser?.displayName ?? 'User'}"
               : "Main App",
-          style: TextStyle(color: Colors.white),
+          style: TextStyle(color: AppColors.textColor),
         ),
-        backgroundColor: Colors.deepPurple,
-        foregroundColor: Colors.white,
+        backgroundColor: AppColors.primaryColor,
+        foregroundColor: AppColors.iconColor,
         actions: [
           IconButton(
             icon: const Icon(Icons.settings),
@@ -225,11 +226,11 @@ class MainPageState extends State<MainPage> {
         padding: const EdgeInsets.only(bottom: 30.0),
         child: FloatingActionButton(
           onPressed: () => _showEventForm(context),
-          backgroundColor: Colors.deepPurple.shade600,
+          backgroundColor: AppColors.secondaryColor,
           shape: const CircleBorder(),
           child: const Icon(
             Icons.add,
-            color: Colors.white,
+            color: AppColors.iconColor,
           ),
         ),
       ),
