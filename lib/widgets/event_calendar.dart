@@ -64,13 +64,14 @@ class _EventCalendarState extends State<EventCalendar> {
                     firstDay: DateTime.utc(2020, 1, 1),
                     lastDay: DateTime.utc(2030, 12, 31),
                     focusedDay: _selectedDay,
+                    headerStyle: HeaderStyle(
+                        formatButtonVisible: false, titleCentered: true),
                     selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
                     onDaySelected: (selectedDay, focusedDay) {
                       setState(() {
                         _selectedDay = selectedDay.toLocal();
                       });
                     },
-                    calendarFormat: CalendarFormat.month,
                     eventLoader: (day) => _eventMap[day] ?? [],
                     holidayPredicate: (day) => _eventMap.containsKey(
                       DateTime(day.year, day.month, day.day),
@@ -142,18 +143,20 @@ class _EventCalendarState extends State<EventCalendar> {
                             ),
                           ),
                           const SizedBox(height: 10),
-                          ListView.builder(
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            itemCount: eventsForSelectedDay.length,
-                            itemBuilder: (context, index) {
-                              final event = eventsForSelectedDay[index];
-                              return EventCard(
-                                event: event,
-                                showLocation: true,
-                                onDelete: widget.onRefresh,
-                              );
-                            },
+                          Flexible(
+                            child: ListView.builder(
+                              shrinkWrap: true,
+                              physics: const BouncingScrollPhysics(),
+                              itemCount: eventsForSelectedDay.length,
+                              itemBuilder: (context, index) {
+                                final event = eventsForSelectedDay[index];
+                                return EventCard(
+                                  event: event,
+                                  showLocation: true,
+                                  onDelete: widget.onRefresh,
+                                );
+                              },
+                            ),
                           ),
                         ] else
                           const Center(
