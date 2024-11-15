@@ -218,12 +218,12 @@ class _RouteDrawerState extends State<RouteDrawer> {
                 width: 56,
                 height: 56,
                 decoration: const BoxDecoration(
-                  color: Colors.deepPurple,
+                  color: AppColors.primaryColor,
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(
                   Icons.arrow_back,
-                  color: Colors.white,
+                  color: AppColors.iconColor,
                   size: 30,
                 ),
               ),

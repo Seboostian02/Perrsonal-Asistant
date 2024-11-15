@@ -102,30 +102,41 @@ class EventViewState extends State<EventView> {
 
   Future<void> _getCurrentLocation() async {
     try {
+      // Obține locația curentă
       Position position = await LocationService().getCurrentLocation();
-      setState(() {
-        _currentLocationLatLng = LatLng(position.latitude, position.longitude);
 
-        _markers
-            .removeWhere((marker) => marker.point == _currentLocationLatLng);
-        _markers.add(
-          Marker(
-            point: _currentLocationLatLng!,
-            builder: (context) => const Icon(
-              Icons.my_location,
-              color: Colors.blue,
-              size: 40.0,
+      if (position != null) {
+        setState(() {
+          // Setează coordonatele locației curente
+          _currentLocationLatLng =
+              LatLng(position.latitude, position.longitude);
+
+          // Actualizează markerul pentru locația curentă
+          _markers
+              .removeWhere((marker) => marker.point == _currentLocationLatLng);
+          _markers.add(
+            Marker(
+              point: _currentLocationLatLng!,
+              builder: (context) => const Icon(
+                Icons.my_location,
+                color: Colors.blue,
+                size: 40.0,
+              ),
+              anchorPos: AnchorPos.align(AnchorAlign.top),
             ),
-            anchorPos: AnchorPos.align(AnchorAlign.top),
-          ),
-        );
+          );
 
-        if (widget.events.length > 1) {
-          _mapController.move(_currentLocationLatLng!, 15.0);
-        }
-      });
+          // Mișcă harta la locația curentă dacă sunt mai multe evenimente
+          if (widget.events.length > 1) {
+            _mapController.move(_currentLocationLatLng!, 15.0);
+          } else {
+            // Mișcă harta doar către locația curentă dacă sunt doar evenimente unice
+            _mapController.move(_currentLocationLatLng!, 15.0);
+          }
+        });
+      }
     } catch (e) {
-      print(e);
+      print("Error fetching location: $e");
     }
   }
 
@@ -224,8 +235,8 @@ class EventViewState extends State<EventView> {
             right: 20,
             child: FloatingActionButton(
               onPressed: _getCurrentLocation,
-              backgroundColor: Colors.deepPurple,
-              foregroundColor: Colors.white,
+              backgroundColor: AppColors.primaryColor,
+              foregroundColor: AppColors.iconColor,
               child: const Icon(Icons.my_location),
             ),
           ),
@@ -244,12 +255,12 @@ class EventViewState extends State<EventView> {
                   width: 56,
                   height: 56,
                   decoration: const BoxDecoration(
-                    color: Colors.deepPurple,
+                    color: AppColors.primaryColor,
                     shape: BoxShape.circle,
                   ),
                   child: const Icon(
                     Icons.arrow_back,
-                    color: Colors.white,
+                    color: AppColors.iconColor,
                     size: 30,
                   ),
                 ),
