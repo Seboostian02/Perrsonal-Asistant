@@ -51,8 +51,8 @@ class MainPageState extends State<MainPage> {
       int modifiedEventId = notification.id;
       if (!events.any(
           (event) => event.id.hashCode.abs() % 10000000 == modifiedEventId)) {
-        await notificationService.cancelNotification(modifiedEventId);
-        print("Notification for event with ID $modifiedEventId canceled.");
+        // await notificationService.cancelNotification(modifiedEventId);
+        // print("Notification for event with ID $modifiedEventId canceled.");
       }
     }
 
@@ -149,13 +149,13 @@ class MainPageState extends State<MainPage> {
   }
 
   void _onItemTapped(int index) async {
-    await _onRefresh();
+    if (index == 1) {
+      // Rulează doar pentru EventView
+      await _onRefresh();
+    }
     setState(() {
       _selectedIndex = index;
     });
-    if (index == 1) {
-      await _setMarkersOnMap();
-    }
   }
 
   Future<void> _refreshEvents() async {
@@ -166,7 +166,8 @@ class MainPageState extends State<MainPage> {
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context);
     final eventProvider = Provider.of<EventProvider>(context);
-
+    print("events in main ------------");
+    print(eventProvider.events);
     return Scaffold(
       extendBody: true,
       appBar: AppBar(
@@ -198,7 +199,7 @@ class MainPageState extends State<MainPage> {
               onRefresh: _refreshEvents,
             ),
           ),
-          eventProvider.events != null
+          eventProvider.events.isNotEmpty
               ? EventView(
                   key: _eventViewKey,
                   events: eventProvider.events,

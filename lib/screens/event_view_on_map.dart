@@ -216,33 +216,42 @@ class EventViewState extends State<EventView> {
             destination: _selectedEventLatLng!,
           ),
         if (_selectedEvent != null && widget.events.length > 1)
-          Positioned(
-            left: (MediaQuery.of(context).size.width - 300) / 2,
-            top: (MediaQuery.of(context).size.height - 200) / 2,
-            child: Stack(
-              children: [
-                EventCard(
-                  event: _selectedEvent != null
-                      ? EventService().createNonNullEvent(_selectedEvent)
-                      : EventService().createNonNullEvent(null),
+          Stack(
+            alignment: Alignment.center,
+            children: [
+              Container(
+                width: MediaQuery.of(context).size.width * 0.8,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16.0),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.2),
+                      blurRadius: 8,
+                      offset: Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: EventCard(
+                  event: EventService().createNonNullEvent(_selectedEvent),
                   showLocation: false,
                   expandMode: true,
                 ),
-                Positioned(
-                  top: 0,
-                  right: 0,
-                  child: IconButton(
-                    icon: const Icon(Icons.close),
-                    onPressed: () {
-                      setState(() {
-                        _selectedEvent = null;
-                        _selectedEventLatLng = null;
-                      });
-                    },
-                  ),
+              ),
+              Positioned(
+                top: 0,
+                right: 0,
+                child: IconButton(
+                  icon: const Icon(Icons.close),
+                  onPressed: () {
+                    setState(() {
+                      _selectedEvent = null;
+                      _selectedEventLatLng = null;
+                    });
+                  },
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
       ],
     );
