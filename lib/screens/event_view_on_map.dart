@@ -49,6 +49,57 @@ class EventViewState extends State<EventView> {
     _setMarkers();
   }
 
+  void _showEventCardDialog(BuildContext context, calendar.Event event) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (BuildContext context) {
+        return FractionallySizedBox(
+          heightFactor: 0.5, // Jumătate din înălțimea ecranului
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(20),
+                topRight: Radius.circular(20),
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.2),
+                  spreadRadius: 2,
+                  blurRadius: 10,
+                ),
+              ],
+            ),
+            child: Stack(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: EventCard(
+                    event: event,
+                    showLocation: false,
+                    expandMode: true,
+                  ),
+                ),
+                Positioned(
+                  top: 30,
+                  right: 10,
+                  child: IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   Future<void> _getCurrentLocation() async {
     try {
       Position position = await LocationService().getCurrentLocation();
@@ -94,7 +145,6 @@ class EventViewState extends State<EventView> {
         anchorPos: AnchorPos.align(AnchorAlign.top),
       ),
     );
-
     for (var event in widget.events) {
       if (event.location != null && event.location!.isNotEmpty) {
         try {
@@ -107,10 +157,8 @@ class EventViewState extends State<EventView> {
                 point: latLng,
                 builder: (context) => GestureDetector(
                   onTap: () {
-                    setState(() {
-                      _selectedEvent = event;
-                      _selectedEventLatLng = latLng;
-                    });
+                    // Apel direct la _showEventCardDialog
+                    _showEventCardDialog(context, event);
                   },
                   child: const Icon(
                     Icons.location_on,
@@ -215,44 +263,44 @@ class EventViewState extends State<EventView> {
             currentLocation: _currentLocationLatLng!,
             destination: _selectedEventLatLng!,
           ),
-        if (_selectedEvent != null && widget.events.length > 1)
-          Stack(
-            alignment: Alignment.center,
-            children: [
-              Container(
-                width: MediaQuery.of(context).size.width * 0.8,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16.0),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.2),
-                      blurRadius: 8,
-                      offset: Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: EventCard(
-                  event: EventService().createNonNullEvent(_selectedEvent),
-                  showLocation: false,
-                  expandMode: true,
-                ),
-              ),
-              Positioned(
-                top: 0,
-                right: 0,
-                child: IconButton(
-                  icon: const Icon(Icons.close),
-                  onPressed: () {
-                    setState(() {
-                      _selectedEvent = null;
-                      _selectedEventLatLng = null;
-                    });
-                  },
-                ),
-              ),
-            ],
-          ),
+        // if (_selectedEvent != null && widget.events.length > 1)
+        //   Stack(
+        //     alignment: Alignment.center,
+        //     children: [
+        //       Container(
+        //         width: MediaQuery.of(context).size.width * 0.8,
+        //         decoration: BoxDecoration(
+        //           color: Colors.white,
+        //           borderRadius: BorderRadius.circular(16.0),
+        //           boxShadow: [
+        //             BoxShadow(
+        //               color: Colors.black.withOpacity(0.2),
+        //               blurRadius: 8,
+        //               offset: Offset(0, 4),
+        //             ),
+        //           ],
+        //         ),
+        //         child: EventCard(
+        //           event: EventService().createNonNullEvent(_selectedEvent),
+        //           showLocation: false,
+        //           expandMode: true,
+        //         ),
+        //       ),
+        //       Positioned(
+        //         top: 0,
+        //         right: 0,
+        //         child: IconButton(
+        //           icon: const Icon(Icons.close),
+        //           onPressed: () {
+        //             setState(() {
+        //               _selectedEvent = null;
+        //               _selectedEventLatLng = null;
+        //             });
+        //           },
+        //         ),
+        //       ),
+        //     ],
+        //   ),
       ],
     );
   }
