@@ -1,3 +1,4 @@
+import 'package:calendar/utils/colors.dart';
 import 'package:flutter/material.dart';
 
 class TimeSelector extends StatelessWidget {
@@ -36,7 +37,8 @@ class TimeSelector extends StatelessWidget {
                 children: [
                   const Text(
                     'Start Time',
-                    style: TextStyle(fontSize: 14, color: Colors.deepPurple),
+                    style: TextStyle(
+                        fontSize: 14, color: AppColors.secondaryColor),
                   ),
                   const SizedBox(height: 8),
                   Text(
@@ -67,7 +69,8 @@ class TimeSelector extends StatelessWidget {
                 children: [
                   const Text(
                     'End Time',
-                    style: TextStyle(fontSize: 14, color: Colors.deepPurple),
+                    style: TextStyle(
+                        fontSize: 14, color: AppColors.secondaryColor),
                   ),
                   const SizedBox(height: 8),
                   Text(

@@ -1,3 +1,4 @@
+import 'package:calendar/utils/colors.dart';
 import 'package:calendar/widgets/route_draw.dart';
 
 import 'package:calendar/widgets/event_card.dart';
@@ -48,32 +49,94 @@ class EventViewState extends State<EventView> {
     _setMarkers();
   }
 
-  Future<void> _getCurrentLocation() async {
-    try {
-      Position position = await LocationService().getCurrentLocation();
-      setState(() {
-        _currentLocationLatLng = LatLng(position.latitude, position.longitude);
-
-        _markers
-            .removeWhere((marker) => marker.point == _currentLocationLatLng);
-        _markers.add(
-          Marker(
-            point: _currentLocationLatLng!,
-            builder: (context) => const Icon(
-              Icons.my_location,
-              color: Colors.blue,
-              size: 40.0,
+  void _showEventCardDialog(BuildContext context, calendar.Event event) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (BuildContext context) {
+        return FractionallySizedBox(
+          heightFactor: 0.5, // Jumătate din înălțimea ecranului
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(20),
+                topRight: Radius.circular(20),
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.2),
+                  spreadRadius: 2,
+                  blurRadius: 10,
+                ),
+              ],
             ),
-            anchorPos: AnchorPos.align(AnchorAlign.top),
+            child: Stack(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: EventCard(
+                    event: event,
+                    showLocation: false,
+                    expandMode: true,
+                  ),
+                ),
+                Positioned(
+                  top: 30,
+                  right: 10,
+                  child: IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                ),
+              ],
+            ),
           ),
         );
+      },
+    );
+  }
 
-        if (widget.events.length > 1) {
-          _mapController.move(_currentLocationLatLng!, 15.0);
-        }
-      });
+  Future<void> _getCurrentLocation() async {
+    try {
+      // Obține locația curentă
+      Position position = await LocationService().getCurrentLocation();
+
+      if (position != null) {
+        setState(() {
+          // Setează coordonatele locației curente
+          _currentLocationLatLng =
+              LatLng(position.latitude, position.longitude);
+
+          // Actualizează markerul pentru locația curentă
+          _markers
+              .removeWhere((marker) => marker.point == _currentLocationLatLng);
+          _markers.add(
+            Marker(
+              point: _currentLocationLatLng!,
+              builder: (context) => const Icon(
+                Icons.my_location,
+                color: Colors.blue,
+                size: 40.0,
+              ),
+              anchorPos: AnchorPos.align(AnchorAlign.top),
+            ),
+          );
+
+          // Mișcă harta la locația curentă dacă sunt mai multe evenimente
+          if (widget.events.length > 1) {
+            _mapController.move(_currentLocationLatLng!, 15.0);
+          } else {
+            // Mișcă harta doar către locația curentă dacă sunt doar evenimente unice
+            _mapController.move(_currentLocationLatLng!, 15.0);
+          }
+        });
+      }
     } catch (e) {
-      print(e);
+      print("Error fetching location: $e");
     }
   }
 
@@ -93,7 +156,6 @@ class EventViewState extends State<EventView> {
         anchorPos: AnchorPos.align(AnchorAlign.top),
       ),
     );
-
     for (var event in widget.events) {
       if (event.location != null && event.location!.isNotEmpty) {
         try {
@@ -106,14 +168,12 @@ class EventViewState extends State<EventView> {
                 point: latLng,
                 builder: (context) => GestureDetector(
                   onTap: () {
-                    setState(() {
-                      _selectedEvent = event;
-                      _selectedEventLatLng = latLng;
-                    });
+                    // Apel direct la _showEventCardDialog
+                    _showEventCardDialog(context, event);
                   },
                   child: const Icon(
                     Icons.location_on,
-                    color: Colors.red,
+                    color: AppColors.locationMarkerColor,
                     size: 40.0,
                   ),
                 ),
@@ -175,8 +235,8 @@ class EventViewState extends State<EventView> {
             right: 20,
             child: FloatingActionButton(
               onPressed: _getCurrentLocation,
-              backgroundColor: Colors.deepPurple,
-              foregroundColor: Colors.white,
+              backgroundColor: AppColors.primaryColor,
+              foregroundColor: AppColors.iconColor,
               child: const Icon(Icons.my_location),
             ),
           ),
@@ -195,12 +255,12 @@ class EventViewState extends State<EventView> {
                   width: 56,
                   height: 56,
                   decoration: const BoxDecoration(
-                    color: Colors.deepPurple,
+                    color: AppColors.primaryColor,
                     shape: BoxShape.circle,
                   ),
                   child: const Icon(
                     Icons.arrow_back,
-                    color: Colors.white,
+                    color: AppColors.iconColor,
                     size: 30,
                   ),
                 ),
@@ -213,35 +273,6 @@ class EventViewState extends State<EventView> {
           RouteDrawer(
             currentLocation: _currentLocationLatLng!,
             destination: _selectedEventLatLng!,
-          ),
-        if (_selectedEvent != null && widget.events.length > 1)
-          Positioned(
-            left: (MediaQuery.of(context).size.width - 300) / 2,
-            top: (MediaQuery.of(context).size.height - 200) / 2,
-            child: Stack(
-              children: [
-                EventCard(
-                  event: _selectedEvent != null
-                      ? EventService().createNonNullEvent(_selectedEvent)
-                      : EventService().createNonNullEvent(null),
-                  showLocation: false,
-                  expandMode: true,
-                ),
-                Positioned(
-                  top: 0,
-                  right: 0,
-                  child: IconButton(
-                    icon: const Icon(Icons.close),
-                    onPressed: () {
-                      setState(() {
-                        _selectedEvent = null;
-                        _selectedEventLatLng = null;
-                      });
-                    },
-                  ),
-                ),
-              ],
-            ),
           ),
       ],
     );

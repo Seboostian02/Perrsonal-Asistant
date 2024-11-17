@@ -1,5 +1,6 @@
 import 'package:calendar/services/auth_service.dart';
 import 'package:calendar/services/notification_service.dart';
+import 'package:calendar/utils/colors.dart';
 import 'package:calendar/widgets/event_form_components/date_selector.dart';
 import 'package:calendar/widgets/event_form_components/event_description_field.dart';
 import 'package:calendar/widgets/event_form_components/event_title_field.dart';
@@ -207,7 +208,7 @@ class EventFormState extends State<EventForm> {
             const Text(
               'New Event',
               style: TextStyle(
-                color: Colors.white,
+                color: AppColors.textColor,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -217,12 +218,12 @@ class EventFormState extends State<EventForm> {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0),
+                  color: AppColors.iconColor.withOpacity(0),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: const Icon(
                   Icons.check,
-                  color: Colors.white,
+                  color: AppColors.iconColor,
                 ),
               ),
             ),
@@ -236,8 +237,8 @@ class EventFormState extends State<EventForm> {
             bottomLeft: Radius.circular(25),
           ),
         ),
-        backgroundColor: Colors.deepPurple,
-        iconTheme: const IconThemeData(color: Colors.white),
+        backgroundColor: AppColors.primaryColor,
+        iconTheme: const IconThemeData(color: AppColors.iconColor),
       ),
       body: Center(
         child: Padding(

@@ -226,7 +226,7 @@ class EventCardState extends State<EventCard> {
                             style: TextStyle(
                               fontSize: 16,
                               color: widget.showLocation
-                                  ? Colors.blue
+                                  ? AppColors.linkColor
                                   : Colors.grey,
                               decoration: widget.showLocation
                                   ? TextDecoration.underline
@@ -238,7 +238,7 @@ class EventCardState extends State<EventCard> {
                                 style: TextStyle(
                                   fontSize: 16,
                                   color: widget.showLocation
-                                      ? Colors.blue
+                                      ? AppColors.linkColor
                                       : Colors.grey,
                                   decoration: widget.showLocation
                                       ? TextDecoration.underline
@@ -274,12 +274,12 @@ class EventCardState extends State<EventCard> {
                         if (!widget.expandMode)
                           Container(
                             decoration: const BoxDecoration(
-                              color: Colors.deepPurple,
+                              color: AppColors.primaryColor,
                               shape: BoxShape.circle,
                             ),
                             child: IconButton(
-                              icon:
-                                  const Icon(Icons.delete, color: Colors.white),
+                              icon: const Icon(Icons.delete,
+                                  color: AppColors.iconColor),
                               onPressed: () => _deleteEvent(context),
                             ),
                           )
