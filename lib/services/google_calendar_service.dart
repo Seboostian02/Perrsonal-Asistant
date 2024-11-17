@@ -20,6 +20,7 @@ class GoogleCalendarService {
     required String location_name,
     DateTime? recurrenceEndDate,
     required RecurrenceType recurrenceType,
+    required String priority,
   }) async {
     try {
       final client = await getAuthenticatedClient(accessToken);
@@ -30,6 +31,8 @@ class GoogleCalendarService {
       event.description = description;
       event.location = location;
 
+      event.extendedProperties =
+          calendar.EventExtendedProperties(private: {'priority': priority});
       var startDateTime = DateTime(
         date.year,
         date.month,

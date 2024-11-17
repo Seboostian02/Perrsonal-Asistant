@@ -5,6 +5,8 @@ import 'package:calendar/widgets/event_form_components/date_selector.dart';
 import 'package:calendar/widgets/event_form_components/event_description_field.dart';
 import 'package:calendar/widgets/event_form_components/event_title_field.dart';
 import 'package:calendar/widgets/event_form_components/location_selector.dart';
+import 'package:calendar/widgets/event_form_components/priority_selector.dart';
+import 'package:calendar/widgets/event_form_components/reccurence_selector.dart';
 import 'package:calendar/widgets/event_form_components/time_selector.dart';
 import 'package:calendar/widgets/event_form_components/user_greeting.dart';
 import 'package:flutter/material.dart';
@@ -12,9 +14,12 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:calendar/services/google_calendar_service.dart';
+import '../models/recurrence_type.dart';
 import '../services/auth_provider.dart';
 
 enum RecurrenceType { none, daily, weekly, monthly }
+
+// enum EventPriority { low, medium, high }
 
 class EventForm extends StatefulWidget {
   const EventForm({super.key});
@@ -26,7 +31,7 @@ class EventForm extends StatefulWidget {
 class EventFormState extends State<EventForm> {
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
-  final NotificationService _notificationService = NotificationService();
+  String selectedPriority = 'Low';
 
   LatLng? _selectedLocation;
   bool _isOnlineMeeting = false;
@@ -60,13 +65,21 @@ class EventFormState extends State<EventForm> {
   }
 
   Future<void> _createEvent() async {
-    final now = DateTime.now().toUtc();
+    final now = DateTime.now();
     final currentDate = DateTime(now.year, now.month, now.day);
     final selectedDate =
         DateTime(_selectedDate.year, _selectedDate.month, _selectedDate.day);
-
+    if (_recurrenceType != RecurrenceType.none && _recurrenceEndDate == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please select a recurrence end date'),
+        ),
+      );
+      return;
+    }
     if (_recurrenceType == RecurrenceType.none && selectedDate == currentDate) {
       final nowTime = TimeOfDay.fromDateTime(now);
+
       if (_startTime.hour < nowTime.hour ||
           (_startTime.hour == nowTime.hour &&
               _startTime.minute <= nowTime.minute)) {
@@ -100,6 +113,7 @@ class EventFormState extends State<EventForm> {
         accessToken: accessToken,
         title: _titleController.text,
         description: _descriptionController.text,
+        priority: selectedPriority,
         location: _isOnlineMeeting
             ? 'Event is online'
             : _selectedLocation != null
@@ -247,32 +261,58 @@ class EventFormState extends State<EventForm> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const UserGreeting(),
+                // const UserGreeting(),
                 EventTitleField(controller: _titleController),
                 EventDescriptionField(controller: _descriptionController),
                 DateSelector(
                   selectedDate: _selectedDate,
                   onDateSelected: _selectDate,
                 ),
-                const SizedBox(height: 20),
                 TimeSelector(
                   startTime: _startTime,
                   endTime: _endTime,
                   onTimeSelected: _selectTime,
                 ),
                 const SizedBox(height: 20),
-                CheckboxListTile(
-                  title: const Text('Online meeting?'),
-                  value: _isOnlineMeeting,
-                  onChanged: (bool? value) {
-                    setState(() {
-                      _isOnlineMeeting = value ?? false;
-                      if (_isOnlineMeeting) {
-                        _selectedLocation = null;
-                      }
-                    });
-                  },
+                // Wrap PrioritySelector and Online Meeting in a Row
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    // PrioritySelector cu lățime mai mică
+                    Container(
+                      width: 130, // Ajustează această valoare după necesități
+                      child: PrioritySelector(
+                        selectedPriority: selectedPriority,
+                        onPriorityChanged: (String? newPriority) {
+                          if (newPriority != null) {
+                            setState(() {
+                              selectedPriority = newPriority;
+                            });
+                          }
+                        },
+                      ),
+                    ),
+
+                    // CheckboxListTile cu lățime mai mare
+                    Container(
+                      width: 200, // Ajustează această valoare după necesități
+                      child: CheckboxListTile(
+                        title: const Text('Online meeting?'),
+                        value: _isOnlineMeeting,
+                        onChanged: (bool? value) {
+                          setState(() {
+                            _isOnlineMeeting = value ?? false;
+                            if (_isOnlineMeeting) {
+                              _selectedLocation = null;
+                            }
+                          });
+                        },
+                      ),
+                    ),
+                  ],
                 ),
+
+                const SizedBox(height: 20),
                 if (!_isOnlineMeeting)
                   CheckboxListTile(
                     title: const Text('Add a location for this event?'),
@@ -297,34 +337,23 @@ class EventFormState extends State<EventForm> {
                     },
                     selectedLocationName: '',
                   ),
-                const SizedBox(height: 20),
-                DropdownButtonFormField<RecurrenceType>(
-                  value: _recurrenceType,
-                  onChanged: (RecurrenceType? newValue) {
+
+                RecurrenceSelector(
+                  recurrenceType: _recurrenceType,
+                  recurrenceEndDate: _recurrenceEndDate,
+                  onRecurrenceChanged: (RecurrenceType? newRecurrenceType) {
                     setState(() {
-                      _recurrenceType = newValue!;
+                      _recurrenceType =
+                          newRecurrenceType ?? RecurrenceType.none;
                       _recurrenceEndDate = null;
                     });
                   },
-                  items: RecurrenceType.values.map((RecurrenceType recurrence) {
-                    return DropdownMenuItem<RecurrenceType>(
-                      value: recurrence,
-                      child: Text(recurrence
-                          .toString()
-                          .split('.')
-                          .last
-                          .replaceAll('_', ' ')
-                          .toUpperCase()),
-                    );
-                  }).toList(),
+                  onEndDateChanged: (DateTime? newEndDate) {
+                    setState(() {
+                      _recurrenceEndDate = newEndDate;
+                    });
+                  },
                 ),
-                if (_recurrenceType != RecurrenceType.none)
-                  ElevatedButton(
-                    onPressed: () => _selectRecurrenceEndDate(context),
-                    child: Text(_recurrenceEndDate == null
-                        ? 'Select Recurrence End Date'
-                        : 'Recurrence set to: ${DateFormat('dd MMM yyyy').format(_recurrenceEndDate!)}'),
-                  ),
               ],
             ),
           ),

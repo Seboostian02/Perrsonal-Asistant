@@ -30,6 +30,19 @@ class EventCard extends StatefulWidget {
 class EventCardState extends State<EventCard> {
   late bool _isExpanded;
 
+  // Mapping priority to colors
+  Color _getPriorityColor(String priority) {
+    switch (priority) {
+      case 'Medium':
+        return AppColors
+            .mediumPriorityColor; // Example color for 'Medium' priority
+      case 'High':
+        return AppColors.highPriorityColor; // Example color for 'High' priority
+      default:
+        return AppColors.lowPriorityColor; // Default color for 'Low' priority
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -166,6 +179,12 @@ class EventCardState extends State<EventCard> {
       locationParts = [location];
     }
 
+    String priority =
+        widget.event.extendedProperties?.private?['priority'] ?? 'Low';
+
+    // Get the color for the card based on priority
+    Color cardColor = _getPriorityColor(priority);
+
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
       width: widget.expandMode
@@ -174,7 +193,7 @@ class EventCardState extends State<EventCard> {
       child: Card(
         elevation: 4,
         margin: const EdgeInsets.symmetric(vertical: 8.0),
-        color: EventCard.cardColor,
+        color: cardColor, // Use the priority-based color
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
@@ -183,10 +202,24 @@ class EventCardState extends State<EventCard> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
+                  Expanded(
+                    child: Text(
+                      widget.event.summary ?? "No Title",
+                      style: const TextStyle(
+                          fontSize: 23, fontWeight: FontWeight.w800),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
                   Text(
-                    widget.event.summary ?? "No Title",
+                    'priority - ($priority)',
                     style: const TextStyle(
-                        fontSize: 23, fontWeight: FontWeight.w800),
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                      color: AppColors.secondaryColor,
+                    ),
+                    overflow: TextOverflow.ellipsis,
                   ),
                   if (!widget.expandMode)
                     IconButton(

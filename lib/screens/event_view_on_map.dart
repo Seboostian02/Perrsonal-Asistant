@@ -82,16 +82,16 @@ class EventViewState extends State<EventView> {
                     expandMode: true,
                   ),
                 ),
-                Positioned(
-                  top: 30,
-                  right: 10,
-                  child: IconButton(
-                    icon: const Icon(Icons.close),
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                  ),
-                ),
+                // Positioned(
+                //   top: 30,
+                //   right: 10,
+                //   child: IconButton(
+                //     icon: const Icon(Icons.close),
+                //     onPressed: () {
+                //       Navigator.of(context).pop();
+                //     },
+                //   ),
+                // ),
               ],
             ),
           ),
@@ -119,7 +119,7 @@ class EventViewState extends State<EventView> {
               point: _currentLocationLatLng!,
               builder: (context) => const Icon(
                 Icons.my_location,
-                color: Colors.blue,
+                color: AppColors.primaryColor,
                 size: 40.0,
               ),
               anchorPos: AnchorPos.align(AnchorAlign.top),
@@ -150,7 +150,7 @@ class EventViewState extends State<EventView> {
         point: _currentLocationLatLng!,
         builder: (context) => const Icon(
           Icons.my_location,
-          color: Colors.blue,
+          color: AppColors.primaryColor,
           size: 40.0,
         ),
         anchorPos: AnchorPos.align(AnchorAlign.top),
