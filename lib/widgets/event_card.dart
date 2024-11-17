@@ -30,6 +30,20 @@ class EventCard extends StatefulWidget {
 class EventCardState extends State<EventCard> {
   late bool _isExpanded;
 
+  // Mapping priority to colors
+  Color _getPriorityColor(String priority) {
+    switch (priority) {
+      case 'Medium':
+        return AppColors
+            .highPriorityColor; // Example color for 'Medium' priority
+      case 'High':
+        return AppColors
+            .mediumPriorityColor; // Example color for 'High' priority
+      default:
+        return AppColors.lowPriorityColor; // Default color for 'Low' priority
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -169,6 +183,9 @@ class EventCardState extends State<EventCard> {
     String priority =
         widget.event.extendedProperties?.private?['priority'] ?? 'Low';
 
+    // Get the color for the card based on priority
+    Color cardColor = _getPriorityColor(priority);
+
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
       width: widget.expandMode
@@ -177,7 +194,7 @@ class EventCardState extends State<EventCard> {
       child: Card(
         elevation: 4,
         margin: const EdgeInsets.symmetric(vertical: 8.0),
-        color: EventCard.cardColor,
+        color: cardColor, // Use the priority-based color
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
