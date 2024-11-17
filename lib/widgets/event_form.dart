@@ -6,7 +6,7 @@ import 'package:calendar/widgets/event_form_components/event_description_field.d
 import 'package:calendar/widgets/event_form_components/event_title_field.dart';
 import 'package:calendar/widgets/event_form_components/location_selector.dart';
 import 'package:calendar/widgets/event_form_components/priority_selector.dart';
-import 'package:calendar/widgets/event_form_components/reccurece_selector.dart';
+import 'package:calendar/widgets/event_form_components/reccurence_selector.dart';
 import 'package:calendar/widgets/event_form_components/time_selector.dart';
 import 'package:calendar/widgets/event_form_components/user_greeting.dart';
 import 'package:flutter/material.dart';
@@ -65,13 +65,21 @@ class EventFormState extends State<EventForm> {
   }
 
   Future<void> _createEvent() async {
-    final now = DateTime.now().toUtc();
+    final now = DateTime.now();
     final currentDate = DateTime(now.year, now.month, now.day);
     final selectedDate =
         DateTime(_selectedDate.year, _selectedDate.month, _selectedDate.day);
-
+    if (_recurrenceType != RecurrenceType.none && _recurrenceEndDate == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please select a recurrence end date'),
+        ),
+      );
+      return;
+    }
     if (_recurrenceType == RecurrenceType.none && selectedDate == currentDate) {
       final nowTime = TimeOfDay.fromDateTime(now);
+
       if (_startTime.hour < nowTime.hour ||
           (_startTime.hour == nowTime.hour &&
               _startTime.minute <= nowTime.minute)) {
