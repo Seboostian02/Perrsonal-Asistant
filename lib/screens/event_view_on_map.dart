@@ -119,7 +119,7 @@ class EventViewState extends State<EventView> {
               point: _currentLocationLatLng!,
               builder: (context) => const Icon(
                 Icons.my_location,
-                color: Colors.blue,
+                color: AppColors.primaryColor,
                 size: 40.0,
               ),
               anchorPos: AnchorPos.align(AnchorAlign.top),
