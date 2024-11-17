@@ -166,6 +166,9 @@ class EventCardState extends State<EventCard> {
       locationParts = [location];
     }
 
+    String priority =
+        widget.event.extendedProperties?.private?['priority'] ?? 'Low';
+
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
       width: widget.expandMode
@@ -183,10 +186,23 @@ class EventCardState extends State<EventCard> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    widget.event.summary ?? "No Title",
-                    style: const TextStyle(
-                        fontSize: 23, fontWeight: FontWeight.w800),
+                  Row(
+                    children: [
+                      Text(
+                        widget.event.summary ?? "No Title",
+                        style: const TextStyle(
+                            fontSize: 23, fontWeight: FontWeight.w800),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        'priority - ($priority)',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                          color: AppColors.secondaryColor,
+                        ),
+                      ),
+                    ],
                   ),
                   if (!widget.expandMode)
                     IconButton(
