@@ -35,10 +35,9 @@ class EventCardState extends State<EventCard> {
     switch (priority) {
       case 'Medium':
         return AppColors
-            .highPriorityColor; // Example color for 'Medium' priority
+            .mediumPriorityColor; // Example color for 'Medium' priority
       case 'High':
-        return AppColors
-            .mediumPriorityColor; // Example color for 'High' priority
+        return AppColors.highPriorityColor; // Example color for 'High' priority
       default:
         return AppColors.lowPriorityColor; // Default color for 'Low' priority
     }
