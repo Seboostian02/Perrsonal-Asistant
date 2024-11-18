@@ -272,13 +272,12 @@ class EventFormState extends State<EventForm> {
                   onTimeSelected: _selectTime,
                 ),
                 const SizedBox(height: 20),
-                // Wrap PrioritySelector and Online Meeting in a Row
+
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    // PrioritySelector cu lățime mai mică
                     Container(
-                      width: 130, // Ajustează această valoare după necesități
+                      width: 130,
                       child: PrioritySelector(
                         selectedPriority: selectedPriority,
                         onPriorityChanged: (String? newPriority) {
@@ -290,10 +289,8 @@ class EventFormState extends State<EventForm> {
                         },
                       ),
                     ),
-
-                    // CheckboxListTile cu lățime mai mare
                     Container(
-                      width: 200, // Ajustează această valoare după necesități
+                      width: 200,
                       child: CheckboxListTile(
                         title: const Text('Online meeting?'),
                         value: _isOnlineMeeting,

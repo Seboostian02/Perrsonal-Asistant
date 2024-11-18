@@ -46,16 +46,23 @@ class _EditEventFormState extends State<EditEventForm> {
     _endTime = TimeOfDay.fromDateTime(
         DateTime.parse(widget.event.end!.dateTime!.toString()).toLocal());
 
-    // Inițializări pentru prioritate și locație
     _selectedPriority =
         widget.event.extendedProperties?.private?['priority'] ?? 'Low';
+
     if (widget.event.location != null) {
-      // Exemplu de extragere coordonate din locație
-      final locationParts = widget.event.location!.split(',');
-      _selectedLocation = LatLng(
-        double.parse(locationParts[0]),
-        double.parse(locationParts[1]),
-      );
+      if (widget.event.location!.contains(',')) {
+        final locationParts = widget.event.location!.split(',');
+        try {
+          _selectedLocation = LatLng(
+            double.parse(locationParts[0]),
+            double.parse(locationParts[1]),
+          );
+        } catch (e) {
+          _selectedLocation = null;
+        }
+      } else {
+        _selectedLocation = null;
+      }
     }
   }
 
@@ -126,7 +133,6 @@ class _EditEventFormState extends State<EditEventForm> {
     widget.event.start = calendar.EventDateTime(dateTime: startDateTime);
     widget.event.end = calendar.EventDateTime(dateTime: endDateTime);
 
-    // Tratarea recurenței
     if (_recurrenceType != model_recurrence.RecurrenceType.none) {
       widget.event.recurrence = [
         'RRULE:FREQ=${_recurrenceType.name.toUpperCase()}${_recurrenceEndDate != null ? ';UNTIL=${DateFormat('yyyyMMdd').format(_recurrenceEndDate!)}' : ''}'
@@ -140,6 +146,21 @@ class _EditEventFormState extends State<EditEventForm> {
 
   @override
   Widget build(BuildContext context) {
+    String locationDisplay = "No location set";
+    bool isOnline = false;
+
+    if (widget.event.location != null) {
+      if (_selectedLocation != null) {
+        locationDisplay =
+            "Lat: ${_selectedLocation!.latitude}, Lng: ${_selectedLocation!.longitude}";
+      } else {
+        locationDisplay = widget.event.location!;
+        if (locationDisplay.toLowerCase() == "online") {
+          isOnline = true;
+        }
+      }
+    }
+
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: SingleChildScrollView(
@@ -155,14 +176,43 @@ class _EditEventFormState extends State<EditEventForm> {
               decoration: const InputDecoration(labelText: "Description"),
             ),
             const SizedBox(height: 16),
-            LocationSelector(
-              selectedLocation: _selectedLocation,
-              selectedLocationName: "Selected Location",
-              onLocationSelected: (location) {
-                setState(() {
-                  _selectedLocation = location;
-                });
-              },
+            ListTile(
+              title: Text("Event Location: $locationDisplay"),
+            ),
+            Column(
+              children: [
+                Row(
+                  children: [
+                    Checkbox(
+                      value: isOnline,
+                      onChanged: (bool? value) {
+                        setState(() {
+                          isOnline = value ?? false;
+                          if (isOnline) {
+                            widget.event.location = "Online";
+                            _selectedLocation = null;
+                          } else {
+                            widget.event.location = null;
+                          }
+                        });
+                      },
+                    ),
+                    const Text("Set as Online"),
+                  ],
+                ),
+                if (!isOnline)
+                  LocationSelector(
+                    selectedLocation: _selectedLocation,
+                    selectedLocationName: locationDisplay,
+                    onLocationSelected: (location) {
+                      setState(() {
+                        _selectedLocation = location;
+                        widget.event.location =
+                            '${location.latitude},${location.longitude}';
+                      });
+                    },
+                  ),
+              ],
             ),
             const SizedBox(height: 16),
             PrioritySelector(
@@ -173,7 +223,6 @@ class _EditEventFormState extends State<EditEventForm> {
                 });
               },
             ),
-            const SizedBox(height: 16),
             const SizedBox(height: 16),
             ListTile(
               title: Text(

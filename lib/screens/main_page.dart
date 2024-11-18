@@ -51,8 +51,8 @@ class MainPageState extends State<MainPage> {
       int modifiedEventId = notification.id;
       if (!events.any(
           (event) => event.id.hashCode.abs() % 10000000 == modifiedEventId)) {
-        // await notificationService.cancelNotification(modifiedEventId);
-        // print("Notification for event with ID $modifiedEventId canceled.");
+        await notificationService.cancelNotification(modifiedEventId);
+        print("Notification for event with ID $modifiedEventId canceled.");
       }
     }
 
