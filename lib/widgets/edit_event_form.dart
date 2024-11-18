@@ -1,0 +1,210 @@
+import 'package:calendar/widgets/event_form_components/location_selector.dart';
+import 'package:calendar/widgets/event_form_components/priority_selector.dart';
+import 'package:calendar/widgets/event_form_components/reccurence_selector.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:flutter/material.dart';
+import 'package:googleapis/calendar/v3.dart' as calendar;
+import 'package:intl/intl.dart';
+import 'package:calendar/models/recurrence_type.dart' as model_recurrence;
+
+class EditEventForm extends StatefulWidget {
+  final calendar.Event event;
+  final Function(calendar.Event) onUpdate;
+
+  const EditEventForm({
+    Key? key,
+    required this.event,
+    required this.onUpdate,
+  }) : super(key: key);
+
+  @override
+  _EditEventFormState createState() => _EditEventFormState();
+}
+
+class _EditEventFormState extends State<EditEventForm> {
+  late TextEditingController _summaryController;
+  late TextEditingController _descriptionController;
+  late DateTime _selectedDate;
+  late TimeOfDay _startTime;
+  late TimeOfDay _endTime;
+  LatLng? _selectedLocation;
+  String _selectedPriority = 'Low';
+  model_recurrence.RecurrenceType _recurrenceType =
+      model_recurrence.RecurrenceType.none;
+  DateTime? _recurrenceEndDate;
+
+  @override
+  void initState() {
+    super.initState();
+    _summaryController = TextEditingController(text: widget.event.summary);
+    _descriptionController =
+        TextEditingController(text: widget.event.description);
+    _selectedDate =
+        DateTime.parse(widget.event.start!.dateTime!.toString()).toLocal();
+    _startTime = TimeOfDay.fromDateTime(
+        DateTime.parse(widget.event.start!.dateTime!.toString()).toLocal());
+    _endTime = TimeOfDay.fromDateTime(
+        DateTime.parse(widget.event.end!.dateTime!.toString()).toLocal());
+
+    // Inițializări pentru prioritate și locație
+    _selectedPriority =
+        widget.event.extendedProperties?.private?['priority'] ?? 'Low';
+    if (widget.event.location != null) {
+      // Exemplu de extragere coordonate din locație
+      final locationParts = widget.event.location!.split(',');
+      _selectedLocation = LatLng(
+        double.parse(locationParts[0]),
+        double.parse(locationParts[1]),
+      );
+    }
+  }
+
+  @override
+  void dispose() {
+    _summaryController.dispose();
+    _descriptionController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _pickDate() async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: _selectedDate,
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2100),
+    );
+    if (picked != null && picked != _selectedDate) {
+      setState(() {
+        _selectedDate = picked;
+      });
+    }
+  }
+
+  Future<void> _pickTime({required bool isStartTime}) async {
+    final TimeOfDay? picked = await showTimePicker(
+      context: context,
+      initialTime: isStartTime ? _startTime : _endTime,
+    );
+    if (picked != null) {
+      setState(() {
+        if (isStartTime) {
+          _startTime = picked;
+        } else {
+          _endTime = picked;
+        }
+      });
+    }
+  }
+
+  void _saveChanges() {
+    widget.event.summary = _summaryController.text;
+    widget.event.description = _descriptionController.text;
+    widget.event.location = _selectedLocation != null
+        ? '${_selectedLocation!.latitude},${_selectedLocation!.longitude}'
+        : null;
+
+    widget.event.extendedProperties ??= calendar.EventExtendedProperties(
+      private: {},
+    );
+    widget.event.extendedProperties!.private!['priority'] = _selectedPriority;
+
+    DateTime startDateTime = DateTime(
+      _selectedDate.year,
+      _selectedDate.month,
+      _selectedDate.day,
+      _startTime.hour,
+      _startTime.minute,
+    );
+    DateTime endDateTime = DateTime(
+      _selectedDate.year,
+      _selectedDate.month,
+      _selectedDate.day,
+      _endTime.hour,
+      _endTime.minute,
+    );
+
+    widget.event.start = calendar.EventDateTime(dateTime: startDateTime);
+    widget.event.end = calendar.EventDateTime(dateTime: endDateTime);
+
+    // Tratarea recurenței
+    if (_recurrenceType != model_recurrence.RecurrenceType.none) {
+      widget.event.recurrence = [
+        'RRULE:FREQ=${_recurrenceType.name.toUpperCase()}${_recurrenceEndDate != null ? ';UNTIL=${DateFormat('yyyyMMdd').format(_recurrenceEndDate!)}' : ''}'
+      ];
+    }
+
+    widget.onUpdate(widget.event);
+
+    Navigator.of(context).pop();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: _summaryController,
+              decoration: const InputDecoration(labelText: "Title"),
+            ),
+            TextField(
+              controller: _descriptionController,
+              decoration: const InputDecoration(labelText: "Description"),
+            ),
+            const SizedBox(height: 16),
+            LocationSelector(
+              selectedLocation: _selectedLocation,
+              selectedLocationName: "Selected Location",
+              onLocationSelected: (location) {
+                setState(() {
+                  _selectedLocation = location;
+                });
+              },
+            ),
+            const SizedBox(height: 16),
+            PrioritySelector(
+              selectedPriority: _selectedPriority,
+              onPriorityChanged: (priority) {
+                setState(() {
+                  _selectedPriority = priority ?? 'Low';
+                });
+              },
+            ),
+            const SizedBox(height: 16),
+            const SizedBox(height: 16),
+            ListTile(
+              title: Text(
+                  "Event Date: ${DateFormat.yMMMd().format(_selectedDate)}"),
+              trailing: IconButton(
+                icon: const Icon(Icons.calendar_today),
+                onPressed: _pickDate,
+              ),
+            ),
+            ListTile(
+              title: Text("Start Time: ${_startTime.format(context)}"),
+              trailing: IconButton(
+                icon: const Icon(Icons.access_time),
+                onPressed: () => _pickTime(isStartTime: true),
+              ),
+            ),
+            ListTile(
+              title: Text("End Time: ${_endTime.format(context)}"),
+              trailing: IconButton(
+                icon: const Icon(Icons.access_time),
+                onPressed: () => _pickTime(isStartTime: false),
+              ),
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: _saveChanges,
+              child: const Text("Save"),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}

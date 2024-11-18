@@ -3,6 +3,7 @@ import 'package:calendar/services/auth_provider.dart';
 import 'package:calendar/services/auth_service.dart';
 import 'package:calendar/services/google_calendar_service.dart';
 import 'package:calendar/utils/colors.dart';
+import 'package:calendar/widgets/edit_event_form.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:googleapis/calendar/v3.dart' as calendar;
@@ -12,6 +13,7 @@ class EventCard extends StatefulWidget {
   final calendar.Event event;
   final bool showLocation;
   final bool expandMode;
+  final bool editEvent;
   final VoidCallback? onDelete;
   static const Color cardColor = AppColors.primaryLightColor;
 
@@ -20,6 +22,7 @@ class EventCard extends StatefulWidget {
     required this.event,
     this.showLocation = false,
     this.expandMode = false,
+    this.editEvent = true,
     this.onDelete,
   }) : super(key: key);
 
@@ -47,6 +50,82 @@ class EventCardState extends State<EventCard> {
   void initState() {
     super.initState();
     _isExpanded = widget.expandMode;
+  }
+
+  void _showEditDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          child: EditEventForm(
+            event: widget.event,
+            onUpdate: (updatedEvent) async {
+              setState(() {
+                widget.event.summary = updatedEvent.summary;
+                widget.event.description = updatedEvent.description;
+                widget.event.location = updatedEvent.location;
+                // Actualizare prioritate
+                widget.event.extendedProperties ??=
+                    calendar.EventExtendedProperties(
+                  private: {},
+                );
+                widget.event.extendedProperties!.private!['priority'] =
+                    updatedEvent.extendedProperties!.private!['priority']!;
+              });
+
+              try {
+                // Obține accessToken
+                final accessToken = await AuthService().accessToken;
+
+                // Verifică dacă accessToken este null
+                if (accessToken == null) {
+                  throw Exception('Access token is null. Please log in again.');
+                }
+
+                String eventId = widget.event.id!; // Asigură-te că ai eventId
+
+                if (updatedEvent.summary == null ||
+                    updatedEvent.summary!.isEmpty) {
+                  throw Exception('Title cannot be empty');
+                }
+                if (updatedEvent.start?.dateTime == null) {
+                  throw Exception('Start time cannot be null');
+                }
+                if (updatedEvent.end?.dateTime == null) {
+                  throw Exception('End time cannot be null');
+                }
+
+                // Convertește DateTime în TimeOfDay
+                TimeOfDay startTime = TimeOfDay.fromDateTime(
+                    updatedEvent.start!.dateTime!.toLocal());
+                TimeOfDay endTime = TimeOfDay.fromDateTime(
+                    updatedEvent.end!.dateTime!.toLocal());
+
+                // Trimite la Google Calendar
+                await GoogleCalendarService.updateEvent(
+                  accessToken:
+                      accessToken, // Acum accesToken este de tip String, nu null
+                  eventId: eventId,
+                  title: updatedEvent.summary!,
+                  description: updatedEvent.description ?? '',
+                  date: updatedEvent.start!.dateTime!.toLocal(),
+                  startTime: startTime, // Folosim TimeOfDay pentru start
+                  endTime: endTime, // Folosim TimeOfDay pentru end
+                  location: updatedEvent.location ?? '',
+                  priority:
+                      updatedEvent.extendedProperties!.private!['priority'] ??
+                          'Low',
+                );
+                print('Event updated successfully in Google Calendar');
+              } catch (error) {
+                print('Error updating event in Google Calendar: $error');
+                // Poți adăuga un mesaj de eroare pentru utilizator dacă dorești
+              }
+            },
+          ),
+        );
+      },
+    );
   }
 
   void _onLocationTap(BuildContext context) {
@@ -221,6 +300,11 @@ class EventCardState extends State<EventCard> {
                     ),
                     overflow: TextOverflow.ellipsis,
                   ),
+                  if (widget.editEvent && _isExpanded) // Buton de editare
+                    IconButton(
+                      icon: const Icon(Icons.edit),
+                      onPressed: () => _showEditDialog(context),
+                    ),
                   if (!widget.expandMode)
                     IconButton(
                       icon: AnimatedRotation(

@@ -19,8 +19,6 @@ import '../services/auth_provider.dart';
 
 enum RecurrenceType { none, daily, weekly, monthly }
 
-// enum EventPriority { low, medium, high }
-
 class EventForm extends StatefulWidget {
   const EventForm({super.key});
 

@@ -185,4 +185,75 @@ class GoogleCalendarService {
     print("Recurring event IDs found: $recurringEventIds");
     return recurringEventIds;
   }
+
+  static Future<void> updateEvent({
+    required String accessToken,
+    required String eventId,
+    required String title,
+    required String description,
+    required DateTime date,
+    required TimeOfDay startTime,
+    required TimeOfDay endTime,
+    String? location,
+    String? priority,
+    bool updateSeries = false,
+  }) async {
+    try {
+      print("a intrat aici--------");
+      final client = await getAuthenticatedClient(accessToken);
+      var calendarApi = calendar.CalendarApi(client);
+
+      String mainEventId = eventId.split('_')[0];
+      var event = await calendarApi.events.get("primary", eventId);
+
+      // Update event details
+      event.summary = title;
+      event.description = description;
+      event.location = location;
+
+      if (priority != null) {
+        event.extendedProperties ??=
+            calendar.EventExtendedProperties(private: {});
+        event.extendedProperties!.private!['priority'] = priority;
+      }
+
+      var startDateTime = DateTime(
+        date.year,
+        date.month,
+        date.day,
+        startTime.hour,
+        startTime.minute,
+      ).toUtc();
+
+      var endDateTime = DateTime(
+        date.year,
+        date.month,
+        date.day,
+        endTime.hour,
+        endTime.minute,
+      ).toUtc();
+
+      event.start = calendar.EventDateTime(
+        dateTime: startDateTime,
+        timeZone: 'Europe/Bucharest',
+      );
+
+      event.end = calendar.EventDateTime(
+        dateTime: endDateTime,
+        timeZone: 'Europe/Bucharest',
+      );
+
+      if (event.recurrence != null && updateSeries) {
+        // Update the entire recurring series
+        await calendarApi.events.patch(event, "primary", mainEventId);
+        print("Recurring series updated successfully!");
+      } else {
+        // Update only this instance or a non-recurring event
+        await calendarApi.events.patch(event, "primary", eventId);
+        print("Event updated successfully!");
+      }
+    } catch (e) {
+      print("Error updating event: $e");
+    }
+  }
 }
