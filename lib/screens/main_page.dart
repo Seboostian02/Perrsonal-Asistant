@@ -1,4 +1,5 @@
 import 'package:calendar/screens/event_view_on_map.dart';
+import 'package:calendar/screens/profile_page.dart';
 import 'package:calendar/screens/settings.dart';
 import 'package:calendar/screens/weather_view.dart';
 import 'package:calendar/services/auth_service.dart';
@@ -212,10 +213,11 @@ class MainPageState extends State<MainPage> {
                   location: _currentPosition!,
                 )
               : const Center(child: CircularProgressIndicator()),
-          NotFoundPage(
-            onBackToHome: () => _onItemTapped(0),
-            notificationService: notificationService,
-          ),
+          const ProfilePage(),
+          // NotFoundPage(
+          //   onBackToHome: () => _onItemTapped(0),
+          //   notificationService: notificationService,
+          // ),
           SettingsList(authProvider: authProvider),
         ],
       ),
