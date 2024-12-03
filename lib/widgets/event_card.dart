@@ -52,81 +52,136 @@ class EventCardState extends State<EventCard> {
     _isExpanded = widget.expandMode;
   }
 
-  void _showEditDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return Dialog(
-          child: EditEventForm(
-            event: widget.event,
-            onUpdate: (updatedEvent) async {
-              setState(() {
-                widget.event.summary = updatedEvent.summary;
-                widget.event.description = updatedEvent.description;
-                widget.event.location = updatedEvent.location;
-                // Actualizare prioritate
-                widget.event.extendedProperties ??=
-                    calendar.EventExtendedProperties(
-                  private: {},
-                );
-                widget.event.extendedProperties!.private!['priority'] =
-                    updatedEvent.extendedProperties!.private!['priority']!;
-              });
+  void _showEditDialog(BuildContext context) async {
+    final accessToken = await AuthService().accessToken;
 
-              try {
-                // Obține accessToken
-                final accessToken = await AuthService().accessToken;
+    if (accessToken != null) {
+      final client =
+          await GoogleCalendarService.getAuthenticatedClient(accessToken);
+      final calendarApi = calendar.CalendarApi(client);
 
-                // Verifică dacă accessToken este null
-                if (accessToken == null) {
-                  throw Exception('Access token is null. Please log in again.');
-                }
+      String mainEventId = widget.event.id!.split('_')[0];
 
-                String eventId = widget.event.id!; // Asigură-te că ai eventId
+      final recurringEventIds =
+          await GoogleCalendarService.getRecurringEventIds(
+        calendarApi,
+        widget.event.id!,
+        widget.event.id!,
+      );
 
-                if (updatedEvent.summary == null ||
-                    updatedEvent.summary!.isEmpty) {
-                  throw Exception('Title cannot be empty');
-                }
-                if (updatedEvent.start?.dateTime == null) {
-                  throw Exception('Start time cannot be null');
-                }
-                if (updatedEvent.end?.dateTime == null) {
-                  throw Exception('End time cannot be null');
-                }
+      bool isRecurring = recurringEventIds.contains(mainEventId);
+      bool editSeries = false;
 
-                // Convertește DateTime în TimeOfDay
-                TimeOfDay startTime = TimeOfDay.fromDateTime(
-                    updatedEvent.start!.dateTime!.toLocal());
-                TimeOfDay endTime = TimeOfDay.fromDateTime(
-                    updatedEvent.end!.dateTime!.toLocal());
+      bool confirmedEdit = await showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: const Text("Edit Event"),
+            content: isRecurring
+                ? const Text(
+                    "Do you want to edit this event or the entire series?")
+                : const Text("Are you sure you want to edit this event?"),
+            actions: [
+              if (isRecurring) ...[
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop(true);
+                  },
+                  child: const Text("This Event"),
+                ),
+                TextButton(
+                  onPressed: () {
+                    editSeries = true;
+                    Navigator.of(context).pop(true);
+                  },
+                  child: const Text("Entire Series"),
+                ),
+              ] else ...[
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(false),
+                  child: const Text("No"),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(true),
+                  child: const Text("Yes"),
+                ),
+              ],
+            ],
+          );
+        },
+      );
 
-                // Trimite la Google Calendar
-                await GoogleCalendarService.updateEvent(
-                  accessToken:
-                      accessToken, // Acum accesToken este de tip String, nu null
-                  eventId: eventId,
-                  title: updatedEvent.summary!,
-                  description: updatedEvent.description ?? '',
-                  date: updatedEvent.start!.dateTime!.toLocal(),
-                  startTime: startTime, // Folosim TimeOfDay pentru start
-                  endTime: endTime, // Folosim TimeOfDay pentru end
-                  location: updatedEvent.location ?? '',
-                  priority:
-                      updatedEvent.extendedProperties!.private!['priority'] ??
+      if (confirmedEdit) {
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return Dialog(
+              child: EditEventForm(
+                event: widget.event,
+                onUpdate: (updatedEvent) async {
+                  setState(() {
+                    widget.event.summary = updatedEvent.summary;
+                    widget.event.description = updatedEvent.description;
+                    widget.event.location = updatedEvent.location;
+                    // Actualizare prioritate
+                    widget.event.extendedProperties ??=
+                        calendar.EventExtendedProperties(
+                      private: {},
+                    );
+                    widget.event.extendedProperties!.private!['priority'] =
+                        updatedEvent.extendedProperties!.private!['priority']!;
+                  });
+
+                  try {
+                    if (updatedEvent.summary == null ||
+                        updatedEvent.summary!.isEmpty) {
+                      throw Exception('Title cannot be empty');
+                    }
+                    if (updatedEvent.start?.dateTime == null) {
+                      throw Exception('Start time cannot be null');
+                    }
+                    if (updatedEvent.end?.dateTime == null) {
+                      throw Exception('End time cannot be null');
+                    }
+
+                    // Convertește DateTime în TimeOfDay
+                    TimeOfDay startTime = TimeOfDay.fromDateTime(
+                        updatedEvent.start!.dateTime!.toLocal());
+                    TimeOfDay endTime = TimeOfDay.fromDateTime(
+                        updatedEvent.end!.dateTime!.toLocal());
+
+                    String eventId =
+                        editSeries ? mainEventId : widget.event.id!;
+
+                    // Trimite la Google Calendar
+                    await GoogleCalendarService.updateEvent(
+                      accessToken: accessToken,
+                      eventId: eventId,
+                      title: updatedEvent.summary!,
+                      description: updatedEvent.description ?? '',
+                      date: updatedEvent.start!.dateTime!.toLocal(),
+                      startTime: startTime,
+                      endTime: endTime,
+                      location: updatedEvent.location ?? '',
+                      priority: updatedEvent
+                              .extendedProperties!.private!['priority'] ??
                           'Low',
-                  updateSeries: true,
-                );
-                print('Event updated successfully in Google Calendar');
-              } catch (error) {
-                print('Error updating event in Google Calendar: $error');
-                // Poți adăuga un mesaj de eroare pentru utilizator dacă dorești
-              }
-            },
-          ),
+                      updateSeries: editSeries,
+                    );
+
+                    print('Event updated successfully in Google Calendar');
+                  } catch (error) {
+                    print('Error updating event in Google Calendar: $error');
+                  }
+                },
+              ),
+            );
+          },
         );
-      },
-    );
+      }
+    } else {
+      print("Failed to get access token for Google Calendar");
+    }
   }
 
   void _onLocationTap(BuildContext context) {
