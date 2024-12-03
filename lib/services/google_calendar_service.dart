@@ -194,19 +194,18 @@ class GoogleCalendarService {
     required DateTime date,
     required TimeOfDay startTime,
     required TimeOfDay endTime,
+    required bool updateSeries,
     String? location,
     String? priority,
-    bool updateSeries = false,
   }) async {
     try {
-      print("a intrat aici--------");
       final client = await getAuthenticatedClient(accessToken);
       var calendarApi = calendar.CalendarApi(client);
 
       String mainEventId = eventId.split('_')[0];
-      var event = await calendarApi.events.get("primary", eventId);
+      var event = await calendarApi.events.get("primary", mainEventId);
 
-      // Update event details
+      // Actualizează detaliile principale ale seriei
       event.summary = title;
       event.description = description;
       event.location = location;
@@ -243,14 +242,66 @@ class GoogleCalendarService {
         timeZone: 'Europe/Bucharest',
       );
 
-      if (event.recurrence != null && updateSeries) {
-        // Update the entire recurring series
+      if (updateSeries) {
+        // Obține toate instanțele seriei
+        var instances =
+            await calendarApi.events.instances("primary", mainEventId);
+        var instanceList = instances.items ?? [];
+
+        // Actualizează evenimentul principal
         await calendarApi.events.patch(event, "primary", mainEventId);
         print("Recurring series updated successfully!");
+
+        // Actualizează fiecare instanță cu noile informații
+        for (var instance in instanceList) {
+          instance.summary = title;
+          instance.description = description;
+          instance.location = location;
+
+          if (priority != null) {
+            instance.extendedProperties ??=
+                calendar.EventExtendedProperties(private: {});
+            instance.extendedProperties!.private!['priority'] = priority;
+          }
+
+          var instanceStart = DateTime(
+            instance.start!.dateTime!.year,
+            instance.start!.dateTime!.month,
+            instance.start!.dateTime!.day,
+            instance.start!.dateTime!.hour,
+            instance.start!.dateTime!.minute,
+          ).toUtc();
+
+          var instanceEnd = DateTime(
+            instance.end!.dateTime!.year,
+            instance.end!.dateTime!.month,
+            instance.end!.dateTime!.day,
+            instance.end!.dateTime!.hour,
+            instance.end!.dateTime!.minute,
+          ).toUtc();
+
+          instance.start = calendar.EventDateTime(
+            dateTime: instanceStart,
+            timeZone: 'Europe/Bucharest',
+          );
+
+          instance.end = calendar.EventDateTime(
+            dateTime: instanceEnd,
+            timeZone: 'Europe/Bucharest',
+          );
+
+          // Actualizează instanța în calendar
+          try {
+            await calendarApi.events.patch(instance, "primary", instance.id!);
+            print("Updated instance: ${instance.id}");
+          } catch (e) {
+            print("Failed to update instance: ${instance.id} - Error: $e");
+          }
+        }
       } else {
-        // Update only this instance or a non-recurring event
+        // Actualizează doar instanța curentă
         await calendarApi.events.patch(event, "primary", eventId);
-        print("Event updated successfully!");
+        print("Single instance updated successfully!");
       }
     } catch (e) {
       print("Error updating event: $e");

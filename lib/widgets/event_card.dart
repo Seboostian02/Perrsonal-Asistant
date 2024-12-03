@@ -115,6 +115,7 @@ class EventCardState extends State<EventCard> {
                   priority:
                       updatedEvent.extendedProperties!.private!['priority'] ??
                           'Low',
+                  updateSeries: true,
                 );
                 print('Event updated successfully in Google Calendar');
               } catch (error) {
