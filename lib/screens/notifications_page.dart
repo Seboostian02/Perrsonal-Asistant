@@ -63,6 +63,15 @@ class _NotificationsPageState extends State<NotificationsPage> {
     });
   }
 
+  String _extractEventName(String? title) {
+    if (title == null || title.isEmpty) {
+      return 'No Title';
+    }
+
+    final parts = title.split(' - ');
+    return parts.isNotEmpty ? 'Event name: ${parts[0]}' : 'No Title';
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -84,7 +93,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                 final notifications = snapshot.data![groupId]!;
 
                 return ExpansionTile(
-                  title: Text('Event Group ID: $groupId'),
+                  title: Text(_extractEventName(notifications.first.title)),
                   children: notifications.map((notification) {
                     return ListTile(
                       title: Text(notification.title ?? 'No Title'),
