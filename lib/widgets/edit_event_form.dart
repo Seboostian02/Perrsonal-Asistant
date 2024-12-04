@@ -38,6 +38,7 @@ class _EditEventFormState extends State<EditEventForm> {
       model_recurrence.RecurrenceType.none;
   DateTime? _recurrenceEndDate;
   String? _errorMessage;
+  String? _timeErrorMessage;
 
   @override
   void initState() {
@@ -114,8 +115,26 @@ class _EditEventFormState extends State<EditEventForm> {
       setState(() {
         if (isStartTime) {
           _startTime = picked;
+
+          // Verificăm dacă start time depășește end time
+          if (_startTime.hour > _endTime.hour ||
+              (_startTime.hour == _endTime.hour &&
+                  _startTime.minute >= _endTime.minute)) {
+            _timeErrorMessage = "Start time must be earlier than end time.";
+          } else {
+            _timeErrorMessage = null; // Resetăm eroarea dacă timpul este valid
+          }
         } else {
           _endTime = picked;
+
+          // Verificăm dacă end time este mai mic decât start time
+          if (_endTime.hour < _startTime.hour ||
+              (_endTime.hour == _startTime.hour &&
+                  _endTime.minute <= _startTime.minute)) {
+            _timeErrorMessage = "End time must be later than start time.";
+          } else {
+            _timeErrorMessage = null; // Resetăm eroarea dacă timpul este valid
+          }
         }
       });
     }
@@ -140,13 +159,28 @@ class _EditEventFormState extends State<EditEventForm> {
       _startTime.hour,
       _startTime.minute,
     );
-    DateTime endDateTime = DateTime(
-      _selectedDate.year,
-      _selectedDate.month,
-      _selectedDate.day,
-      _endTime.hour,
-      _endTime.minute,
-    );
+
+    DateTime endDateTime;
+    if (_endTime.hour < _startTime.hour ||
+        (_endTime.hour == _startTime.hour &&
+            _endTime.minute < _startTime.minute)) {
+      // Setăm endDateTime pentru ziua următoare
+      endDateTime = DateTime(
+        _selectedDate.year,
+        _selectedDate.month,
+        _selectedDate.day + 1,
+        _endTime.hour,
+        _endTime.minute,
+      );
+    } else {
+      endDateTime = DateTime(
+        _selectedDate.year,
+        _selectedDate.month,
+        _selectedDate.day,
+        _endTime.hour,
+        _endTime.minute,
+      );
+    }
 
     widget.event.start = calendar.EventDateTime(dateTime: startDateTime);
     widget.event.end = calendar.EventDateTime(dateTime: endDateTime);
@@ -272,12 +306,18 @@ class _EditEventFormState extends State<EditEventForm> {
                 onPressed: () => _pickTime(isStartTime: false),
               ),
             ),
+            if (_timeErrorMessage != null)
+              Padding(
+                padding: const EdgeInsets.only(top: 8.0),
+                child: Text(
+                  _timeErrorMessage!,
+                  style: const TextStyle(color: Colors.red, fontSize: 12),
+                ),
+              ),
             const SizedBox(height: 16),
             ElevatedButton(
-              onPressed: () {
-                _saveChanges();
-                //widget.onEdit!();
-              },
+              onPressed:
+                  _timeErrorMessage == null ? () => _saveChanges() : null,
               child: const Text("Save"),
             ),
           ],
