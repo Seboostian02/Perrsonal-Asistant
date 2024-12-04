@@ -184,23 +184,29 @@ class EventFormState extends State<EventForm> {
       initialTime: isStartTime ? _startTime : _endTime,
       initialEntryMode: TimePickerEntryMode.input,
     );
+
     if (picked != null) {
       setState(() {
         if (isStartTime) {
-          _startTime = picked;
-
-          if (_endTime.hour < _startTime.hour ||
-              (_endTime.hour == _startTime.hour &&
-                  _endTime.minute <= _startTime.minute)) {
-            _endTime = picked.replacing(hour: picked.hour + 1);
+          if (picked.hour > _endTime.hour ||
+              (picked.hour == _endTime.hour &&
+                  picked.minute >= _endTime.minute)) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Start time must be before end time'),
+              ),
+            );
+            return;
           }
+          _startTime = picked;
         } else {
           if (picked.hour < _startTime.hour ||
               (picked.hour == _startTime.hour &&
                   picked.minute <= _startTime.minute)) {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
-                  content: Text('End time must be after start time')),
+                content: Text('End time must be after start time'),
+              ),
             );
             return;
           }
