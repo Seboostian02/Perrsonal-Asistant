@@ -106,6 +106,7 @@ class _EditEventFormState extends State<EditEventForm> {
 
   Future<void> _pickTime({required bool isStartTime}) async {
     final TimeOfDay? picked = await showTimePicker(
+      initialEntryMode: TimePickerEntryMode.input,
       context: context,
       initialTime: isStartTime ? _startTime : _endTime,
     );
