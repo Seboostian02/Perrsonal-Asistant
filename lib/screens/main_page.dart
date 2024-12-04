@@ -34,8 +34,26 @@ class MainPageState extends State<MainPage> {
   @override
   void initState() {
     super.initState();
+    GoogleCalendarService.instance.addListener(_onEventListReload);
     _fetchAndScheduleNotifications();
     _getCurrentLocation();
+  }
+
+  @override
+  void dispose() {
+    // Eliminăm listener-ul când pagina este distrusă
+    GoogleCalendarService.instance.removeListener(_onEventListReload);
+    super.dispose();
+  }
+
+  void _onEventListReload() async {
+    // Dacă reloadEventList este activat, reîncarcă evenimentele
+    if (GoogleCalendarService.instance.reloadEventList) {
+      await _fetchEvents(); // Reîncarcă lista de evenimente
+      setState(() {}); // Actualizează interfața utilizatorului
+      GoogleCalendarService.instance.reloadEventList =
+          false; // Resetează variabila
+    }
   }
 
   Future<void> _fetchAndScheduleNotifications() async {
@@ -126,6 +144,7 @@ class MainPageState extends State<MainPage> {
     if (_selectedIndex == 1) {
       await _setMarkersOnMap();
     }
+    GoogleCalendarService.instance.reloadEventList = false;
   }
 
   Future<void> _setMarkersOnMap() async {
@@ -167,8 +186,14 @@ class MainPageState extends State<MainPage> {
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context);
     final eventProvider = Provider.of<EventProvider>(context);
-    print("events in main ------------");
-    print(eventProvider.events);
+
+    final calendarService = Provider.of<GoogleCalendarService>(context);
+    if (calendarService.reloadEventList) {
+      _fetchEvents(); // Reîncarcă lista de evenimente
+      calendarService.reloadEventList = false; // Resetează flag-ul
+      print(
+          'reloadEventList after fetching: ${calendarService.reloadEventList}');
+    }
     return Scaffold(
       extendBody: true,
       appBar: AppBar(

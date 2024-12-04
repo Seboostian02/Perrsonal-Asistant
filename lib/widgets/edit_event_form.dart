@@ -10,11 +10,15 @@ import 'package:calendar/models/recurrence_type.dart' as model_recurrence;
 class EditEventForm extends StatefulWidget {
   final calendar.Event event;
   final Function(calendar.Event) onUpdate;
+  final VoidCallback? onEdit;
+  final bool editSeries;
 
   const EditEventForm({
     Key? key,
     required this.event,
     required this.onUpdate,
+    required this.editSeries,
+    this.onEdit,
   }) : super(key: key);
 
   @override
@@ -27,11 +31,13 @@ class _EditEventFormState extends State<EditEventForm> {
   late DateTime _selectedDate;
   late TimeOfDay _startTime;
   late TimeOfDay _endTime;
+  late bool _isDateLocked;
   LatLng? _selectedLocation;
   String _selectedPriority = 'Low';
   model_recurrence.RecurrenceType _recurrenceType =
       model_recurrence.RecurrenceType.none;
   DateTime? _recurrenceEndDate;
+  String? _errorMessage;
 
   @override
   void initState() {
@@ -48,6 +54,9 @@ class _EditEventFormState extends State<EditEventForm> {
 
     _selectedPriority =
         widget.event.extendedProperties?.private?['priority'] ?? 'Low';
+
+    _isDateLocked =
+        widget.editSeries; // Blochează modificarea datei dacă editezi seria
 
     if (widget.event.location != null) {
       if (widget.event.location!.contains(',')) {
@@ -74,6 +83,13 @@ class _EditEventFormState extends State<EditEventForm> {
   }
 
   Future<void> _pickDate() async {
+    if (_isDateLocked) {
+      setState(() {
+        _errorMessage = "You cannot edit the date for a recurring series.";
+      });
+      return;
+    }
+
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: _selectedDate,
@@ -83,6 +99,7 @@ class _EditEventFormState extends State<EditEventForm> {
     if (picked != null && picked != _selectedDate) {
       setState(() {
         _selectedDate = picked;
+        _errorMessage = null; // Resetează mesajul de eroare
       });
     }
   }
@@ -232,6 +249,14 @@ class _EditEventFormState extends State<EditEventForm> {
                 onPressed: _pickDate,
               ),
             ),
+            if (_isDateLocked && _errorMessage != null)
+              Padding(
+                padding: const EdgeInsets.only(top: 8.0),
+                child: Text(
+                  _errorMessage!,
+                  style: const TextStyle(color: Colors.red, fontSize: 12),
+                ),
+              ),
             ListTile(
               title: Text("Start Time: ${_startTime.format(context)}"),
               trailing: IconButton(
@@ -248,7 +273,10 @@ class _EditEventFormState extends State<EditEventForm> {
             ),
             const SizedBox(height: 16),
             ElevatedButton(
-              onPressed: _saveChanges,
+              onPressed: () {
+                _saveChanges();
+                //widget.onEdit!();
+              },
               child: const Text("Save"),
             ),
           ],

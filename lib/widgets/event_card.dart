@@ -15,6 +15,7 @@ class EventCard extends StatefulWidget {
   final bool expandMode;
   final bool editEvent;
   final VoidCallback? onDelete;
+  final VoidCallback? onEdit;
   static const Color cardColor = AppColors.primaryLightColor;
 
   const EventCard({
@@ -24,6 +25,7 @@ class EventCard extends StatefulWidget {
     this.expandMode = false,
     this.editEvent = true,
     this.onDelete,
+    this.onEdit,
   }) : super(key: key);
 
   @override
@@ -85,6 +87,7 @@ class EventCardState extends State<EventCard> {
               if (isRecurring) ...[
                 TextButton(
                   onPressed: () {
+                    editSeries = false;
                     Navigator.of(context).pop(true);
                   },
                   child: const Text("This Event"),
@@ -118,6 +121,8 @@ class EventCardState extends State<EventCard> {
             return Dialog(
               child: EditEventForm(
                 event: widget.event,
+                onEdit: widget.onEdit,
+                editSeries: editSeries,
                 onUpdate: (updatedEvent) async {
                   setState(() {
                     widget.event.summary = updatedEvent.summary;
