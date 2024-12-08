@@ -229,47 +229,7 @@ class EventViewState extends State<EventView> {
             ],
           ),
         ),
-        if (widget.showCurrLocation)
-          Positioned(
-            top: 20,
-            right: 20,
-            child: FloatingActionButton(
-              onPressed: _getCurrentLocation,
-              backgroundColor: AppColors.primaryColor,
-              foregroundColor: AppColors.iconColor,
-              child: const Icon(Icons.my_location),
-            ),
-          ),
-        if (widget.showBackArrow)
-          Positioned(
-            top: 50,
-            left: 20,
-            child: Material(
-              elevation: 6,
-              shape: const CircleBorder(),
-              child: InkWell(
-                onTap: () {
-                  Navigator.of(context).pop();
-                },
-                child: Container(
-                  width: 56,
-                  height: 56,
-                  decoration: const BoxDecoration(
-                    color: AppColors.primaryColor,
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(
-                    Icons.arrow_back,
-                    color: AppColors.iconColor,
-                    size: 30,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        if (widget.showRoute == true &&
-            widget.events.length == 1 &&
-            _selectedEventLatLng != null)
+        if (widget.showRoute && _selectedEventLatLng != null)
           RouteDrawer(
             currentLocation: _currentLocationLatLng!,
             destination: _selectedEventLatLng!,
