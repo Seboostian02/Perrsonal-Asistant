@@ -1,4 +1,5 @@
 import 'package:TimeBuddy/screens/notifications_page.dart';
+import 'package:TimeBuddy/screens/privacy_page.dart';
 import 'package:TimeBuddy/screens/profile_page.dart';
 import 'package:flutter/material.dart';
 import '../services/auth_provider.dart';
@@ -47,7 +48,12 @@ class SettingsList extends StatelessWidget {
             leading: const Icon(Icons.lock),
             title: const Text('Privacy'),
             onTap: () {
-              print("privacy -----------");
+              showDialog(
+                context: context,
+                builder: (context) => Dialog.fullscreen(
+                  child: const PrivacyPage(),
+                ),
+              );
             },
           ),
           const Divider(),
