@@ -11,6 +11,7 @@ final NotificationService notificationService = NotificationService();
 class GoogleCalendarService with ChangeNotifier {
   static GoogleCalendarService? _instance;
   bool reloadEventList = false;
+  bool isLoading = false;
 
   GoogleCalendarService._();
 
@@ -209,6 +210,10 @@ class GoogleCalendarService with ChangeNotifier {
     String? priority,
   }) async {
     try {
+      GoogleCalendarService calendarService = GoogleCalendarService.instance;
+      calendarService.isLoading = true;
+      calendarService.notifyListeners();
+
       print("Updating event, series update: $updateSeries");
       final client = await getAuthenticatedClient(accessToken);
       var calendarApi = calendar.CalendarApi(client);
@@ -305,6 +310,7 @@ class GoogleCalendarService with ChangeNotifier {
       GoogleCalendarService calendarService = GoogleCalendarService.instance;
       // După finalizarea actualizării, setăm reloadEventList la false
       calendarService.reloadEventList = true;
+      calendarService.isLoading = false;
       print(
           'reloadEventList in updateEvent: ${calendarService.reloadEventList}');
       // Notificăm ascultătorii despre actualizarea completă

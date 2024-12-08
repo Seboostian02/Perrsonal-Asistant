@@ -186,14 +186,8 @@ class MainPageState extends State<MainPage> {
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context);
     final eventProvider = Provider.of<EventProvider>(context);
-
     final calendarService = Provider.of<GoogleCalendarService>(context);
-    if (calendarService.reloadEventList) {
-      _fetchEvents(); // Reîncarcă lista de evenimente
-      calendarService.reloadEventList = false; // Resetează flag-ul
-      print(
-          'reloadEventList after fetching: ${calendarService.reloadEventList}');
-    }
+
     return Scaffold(
       extendBody: true,
       appBar: AppBar(
@@ -217,14 +211,21 @@ class MainPageState extends State<MainPage> {
       body: IndexedStack(
         index: _selectedIndex,
         children: [
-          RefreshIndicator(
-            onRefresh: _onRefresh,
-            child: EventList(
-              events: eventProvider.events,
-              loading: _loading,
-              onRefresh: _refreshEvents,
-            ),
-          ),
+          calendarService.isLoading
+              ? const Center(
+                  child: Text(
+                    "Is Loading...",
+                    style: TextStyle(fontSize: 18),
+                  ),
+                )
+              : RefreshIndicator(
+                  onRefresh: _onRefresh,
+                  child: EventList(
+                    events: eventProvider.events,
+                    loading: _loading,
+                    onRefresh: _refreshEvents,
+                  ),
+                ),
           eventProvider.events.isNotEmpty
               ? EventView(
                   key: _eventViewKey,
@@ -239,10 +240,6 @@ class MainPageState extends State<MainPage> {
                 )
               : const Center(child: CircularProgressIndicator()),
           const ProfilePage(),
-          // NotFoundPage(
-          //   onBackToHome: () => _onItemTapped(0),
-          //   notificationService: notificationService,
-          // ),
           SettingsList(authProvider: authProvider),
         ],
       ),
