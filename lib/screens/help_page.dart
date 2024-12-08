@@ -1,4 +1,5 @@
 import 'package:TimeBuddy/utils/colors.dart';
+import 'package:TimeBuddy/utils/contact.dart';
 import 'package:flutter/material.dart';
 
 class HelpSupportPage extends StatelessWidget {
@@ -42,7 +43,7 @@ class HelpSupportPage extends StatelessWidget {
                 ),
                 const SizedBox(height: 10),
                 const Text(
-                  "1. How can I access my calendar in the app?\n   - After signing in, you can access the calendar from the home page.\n\n2. What should I do if I am not receiving event alerts?\n   - Check the notification permissions in your device settings.\n\n3. How can I contact the support team if I encounter a problem?\n   - You can send an email to contact@myapp.com.",
+                  "1. How can I access my calendar in the app?\n   - After signing in, you can access the calendar from the home page.\n\n2. What should I do if I am not receiving event alerts?\n   - Check the notification permissions in your device settings.\n\n3. How can I contact the support team if I encounter a problem?\n   - You can send an email to ${ContactData.email}.",
                   style: TextStyle(fontSize: 14),
                 ),
                 const SizedBox(height: 20),
@@ -57,7 +58,7 @@ class HelpSupportPage extends StatelessWidget {
                 ),
                 const SizedBox(height: 10),
                 const Text(
-                  "- Email: contact@myapp.com\n- In-app support: Send us feedback through the app settings.\n- Phone: +40 123 456 7890",
+                  "- Email: ${ContactData.email}\n- In-app support: Send us feedback through the app settings.\n- Phone: ${ContactData.phone}",
                   style: TextStyle(fontSize: 14),
                 ),
                 const SizedBox(height: 20),

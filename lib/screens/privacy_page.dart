@@ -1,5 +1,6 @@
 import 'package:TimeBuddy/utils/colors.dart';
 import 'package:flutter/material.dart';
+import 'package:TimeBuddy/utils/contact.dart';
 
 class PrivacyPage extends StatelessWidget {
   const PrivacyPage({super.key});
@@ -32,7 +33,7 @@ class PrivacyPage extends StatelessWidget {
                 ),
                 const SizedBox(height: 20),
                 const Text(
-                  "1. **Data Collection:**\nThe app collects limited information such as location data and notifications to function optimally.\n\n2. **Use of Data:**\nThe information is used solely for the purposes mentioned, such as calendar planning and location-based alerts.\n\n3. **Data Protection:**\nInformation is encrypted and secured according to modern security standards.\n\n4. **Data Sharing:**\nWe do not share personal information with third parties without the user's explicit consent.\n\n5. **Contact:**\nIf you have any questions or concerns regarding our privacy policy, you can contact our team at contact@myapp.com.",
+                  "1. **Data Collection:**\nThe app collects limited information such as location data and notifications to function optimally.\n\n2. **Use of Data:**\nThe information is used solely for the purposes mentioned, such as calendar planning and location-based alerts.\n\n3. **Data Protection:**\nInformation is encrypted and secured according to modern security standards.\n\n4. **Data Sharing:**\nWe do not share personal information with third parties without the user's explicit consent.\n\n5. **Contact:**\nIf you have any questions or concerns regarding our privacy policy, you can contact our team at ${ContactData.email}.",
                   style: TextStyle(fontSize: 16),
                 ),
                 const SizedBox(height: 20),
