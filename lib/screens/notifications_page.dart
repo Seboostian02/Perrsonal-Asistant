@@ -75,7 +75,14 @@ class _NotificationsPageState extends State<NotificationsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Scheduled Notifications')),
+      appBar: AppBar(
+          title: const Text(
+        'Scheduled Notifications',
+        style: TextStyle(
+          fontWeight: FontWeight.bold,
+          fontSize: 20,
+        ),
+      )),
       body: FutureBuilder<Map<int, List<PendingNotificationRequest>>>(
         future: _pendingNotifications,
         builder: (context, snapshot) {
