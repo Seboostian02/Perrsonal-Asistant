@@ -18,7 +18,7 @@ class HelpSupportPage extends StatelessWidget {
               children: [
                 const SizedBox(height: 10),
                 const Text(
-                  "Ajutor și Suport",
+                  "Help and Support",
                   style: TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.bold,
@@ -27,14 +27,14 @@ class HelpSupportPage extends StatelessWidget {
                 ),
                 const SizedBox(height: 20),
                 const Text(
-                  "Bine ai venit în secțiunea Ajutor și Suport. Aici poți găsi informații despre utilizarea aplicației, întrebări frecvente și modalități de a contacta echipa noastră.",
+                  "Welcome to the Help and Support section. Here you can find information on how to use the app, frequently asked questions, and ways to contact our support team.",
                   style: TextStyle(fontSize: 16),
                 ),
                 const SizedBox(height: 20),
                 const Divider(),
                 const SizedBox(height: 10),
                 const Text(
-                  "Întrebări frecvente:",
+                  "Frequently Asked Questions:",
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -42,14 +42,14 @@ class HelpSupportPage extends StatelessWidget {
                 ),
                 const SizedBox(height: 10),
                 const Text(
-                  "1. Cum pot accesa calendarul din aplicație?\n   - După autentificare, vei avea acces la calendar din pagina principală.\n\n2. Ce să fac dacă nu primesc alerte despre evenimente?\n   - Verifică permisiunile de notificare din setările dispozitivului.\n\n3. Cum pot contacta echipa de suport dacă întâmpin o problemă?\n   - Poți trimite un e-mail la adresa contact@myapp.com.",
+                  "1. How can I access my calendar in the app?\n   - After signing in, you can access the calendar from the home page.\n\n2. What should I do if I am not receiving event alerts?\n   - Check the notification permissions in your device settings.\n\n3. How can I contact the support team if I encounter a problem?\n   - You can send an email to contact@myapp.com.",
                   style: TextStyle(fontSize: 14),
                 ),
                 const SizedBox(height: 20),
                 const Divider(),
                 const SizedBox(height: 10),
                 const Text(
-                  "Modalități de contact:",
+                  "Contact Methods:",
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -57,7 +57,7 @@ class HelpSupportPage extends StatelessWidget {
                 ),
                 const SizedBox(height: 10),
                 const Text(
-                  "- Email: contact@myapp.com\n- Suport prin aplicație: Trimite-ne feedback din setările aplicației.\n- Telefon: +40 123 456 7890",
+                  "- Email: contact@myapp.com\n- In-app support: Send us feedback through the app settings.\n- Phone: +40 123 456 7890",
                   style: TextStyle(fontSize: 14),
                 ),
                 const SizedBox(height: 20),
@@ -65,7 +65,7 @@ class HelpSupportPage extends StatelessWidget {
                   onPressed: () {
                     Navigator.pop(context);
                   },
-                  child: const Text("Înapoi"),
+                  child: const Text("Go Back"),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.secondaryColor,
                     foregroundColor: AppColors.textColor,
