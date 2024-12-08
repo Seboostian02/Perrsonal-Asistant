@@ -1,4 +1,5 @@
 import 'package:calendar/screens/event_view_on_map.dart';
+import 'package:calendar/screens/loading.dart';
 import 'package:calendar/screens/profile_page.dart';
 import 'package:calendar/screens/settings.dart';
 import 'package:calendar/screens/weather_view.dart';
@@ -212,12 +213,7 @@ class MainPageState extends State<MainPage> {
         index: _selectedIndex,
         children: [
           calendarService.isLoading
-              ? const Center(
-                  child: Text(
-                    "Is Loading...",
-                    style: TextStyle(fontSize: 18),
-                  ),
-                )
+              ? LoadingScreen()
               : RefreshIndicator(
                   onRefresh: _onRefresh,
                   child: EventList(
