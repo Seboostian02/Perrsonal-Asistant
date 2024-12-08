@@ -11,7 +11,6 @@ import 'package:googleapis/calendar/v3.dart' as calendar;
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 
-import 'package:TimeBuddy/services/event_service.dart';
 import 'package:TimeBuddy/services/location_service.dart';
 import 'package:TimeBuddy/env/env.dart';
 
