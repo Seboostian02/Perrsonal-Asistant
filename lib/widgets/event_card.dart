@@ -3,6 +3,7 @@ import 'package:calendar/services/auth_provider.dart';
 import 'package:calendar/services/auth_service.dart';
 import 'package:calendar/services/google_calendar_service.dart';
 import 'package:calendar/utils/colors.dart';
+import 'package:calendar/widgets/edit_event_form.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:googleapis/calendar/v3.dart' as calendar;
@@ -12,7 +13,9 @@ class EventCard extends StatefulWidget {
   final calendar.Event event;
   final bool showLocation;
   final bool expandMode;
+  final bool editEvent;
   final VoidCallback? onDelete;
+  final VoidCallback? onEdit;
   static const Color cardColor = AppColors.primaryLightColor;
 
   const EventCard({
@@ -20,7 +23,9 @@ class EventCard extends StatefulWidget {
     required this.event,
     this.showLocation = false,
     this.expandMode = false,
+    this.editEvent = true,
     this.onDelete,
+    this.onEdit,
   }) : super(key: key);
 
   @override
@@ -47,6 +52,141 @@ class EventCardState extends State<EventCard> {
   void initState() {
     super.initState();
     _isExpanded = widget.expandMode;
+  }
+
+  void _showEditDialog(BuildContext context) async {
+    final accessToken = await AuthService().accessToken;
+
+    if (accessToken != null) {
+      final client =
+          await GoogleCalendarService.getAuthenticatedClient(accessToken);
+      final calendarApi = calendar.CalendarApi(client);
+
+      String mainEventId = widget.event.id!.split('_')[0];
+
+      final recurringEventIds =
+          await GoogleCalendarService.getRecurringEventIds(
+        calendarApi,
+        widget.event.id!,
+        widget.event.id!,
+      );
+
+      bool isRecurring = recurringEventIds.contains(mainEventId);
+      bool editSeries = false;
+
+      bool confirmedEdit = await showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: const Text("Edit Event"),
+            content: isRecurring
+                ? const Text(
+                    "Do you want to edit this event or the entire series?")
+                : const Text("Are you sure you want to edit this event?"),
+            actions: [
+              if (isRecurring) ...[
+                TextButton(
+                  onPressed: () {
+                    editSeries = false;
+                    Navigator.of(context).pop(true);
+                  },
+                  child: const Text("This Event"),
+                ),
+                TextButton(
+                  onPressed: () {
+                    editSeries = true;
+                    Navigator.of(context).pop(true);
+                  },
+                  child: const Text("Entire Series"),
+                ),
+              ] else ...[
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(false),
+                  child: const Text("No"),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(true),
+                  child: const Text("Yes"),
+                ),
+              ],
+            ],
+          );
+        },
+      );
+
+      if (confirmedEdit) {
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return Dialog(
+              child: EditEventForm(
+                event: widget.event,
+                onEdit: widget.onEdit,
+                editSeries: editSeries,
+                onUpdate: (updatedEvent) async {
+                  setState(() {
+                    widget.event.summary = updatedEvent.summary;
+                    widget.event.description = updatedEvent.description;
+                    widget.event.location = updatedEvent.location;
+                    // Actualizare prioritate
+                    widget.event.extendedProperties ??=
+                        calendar.EventExtendedProperties(
+                      private: {},
+                    );
+                    widget.event.extendedProperties!.private!['priority'] =
+                        updatedEvent.extendedProperties!.private!['priority']!;
+                  });
+
+                  try {
+                    if (updatedEvent.summary == null ||
+                        updatedEvent.summary!.isEmpty) {
+                      throw Exception('Title cannot be empty');
+                    }
+                    if (updatedEvent.start?.dateTime == null) {
+                      throw Exception('Start time cannot be null');
+                    }
+                    if (updatedEvent.end?.dateTime == null) {
+                      throw Exception('End time cannot be null');
+                    }
+
+                    // Convertește DateTime în TimeOfDay
+                    TimeOfDay startTime = TimeOfDay.fromDateTime(
+                        updatedEvent.start!.dateTime!.toLocal());
+                    TimeOfDay endTime = TimeOfDay.fromDateTime(
+                        updatedEvent.end!.dateTime!.toLocal());
+
+                    String eventId =
+                        editSeries ? mainEventId : widget.event.id!;
+
+                    // Trimite la Google Calendar
+                    await GoogleCalendarService.updateEvent(
+                      accessToken: accessToken,
+                      eventId: eventId,
+                      title: updatedEvent.summary!,
+                      description: updatedEvent.description ?? '',
+                      date: updatedEvent.start!.dateTime!.toLocal(),
+                      startTime: startTime,
+                      endTime: endTime,
+                      location: updatedEvent.location ?? '',
+                      priority: updatedEvent
+                              .extendedProperties!.private!['priority'] ??
+                          'Low',
+                      updateSeries: editSeries,
+                    );
+
+                    print('Event updated successfully in Google Calendar');
+                  } catch (error) {
+                    print('Error updating event in Google Calendar: $error');
+                  }
+                },
+              ),
+            );
+          },
+        );
+      }
+    } else {
+      print("Failed to get access token for Google Calendar");
+    }
   }
 
   void _onLocationTap(BuildContext context) {
@@ -221,6 +361,11 @@ class EventCardState extends State<EventCard> {
                     ),
                     overflow: TextOverflow.ellipsis,
                   ),
+                  if (widget.editEvent && _isExpanded) // Buton de editare
+                    IconButton(
+                      icon: const Icon(Icons.edit),
+                      onPressed: () => _showEditDialog(context),
+                    ),
                   if (!widget.expandMode)
                     IconButton(
                       icon: AnimatedRotation(

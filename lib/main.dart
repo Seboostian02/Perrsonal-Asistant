@@ -9,6 +9,7 @@ import 'package:permission_handler/permission_handler.dart';
 
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
+import 'services/google_calendar_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -24,6 +25,7 @@ void main() async {
       providers: [
         ChangeNotifierProvider(create: (_) => EventProvider()),
         ChangeNotifierProvider(create: (_) => AuthProvider()),
+        ChangeNotifierProvider(create: (_) => GoogleCalendarService.instance),
       ],
       child: MyApp(
         hasLocationPermission: hasPermission,

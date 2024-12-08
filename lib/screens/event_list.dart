@@ -105,6 +105,7 @@ class EventList extends StatelessWidget {
                         event: event,
                         showLocation: true,
                         onDelete: onRefresh,
+                        onEdit: onRefresh,
                       ),
                   const SizedBox(height: 20),
                   const Text(
@@ -118,6 +119,7 @@ class EventList extends StatelessWidget {
                       showLocation: true,
                       key: ValueKey(event.id),
                       onDelete: onRefresh,
+                      onEdit: onRefresh,
                     ),
                 ],
               ],

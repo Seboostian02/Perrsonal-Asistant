@@ -19,8 +19,6 @@ import '../services/auth_provider.dart';
 
 enum RecurrenceType { none, daily, weekly, monthly }
 
-// enum EventPriority { low, medium, high }
-
 class EventForm extends StatefulWidget {
   const EventForm({super.key});
 
@@ -186,23 +184,29 @@ class EventFormState extends State<EventForm> {
       initialTime: isStartTime ? _startTime : _endTime,
       initialEntryMode: TimePickerEntryMode.input,
     );
+
     if (picked != null) {
       setState(() {
         if (isStartTime) {
-          _startTime = picked;
-
-          if (_endTime.hour < _startTime.hour ||
-              (_endTime.hour == _startTime.hour &&
-                  _endTime.minute <= _startTime.minute)) {
-            _endTime = picked.replacing(hour: picked.hour + 1);
+          if (picked.hour > _endTime.hour ||
+              (picked.hour == _endTime.hour &&
+                  picked.minute >= _endTime.minute)) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Start time must be before end time'),
+              ),
+            );
+            return;
           }
+          _startTime = picked;
         } else {
           if (picked.hour < _startTime.hour ||
               (picked.hour == _startTime.hour &&
                   picked.minute <= _startTime.minute)) {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
-                  content: Text('End time must be after start time')),
+                content: Text('End time must be after start time'),
+              ),
             );
             return;
           }
@@ -274,13 +278,12 @@ class EventFormState extends State<EventForm> {
                   onTimeSelected: _selectTime,
                 ),
                 const SizedBox(height: 20),
-                // Wrap PrioritySelector and Online Meeting in a Row
+
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    // PrioritySelector cu lățime mai mică
                     Container(
-                      width: 130, // Ajustează această valoare după necesități
+                      width: 130,
                       child: PrioritySelector(
                         selectedPriority: selectedPriority,
                         onPriorityChanged: (String? newPriority) {
@@ -292,10 +295,8 @@ class EventFormState extends State<EventForm> {
                         },
                       ),
                     ),
-
-                    // CheckboxListTile cu lățime mai mare
                     Container(
-                      width: 200, // Ajustează această valoare după necesități
+                      width: 200,
                       child: CheckboxListTile(
                         title: const Text('Online meeting?'),
                         value: _isOnlineMeeting,

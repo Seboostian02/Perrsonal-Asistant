@@ -1,4 +1,6 @@
 import 'package:calendar/screens/event_view_on_map.dart';
+import 'package:calendar/screens/loading.dart';
+import 'package:calendar/screens/profile_page.dart';
 import 'package:calendar/screens/settings.dart';
 import 'package:calendar/screens/weather_view.dart';
 import 'package:calendar/services/auth_service.dart';
@@ -33,8 +35,26 @@ class MainPageState extends State<MainPage> {
   @override
   void initState() {
     super.initState();
+    GoogleCalendarService.instance.addListener(_onEventListReload);
     _fetchAndScheduleNotifications();
     _getCurrentLocation();
+  }
+
+  @override
+  void dispose() {
+    // Eliminăm listener-ul când pagina este distrusă
+    GoogleCalendarService.instance.removeListener(_onEventListReload);
+    super.dispose();
+  }
+
+  void _onEventListReload() async {
+    // Dacă reloadEventList este activat, reîncarcă evenimentele
+    if (GoogleCalendarService.instance.reloadEventList) {
+      await _fetchEvents(); // Reîncarcă lista de evenimente
+      setState(() {}); // Actualizează interfața utilizatorului
+      GoogleCalendarService.instance.reloadEventList =
+          false; // Resetează variabila
+    }
   }
 
   Future<void> _fetchAndScheduleNotifications() async {
@@ -51,8 +71,8 @@ class MainPageState extends State<MainPage> {
       int modifiedEventId = notification.id;
       if (!events.any(
           (event) => event.id.hashCode.abs() % 10000000 == modifiedEventId)) {
-        // await notificationService.cancelNotification(modifiedEventId);
-        // print("Notification for event with ID $modifiedEventId canceled.");
+        await notificationService.cancelNotification(modifiedEventId);
+        print("Notification for event with ID $modifiedEventId canceled.");
       }
     }
 
@@ -125,6 +145,7 @@ class MainPageState extends State<MainPage> {
     if (_selectedIndex == 1) {
       await _setMarkersOnMap();
     }
+    GoogleCalendarService.instance.reloadEventList = false;
   }
 
   Future<void> _setMarkersOnMap() async {
@@ -166,8 +187,8 @@ class MainPageState extends State<MainPage> {
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context);
     final eventProvider = Provider.of<EventProvider>(context);
-    print("events in main ------------");
-    print(eventProvider.events);
+    final calendarService = Provider.of<GoogleCalendarService>(context);
+
     return Scaffold(
       extendBody: true,
       appBar: AppBar(
@@ -191,14 +212,16 @@ class MainPageState extends State<MainPage> {
       body: IndexedStack(
         index: _selectedIndex,
         children: [
-          RefreshIndicator(
-            onRefresh: _onRefresh,
-            child: EventList(
-              events: eventProvider.events,
-              loading: _loading,
-              onRefresh: _refreshEvents,
-            ),
-          ),
+          calendarService.isLoading
+              ? LoadingScreen()
+              : RefreshIndicator(
+                  onRefresh: _onRefresh,
+                  child: EventList(
+                    events: eventProvider.events,
+                    loading: _loading,
+                    onRefresh: _refreshEvents,
+                  ),
+                ),
           eventProvider.events.isNotEmpty
               ? EventView(
                   key: _eventViewKey,
@@ -212,10 +235,7 @@ class MainPageState extends State<MainPage> {
                   location: _currentPosition!,
                 )
               : const Center(child: CircularProgressIndicator()),
-          NotFoundPage(
-            onBackToHome: () => _onItemTapped(0),
-            notificationService: notificationService,
-          ),
+          const ProfilePage(),
           SettingsList(authProvider: authProvider),
         ],
       ),

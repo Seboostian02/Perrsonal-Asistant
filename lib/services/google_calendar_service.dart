@@ -8,7 +8,18 @@ import 'notification_service.dart';
 
 final NotificationService notificationService = NotificationService();
 
-class GoogleCalendarService {
+class GoogleCalendarService with ChangeNotifier {
+  static GoogleCalendarService? _instance;
+  bool reloadEventList = false;
+  bool isLoading = false;
+
+  GoogleCalendarService._();
+
+  static GoogleCalendarService get instance {
+    _instance ??= GoogleCalendarService._();
+    return _instance!;
+  }
+
   static Future<void> createEvent({
     required String accessToken,
     required String title,
@@ -184,5 +195,126 @@ class GoogleCalendarService {
 
     print("Recurring event IDs found: $recurringEventIds");
     return recurringEventIds;
+  }
+
+  static Future<void> updateEvent({
+    required String accessToken,
+    required String eventId,
+    required String title,
+    required String description,
+    required DateTime date,
+    required TimeOfDay startTime,
+    required TimeOfDay endTime,
+    required bool updateSeries,
+    String? location,
+    String? priority,
+  }) async {
+    try {
+      GoogleCalendarService calendarService = GoogleCalendarService.instance;
+      calendarService.isLoading = true;
+      calendarService.notifyListeners();
+
+      print("Updating event, series update: $updateSeries");
+      final client = await getAuthenticatedClient(accessToken);
+      var calendarApi = calendar.CalendarApi(client);
+
+      if (updateSeries) {
+        // Actualizare întreaga serie
+        String mainEventId = eventId.split('_')[0];
+        var event = await calendarApi.events.get("primary", mainEventId);
+
+        event.summary = title;
+        event.description = description;
+        event.location = location;
+
+        if (priority != null) {
+          event.extendedProperties ??=
+              calendar.EventExtendedProperties(private: {});
+          event.extendedProperties!.private!['priority'] = priority;
+        }
+
+        var startDateTime = DateTime(
+          date.year,
+          date.month,
+          date.day,
+          startTime.hour,
+          startTime.minute,
+        ).toUtc();
+
+        var endDateTime = DateTime(
+          date.year,
+          date.month,
+          date.day,
+          endTime.hour,
+          endTime.minute,
+        ).toUtc();
+
+        event.start = calendar.EventDateTime(
+          dateTime: startDateTime,
+          timeZone: 'Europe/Bucharest',
+        );
+
+        event.end = calendar.EventDateTime(
+          dateTime: endDateTime,
+          timeZone: 'Europe/Bucharest',
+        );
+
+        await calendarApi.events.patch(event, "primary", mainEventId);
+        print("Series updated successfully.");
+      } else {
+        // Actualizare doar a instanței selectate
+        var event = await calendarApi.events.get("primary", eventId);
+
+        event.summary = title;
+        event.description = description;
+        event.location = location;
+
+        if (priority != null) {
+          event.extendedProperties ??=
+              calendar.EventExtendedProperties(private: {});
+          event.extendedProperties!.private!['priority'] = priority;
+        }
+
+        var startDateTime = DateTime(
+          date.year,
+          date.month,
+          date.day,
+          startTime.hour,
+          startTime.minute,
+        ).toUtc();
+
+        var endDateTime = DateTime(
+          date.year,
+          date.month,
+          date.day,
+          endTime.hour,
+          endTime.minute,
+        ).toUtc();
+
+        event.start = calendar.EventDateTime(
+          dateTime: startDateTime,
+          timeZone: 'Europe/Bucharest',
+        );
+
+        event.end = calendar.EventDateTime(
+          dateTime: endDateTime,
+          timeZone: 'Europe/Bucharest',
+        );
+
+        await calendarApi.events.patch(event, "primary", eventId);
+        print("Single event updated successfully.");
+      }
+    } catch (e) {
+      print("Error updating event: $e");
+    } finally {
+      GoogleCalendarService calendarService = GoogleCalendarService.instance;
+      // După finalizarea actualizării, setăm reloadEventList la false
+      calendarService.reloadEventList = true;
+      calendarService.isLoading = false;
+      print(
+          'reloadEventList in updateEvent: ${calendarService.reloadEventList}');
+      // Notificăm ascultătorii despre actualizarea completă
+      calendarService.notifyListeners();
+    }
   }
 }
