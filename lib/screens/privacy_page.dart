@@ -18,7 +18,7 @@ class PrivacyPage extends StatelessWidget {
               children: [
                 const SizedBox(height: 10),
                 const Text(
-                  "Politica de Confidențialitate",
+                  "Privacy Policy",
                   style: TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.bold,
@@ -27,12 +27,12 @@ class PrivacyPage extends StatelessWidget {
                 ),
                 const SizedBox(height: 20),
                 const Text(
-                  "Ultima actualizare: Decembrie 2023",
+                  "Last updated: December 2023",
                   style: TextStyle(fontSize: 14, color: Colors.grey),
                 ),
                 const SizedBox(height: 20),
                 const Text(
-                  "1. **Colectarea datelor:**\nAplicația colectează informații limitate, cum ar fi datele de locație și notificări, pentru a funcționa optim.\n\n2. **Utilizarea datelor:**\nInformațiile sunt utilizate doar pentru scopurile menționate, cum ar fi planificarea calendarului și alertele bazate pe locație.\n\n3. **Protejarea datelor:**\nInformațiile sunt criptate și protejate conform standardelor de securitate moderne.\n\n4. **Partajarea datelor:**\nNu partajăm informațiile personale cu terțe părți fără acordul explicit al utilizatorului.\n\n5. **Contact:**\nDacă ai întrebări sau preocupări cu privire la politica noastră de confidențialitate, te poți adresa echipei noastre la contact@myapp.com.",
+                  "1. **Data Collection:**\nThe app collects limited information such as location data and notifications to function optimally.\n\n2. **Use of Data:**\nThe information is used solely for the purposes mentioned, such as calendar planning and location-based alerts.\n\n3. **Data Protection:**\nInformation is encrypted and secured according to modern security standards.\n\n4. **Data Sharing:**\nWe do not share personal information with third parties without the user's explicit consent.\n\n5. **Contact:**\nIf you have any questions or concerns regarding our privacy policy, you can contact our team at contact@myapp.com.",
                   style: TextStyle(fontSize: 16),
                 ),
                 const SizedBox(height: 20),
@@ -40,7 +40,7 @@ class PrivacyPage extends StatelessWidget {
                   onPressed: () {
                     Navigator.pop(context);
                   },
-                  child: const Text("Înapoi"),
+                  child: const Text("Go Back"),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.secondaryColor,
                     foregroundColor: AppColors.textColor,
