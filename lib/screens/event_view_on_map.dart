@@ -56,7 +56,7 @@ class EventViewState extends State<EventView> {
       backgroundColor: Colors.transparent,
       builder: (BuildContext context) {
         return FractionallySizedBox(
-          heightFactor: 0.5, // Jumătate din înălțimea ecranului
+          heightFactor: 0.5,
           child: Container(
             decoration: BoxDecoration(
               color: Colors.white,
