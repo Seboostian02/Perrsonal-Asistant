@@ -1,8 +1,8 @@
-import 'package:calendar/screens/weather_view_components/current_weather.dart';
-import 'package:calendar/screens/weather_view_components/hourly_forecast.dart';
-import 'package:calendar/screens/weather_view_components/weekly_forecast.dart';
+import 'package:TimeBuddy/screens/weather_view_components/current_weather.dart';
+import 'package:TimeBuddy/screens/weather_view_components/hourly_forecast.dart';
+import 'package:TimeBuddy/screens/weather_view_components/weekly_forecast.dart';
 import 'package:flutter/material.dart';
-import 'package:calendar/services/weather_service.dart';
+import 'package:TimeBuddy/services/weather_service.dart';
 import 'package:geolocator/geolocator.dart';
 
 class WeatherView extends StatefulWidget {

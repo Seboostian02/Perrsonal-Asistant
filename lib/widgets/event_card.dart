@@ -1,9 +1,9 @@
-import 'package:calendar/screens/event_view_on_map.dart';
-import 'package:calendar/services/auth_provider.dart';
-import 'package:calendar/services/auth_service.dart';
-import 'package:calendar/services/google_calendar_service.dart';
-import 'package:calendar/utils/colors.dart';
-import 'package:calendar/widgets/edit_event_form.dart';
+import 'package:TimeBuddy/screens/event_view_on_map.dart';
+import 'package:TimeBuddy/services/auth_provider.dart';
+import 'package:TimeBuddy/services/auth_service.dart';
+import 'package:TimeBuddy/services/google_calendar_service.dart';
+import 'package:TimeBuddy/utils/colors.dart';
+import 'package:TimeBuddy/widgets/edit_event_form.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:googleapis/calendar/v3.dart' as calendar;

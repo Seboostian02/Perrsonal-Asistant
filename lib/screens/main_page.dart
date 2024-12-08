@@ -1,12 +1,12 @@
-import 'package:calendar/screens/event_view_on_map.dart';
-import 'package:calendar/screens/loading.dart';
-import 'package:calendar/screens/profile_page.dart';
-import 'package:calendar/screens/settings.dart';
-import 'package:calendar/screens/weather_view.dart';
-import 'package:calendar/services/auth_service.dart';
-import 'package:calendar/services/event_provider.dart';
-import 'package:calendar/services/location_service.dart';
-import 'package:calendar/utils/colors.dart';
+import 'package:TimeBuddy/screens/event_view_on_map.dart';
+import 'package:TimeBuddy/screens/loading.dart';
+import 'package:TimeBuddy/screens/profile_page.dart';
+import 'package:TimeBuddy/screens/settings.dart';
+import 'package:TimeBuddy/screens/weather_view.dart';
+import 'package:TimeBuddy/services/auth_service.dart';
+import 'package:TimeBuddy/services/event_provider.dart';
+import 'package:TimeBuddy/services/location_service.dart';
+import 'package:TimeBuddy/utils/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -193,10 +193,9 @@ class MainPageState extends State<MainPage> {
       extendBody: true,
       appBar: AppBar(
         title: Text(
-          authProvider.isLoggedIn
-              ? "Hello, ${authProvider.currentUser?.displayName ?? 'User'}"
-              : "Main App",
-          style: TextStyle(color: AppColors.textColor),
+          authProvider.isLoggedIn ? "TimeBuddy" : "Main App",
+          style: TextStyle(
+              color: AppColors.textColor, fontWeight: FontWeight.w500),
         ),
         backgroundColor: AppColors.primaryColor,
         foregroundColor: AppColors.iconColor,

@@ -1,5 +1,5 @@
-import 'package:calendar/screens/notifications_page.dart';
-import 'package:calendar/screens/profile_page.dart';
+import 'package:TimeBuddy/screens/notifications_page.dart';
+import 'package:TimeBuddy/screens/profile_page.dart';
 import 'package:flutter/material.dart';
 import '../services/auth_provider.dart';
 

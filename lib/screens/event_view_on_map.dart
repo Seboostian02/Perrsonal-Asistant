@@ -1,8 +1,8 @@
-import 'package:calendar/utils/colors.dart';
-import 'package:calendar/widgets/route_draw.dart';
+import 'package:TimeBuddy/utils/colors.dart';
+import 'package:TimeBuddy/widgets/route_draw.dart';
 
-import 'package:calendar/widgets/event_card.dart';
-import 'package:calendar/widgets/zoom_controls.dart';
+import 'package:TimeBuddy/widgets/event_card.dart';
+import 'package:TimeBuddy/widgets/zoom_controls.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
@@ -11,9 +11,9 @@ import 'package:googleapis/calendar/v3.dart' as calendar;
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 
-import 'package:calendar/services/event_service.dart';
-import 'package:calendar/services/location_service.dart';
-import 'package:calendar/env/env.dart';
+import 'package:TimeBuddy/services/event_service.dart';
+import 'package:TimeBuddy/services/location_service.dart';
+import 'package:TimeBuddy/env/env.dart';
 
 class EventView extends StatefulWidget {
   final List<calendar.Event> events;

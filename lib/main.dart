@@ -1,5 +1,5 @@
-import 'package:calendar/screens/permission_page.dart';
-import 'package:calendar/services/event_provider.dart';
+import 'package:TimeBuddy/services/event_provider.dart';
+import 'package:TimeBuddy/utils/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'screens/main_page.dart';
@@ -17,7 +17,6 @@ void main() async {
   await Firebase.initializeApp();
   tz.initializeTimeZones();
   tz.setLocalLocation(tz.getLocation('Europe/Bucharest'));
-
   final hasPermission = await _checkLocationPermission();
   final hasNotificationPermission = await _checkNotificationPermission();
   final hasExactAlarmPermission = await _checkExactAlarmPermission();
@@ -64,7 +63,7 @@ Future<bool> _checkNotificationPermission() async {
 }
 
 Future<bool> _checkExactAlarmPermission() async {
-  if (await Permission.scheduleExactAlarm.isGranted) {
+  if (await Permission.notification.isGranted) {
     return true;
   }
   return _requestPermission(Permission.scheduleExactAlarm);
@@ -87,9 +86,111 @@ class MyApp extends StatelessWidget {
     final isLoggedIn = Provider.of<AuthProvider>(context).isLoggedIn;
 
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       home: hasLocationPermission && hasExactAlarmPermission
           ? (isLoggedIn ? const MainPage() : const LoginPage())
           : const PermissionPage(),
+    );
+  }
+}
+
+class PermissionPage extends StatelessWidget {
+  const PermissionPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              AppColors.primaryLightColor,
+              AppColors.primaryDarkColor,
+            ],
+          ),
+        ),
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 32.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.lock,
+                  size: 100,
+                  color: AppColors.iconColor,
+                ),
+                const SizedBox(height: 20),
+                Text(
+                  "Permissions Required",
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textColor,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  "To continue, please grant the required permissions.",
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: AppColors.textColor.withOpacity(0.7),
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 40),
+                ElevatedButton.icon(
+                  onPressed: () async {
+                    final hasLocation = await _checkLocationPermission();
+                    final hasNotification =
+                        await _checkNotificationPermission();
+                    final hasExactAlarm = await _checkExactAlarmPermission();
+
+                    if (hasLocation && hasNotification && hasExactAlarm) {
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const MyApp(
+                            hasLocationPermission: true,
+                            hasNotificationPermission: true,
+                            hasExactAlarmPermission: true,
+                          ),
+                        ),
+                      );
+                    }
+                  },
+                  icon: const Icon(Icons.check),
+                  label: const Text("Grant Permissions"),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.secondaryColor,
+                    foregroundColor: AppColors.textColor,
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 16.0,
+                      horizontal: 24.0,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                    textStyle: const TextStyle(fontSize: 16),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Text(
+                  "Permissions needed: Location, Notifications, and Exact Alarms.",
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: AppColors.textColor.withOpacity(0.9),
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

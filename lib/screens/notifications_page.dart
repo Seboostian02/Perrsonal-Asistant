@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:calendar/services/notification_service.dart';
+import 'package:TimeBuddy/services/notification_service.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 class NotificationsPage extends StatefulWidget {

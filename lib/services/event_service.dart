@@ -1,4 +1,4 @@
-import 'package:calendar/services/auth_service.dart';
+import 'package:TimeBuddy/services/auth_service.dart';
 import 'package:googleapis/calendar/v3.dart' as calendar;
 import '../services/google_calendar_service.dart';
 

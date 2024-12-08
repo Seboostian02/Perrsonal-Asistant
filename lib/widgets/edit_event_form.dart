@@ -1,11 +1,11 @@
-import 'package:calendar/widgets/event_form_components/location_selector.dart';
-import 'package:calendar/widgets/event_form_components/priority_selector.dart';
-import 'package:calendar/widgets/event_form_components/reccurence_selector.dart';
+import 'package:TimeBuddy/widgets/event_form_components/location_selector.dart';
+import 'package:TimeBuddy/widgets/event_form_components/priority_selector.dart';
+import 'package:TimeBuddy/widgets/event_form_components/reccurence_selector.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:googleapis/calendar/v3.dart' as calendar;
 import 'package:intl/intl.dart';
-import 'package:calendar/models/recurrence_type.dart' as model_recurrence;
+import 'package:TimeBuddy/models/recurrence_type.dart' as model_recurrence;
 
 class EditEventForm extends StatefulWidget {
   final calendar.Event event;
