@@ -1,4 +1,4 @@
-import 'package:calendar/utils/colors.dart';
+import 'package:TimeBuddy/utils/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 

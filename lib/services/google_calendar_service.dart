@@ -1,4 +1,4 @@
-import 'package:calendar/widgets/event_form.dart';
+import 'package:TimeBuddy/widgets/event_form.dart';
 import 'package:googleapis_auth/googleapis_auth.dart';
 import 'package:googleapis/calendar/v3.dart' as calendar;
 import 'package:googleapis_auth/auth_io.dart';

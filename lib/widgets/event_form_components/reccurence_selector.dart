@@ -1,5 +1,5 @@
-import 'package:calendar/utils/colors.dart';
-import 'package:calendar/widgets/event_form.dart';
+import 'package:TimeBuddy/utils/colors.dart';
+import 'package:TimeBuddy/widgets/event_form.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 

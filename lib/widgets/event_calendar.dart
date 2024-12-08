@@ -1,4 +1,4 @@
-import 'package:calendar/utils/colors.dart';
+import 'package:TimeBuddy/utils/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:googleapis/calendar/v3.dart' as calendar;
 import 'package:table_calendar/table_calendar.dart';

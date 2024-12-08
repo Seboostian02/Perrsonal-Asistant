@@ -1,4 +1,4 @@
-import 'package:calendar/utils/colors.dart';
+import 'package:TimeBuddy/utils/colors.dart';
 import 'package:flutter/material.dart';
 
 class TimeSelector extends StatelessWidget {

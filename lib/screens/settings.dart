@@ -1,5 +1,7 @@
-import 'package:calendar/screens/notifications_page.dart';
-import 'package:calendar/screens/profile_page.dart';
+import 'package:TimeBuddy/screens/help_page.dart';
+import 'package:TimeBuddy/screens/notifications_page.dart';
+import 'package:TimeBuddy/screens/privacy_page.dart';
+import 'package:TimeBuddy/screens/profile_page.dart';
 import 'package:flutter/material.dart';
 import '../services/auth_provider.dart';
 
@@ -47,7 +49,12 @@ class SettingsList extends StatelessWidget {
             leading: const Icon(Icons.lock),
             title: const Text('Privacy'),
             onTap: () {
-              print("privacy -----------");
+              showDialog(
+                context: context,
+                builder: (context) => Dialog.fullscreen(
+                  child: const PrivacyPage(),
+                ),
+              );
             },
           ),
           const Divider(),
@@ -55,7 +62,12 @@ class SettingsList extends StatelessWidget {
             leading: const Icon(Icons.help),
             title: const Text('Help & Support'),
             onTap: () {
-              print("HEEEELP -----------");
+              showDialog(
+                context: context,
+                builder: (context) => Dialog.fullscreen(
+                  child: const HelpSupportPage(),
+                ),
+              );
             },
           ),
           const Divider(),

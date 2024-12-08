@@ -1,4 +1,4 @@
-import 'package:calendar/services/auth_provider.dart';
+import 'package:TimeBuddy/services/auth_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 

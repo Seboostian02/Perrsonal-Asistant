@@ -1,8 +1,8 @@
-import 'package:calendar/utils/colors.dart';
-import 'package:calendar/widgets/route_draw.dart';
+import 'package:TimeBuddy/utils/colors.dart';
+import 'package:TimeBuddy/widgets/route_draw.dart';
 
-import 'package:calendar/widgets/event_card.dart';
-import 'package:calendar/widgets/zoom_controls.dart';
+import 'package:TimeBuddy/widgets/event_card.dart';
+import 'package:TimeBuddy/widgets/zoom_controls.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
@@ -11,9 +11,8 @@ import 'package:googleapis/calendar/v3.dart' as calendar;
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 
-import 'package:calendar/services/event_service.dart';
-import 'package:calendar/services/location_service.dart';
-import 'package:calendar/env/env.dart';
+import 'package:TimeBuddy/services/location_service.dart';
+import 'package:TimeBuddy/env/env.dart';
 
 class EventView extends StatefulWidget {
   final List<calendar.Event> events;
@@ -56,7 +55,7 @@ class EventViewState extends State<EventView> {
       backgroundColor: Colors.transparent,
       builder: (BuildContext context) {
         return FractionallySizedBox(
-          heightFactor: 0.5, // Jumătate din înălțimea ecranului
+          heightFactor: 0.5,
           child: Container(
             decoration: BoxDecoration(
               color: Colors.white,
@@ -229,47 +228,7 @@ class EventViewState extends State<EventView> {
             ],
           ),
         ),
-        if (widget.showCurrLocation)
-          Positioned(
-            top: 20,
-            right: 20,
-            child: FloatingActionButton(
-              onPressed: _getCurrentLocation,
-              backgroundColor: AppColors.primaryColor,
-              foregroundColor: AppColors.iconColor,
-              child: const Icon(Icons.my_location),
-            ),
-          ),
-        if (widget.showBackArrow)
-          Positioned(
-            top: 50,
-            left: 20,
-            child: Material(
-              elevation: 6,
-              shape: const CircleBorder(),
-              child: InkWell(
-                onTap: () {
-                  Navigator.of(context).pop();
-                },
-                child: Container(
-                  width: 56,
-                  height: 56,
-                  decoration: const BoxDecoration(
-                    color: AppColors.primaryColor,
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(
-                    Icons.arrow_back,
-                    color: AppColors.iconColor,
-                    size: 30,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        if (widget.showRoute == true &&
-            widget.events.length == 1 &&
-            _selectedEventLatLng != null)
+        if (widget.showRoute && _selectedEventLatLng != null)
           RouteDrawer(
             currentLocation: _currentLocationLatLng!,
             destination: _selectedEventLatLng!,

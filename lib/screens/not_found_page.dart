@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:calendar/services/notification_service.dart';
+import 'package:TimeBuddy/services/notification_service.dart';
 
 class NotFoundPage extends StatelessWidget {
   final VoidCallback onBackToHome;

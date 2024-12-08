@@ -1,9 +1,9 @@
-import 'package:calendar/env/env.dart';
-import 'package:calendar/utils/colors.dart';
+import 'package:TimeBuddy/env/env.dart';
+import 'package:TimeBuddy/utils/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:calendar/widgets/zoom_controls.dart';
+import 'package:TimeBuddy/widgets/zoom_controls.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
@@ -77,6 +77,12 @@ class _RouteDrawerState extends State<RouteDrawer> {
                 (data['features'][0]['geometry']['coordinates'] as List)
                     .map((coord) => LatLng(coord[1], coord[0]))
                     .toList();
+
+            if (selectedTransportMode == 'Driving') {
+              showTrafficTiles = true;
+            } else {
+              showTrafficTiles = false;
+            }
           });
         }
       } else {
@@ -150,18 +156,6 @@ class _RouteDrawerState extends State<RouteDrawer> {
           ],
         ),
         ZoomControls(mapController: mapController),
-        Positioned(
-          bottom: 80,
-          left: 20,
-          child: ElevatedButton(
-            onPressed: () {
-              setState(() {
-                showTrafficTiles = !showTrafficTiles;
-              });
-            },
-            child: Text(showTrafficTiles ? 'Hide Traffic' : 'Show Traffic'),
-          ),
-        ),
         Positioned(
           bottom: 20,
           left: 0,

@@ -1,8 +1,8 @@
-import 'package:calendar/services/auth_service.dart';
-import 'package:calendar/services/google_calendar_service.dart';
+import 'package:TimeBuddy/services/auth_service.dart';
+import 'package:TimeBuddy/services/google_calendar_service.dart';
 import 'package:flutter/material.dart';
 import 'package:googleapis/calendar/v3.dart' as calendar;
-import 'package:calendar/widgets/event_form.dart';
+import 'package:TimeBuddy/widgets/event_form.dart';
 
 class EventProvider with ChangeNotifier {
   List<calendar.Event> _events = [];

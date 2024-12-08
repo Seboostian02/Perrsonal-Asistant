@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'package:calendar/env/env.dart';
+import 'package:TimeBuddy/env/env.dart';
 import 'package:http/http.dart' as http;
 
 class WeatherService {
