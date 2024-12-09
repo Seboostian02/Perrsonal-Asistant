@@ -117,13 +117,13 @@ class PermissionPage extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(
+                const Icon(
                   Icons.lock,
                   size: 100,
                   color: AppColors.iconColor,
                 ),
                 const SizedBox(height: 20),
-                Text(
+                const Text(
                   "Permissions Required",
                   style: TextStyle(
                     fontSize: 24,
