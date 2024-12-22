@@ -23,15 +23,11 @@ class AppColors {
 
   // Card and Background Colors
   static const Color footerColor = Color(0xFF512DA8);
-  static const Color dividerColor =
-      Color(0xFFBDBDBD); // Light grey color for dividers
-  static const Color cardColor = Colors.white; // White color for the card
+  static const Color dividerColor = Color(0xFFBDBDBD);
+  static const Color cardColor = Colors.white;
 
   // Priority Colors
-  static const Color lowPriorityColor =
-      Color.fromARGB(255, 233, 218, 255); // Lumină, pentru prioritate scăzută
-  static const Color mediumPriorityColor =
-      Color.fromARGB(255, 213, 187, 254); // Culoare de bază
-  static const Color highPriorityColor =
-      Color.fromARGB(255, 197, 158, 255); // Mai închis, pentru prioritate mare
+  static const Color lowPriorityColor = Color.fromARGB(255, 233, 218, 255);
+  static const Color mediumPriorityColor = Color.fromARGB(255, 213, 187, 254);
+  static const Color highPriorityColor = Color.fromARGB(255, 197, 158, 255);
 }

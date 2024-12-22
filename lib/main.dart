@@ -41,12 +41,10 @@ Future<bool> _requestPermission(Permission permission) async {
   var status = await permission.status;
 
   if (status.isDenied || status.isRestricted) {
-    // Cere permisiunea
     status = await permission.request();
   }
 
   if (status.isPermanentlyDenied) {
-    // Arată utilizatorului un dialog pentru a accesa setările aplicației
     await openAppSettings();
     status = await permission.status;
   }
