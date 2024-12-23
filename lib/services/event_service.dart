@@ -9,10 +9,8 @@ class EventService {
 
     if (accessToken != null) {
       DateTime now = DateTime.now();
-      DateTime startTime =
-          now.subtract(const Duration(hours: 12)); // 12 ore în urma
-      DateTime endTime =
-          now.add(const Duration(days: 365 * 10)); // evenimente pe 10 ani
+      DateTime startTime = now.subtract(const Duration(hours: 12));
+      DateTime endTime = now.add(const Duration(days: 365 * 10));
 
       events = await GoogleCalendarService.getEvents(
         accessToken: accessToken,
