@@ -233,6 +233,30 @@ class EventViewState extends State<EventView> {
             currentLocation: _currentLocationLatLng!,
             destination: _selectedEventLatLng!,
           ),
+        if (widget.showCurrLocation)
+          Positioned(
+            top: 15,
+            right: 15,
+            child: Container(
+              width: 60, // Lățimea butonului
+              height: 60, // Înălțimea butonului
+              child: FloatingActionButton(
+                backgroundColor: AppColors.primaryColor,
+                onPressed: () {
+                  if (_currentLocationLatLng != null) {
+                    _mapController.move(_currentLocationLatLng!, 15.0);
+                  } else {
+                    _getCurrentLocation();
+                  }
+                },
+                child: const Icon(
+                  Icons.my_location,
+                  color: Colors.white,
+                  size: 30, // Dimensiunea iconiței
+                ),
+              ),
+            ),
+          ),
       ],
     );
   }
