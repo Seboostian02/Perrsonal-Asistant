@@ -48,12 +48,10 @@ class MainPageState extends State<MainPage> {
   }
 
   void _onEventListReload() async {
-    // Dacă reloadEventList este activat, reîncarcă evenimentele
     if (GoogleCalendarService.instance.reloadEventList) {
-      await _fetchEvents(); // Reîncarcă lista de evenimente
-      setState(() {}); // Actualizează interfața utilizatorului
-      GoogleCalendarService.instance.reloadEventList =
-          false; // Resetează variabila
+      await _fetchEvents();
+      setState(() {}); // Updates the user interface
+      GoogleCalendarService.instance.reloadEventList = false;
     }
   }
 
