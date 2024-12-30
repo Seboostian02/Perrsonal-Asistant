@@ -55,6 +55,38 @@ class EventCardState extends State<EventCard> {
     _isExpanded = widget.expandMode;
   }
 
+  void _showTopSnackBar(BuildContext context, String message) {
+    final overlay = Overlay.of(context);
+    final overlayEntry = OverlayEntry(
+      builder: (context) => Positioned(
+        top: MediaQuery.of(context).padding.top,
+        left: 0,
+        right: 0,
+        child: Material(
+          elevation: 6.0,
+          child: Container(
+            color: Colors.red,
+            padding: const EdgeInsets.all(16.0),
+            child: Text(
+              message,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 20,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    overlay.insert(overlayEntry);
+
+    Future.delayed(const Duration(seconds: 4), () {
+      overlayEntry.remove();
+    });
+  }
+
   void _updateEvent(BuildContext context) async {
     final accessToken = await AuthService().accessToken;
 
@@ -114,6 +146,65 @@ class EventCardState extends State<EventCard> {
           );
         },
       );
+      void _handleEventUpdate(
+          BuildContext context, calendar.Event updatedEvent) async {
+        // Verifică dacă datele sunt valide înainte de a actualiza UI-ul
+        if (updatedEvent.summary == null || updatedEvent.summary!.isEmpty) {
+          updatedEvent.summary = 'No title';
+        }
+
+        if (updatedEvent.start?.dateTime == null) {
+          _showTopSnackBar(context, 'Start time cannot be null');
+          return;
+        }
+
+        if (updatedEvent.end?.dateTime == null) {
+          _showTopSnackBar(context, 'End time cannot be null');
+          return;
+        }
+
+        setState(() {
+          widget.event.summary = updatedEvent.summary;
+          widget.event.description = updatedEvent.description;
+          widget.event.location = updatedEvent.location;
+          // Updates pririty
+          widget.event.extendedProperties ??= calendar.EventExtendedProperties(
+            private: {},
+          );
+          widget.event.extendedProperties!.private!['priority'] =
+              updatedEvent.extendedProperties!.private!['priority']!;
+        });
+
+        try {
+          TimeOfDay startTime =
+              TimeOfDay.fromDateTime(updatedEvent.start!.dateTime!.toLocal());
+          TimeOfDay endTime =
+              TimeOfDay.fromDateTime(updatedEvent.end!.dateTime!.toLocal());
+
+          String eventId = editSeries ? mainEventId : widget.event.id!;
+
+          await GoogleCalendarService.updateEvent(
+            accessToken: accessToken,
+            eventId: eventId,
+            title: updatedEvent.summary!,
+            description: updatedEvent.description ?? '',
+            date: updatedEvent.start!.dateTime!.toLocal(),
+            startTime: startTime,
+            endTime: endTime,
+            location: updatedEvent.location ?? '',
+            priority:
+                updatedEvent.extendedProperties!.private!['priority'] ?? 'Low',
+            updateSeries: editSeries,
+          );
+
+          print('Event updated successfully in Google Calendar');
+        } catch (error) {
+          print('Error updating event in Google Calendar: $error');
+
+          // Afișează un SnackBar cu mesajul de eroare folosind funcția personalizată
+          _showTopSnackBar(context, 'Error: $error');
+        }
+      }
 
       if (confirmedEdit) {
         showDialog(
@@ -124,61 +215,8 @@ class EventCardState extends State<EventCard> {
                 event: widget.event,
                 onEdit: widget.onEdit,
                 editSeries: editSeries,
-                onUpdate: (updatedEvent) async {
-                  setState(() {
-                    widget.event.summary = updatedEvent.summary;
-                    widget.event.description = updatedEvent.description;
-                    widget.event.location = updatedEvent.location;
-                    // Actualizare prioritate
-                    widget.event.extendedProperties ??=
-                        calendar.EventExtendedProperties(
-                      private: {},
-                    );
-                    widget.event.extendedProperties!.private!['priority'] =
-                        updatedEvent.extendedProperties!.private!['priority']!;
-                  });
-
-                  try {
-                    if (updatedEvent.summary == null ||
-                        updatedEvent.summary!.isEmpty) {
-                      throw Exception('Title cannot be empty');
-                    }
-                    if (updatedEvent.start?.dateTime == null) {
-                      throw Exception('Start time cannot be null');
-                    }
-                    if (updatedEvent.end?.dateTime == null) {
-                      throw Exception('End time cannot be null');
-                    }
-
-                    // Convertește DateTime în TimeOfDay
-                    TimeOfDay startTime = TimeOfDay.fromDateTime(
-                        updatedEvent.start!.dateTime!.toLocal());
-                    TimeOfDay endTime = TimeOfDay.fromDateTime(
-                        updatedEvent.end!.dateTime!.toLocal());
-
-                    String eventId =
-                        editSeries ? mainEventId : widget.event.id!;
-
-                    // Trimite la Google Calendar
-                    await GoogleCalendarService.updateEvent(
-                      accessToken: accessToken,
-                      eventId: eventId,
-                      title: updatedEvent.summary!,
-                      description: updatedEvent.description ?? '',
-                      date: updatedEvent.start!.dateTime!.toLocal(),
-                      startTime: startTime,
-                      endTime: endTime,
-                      location: updatedEvent.location ?? '',
-                      priority: updatedEvent
-                              .extendedProperties!.private!['priority'] ??
-                          'Low',
-                      updateSeries: editSeries,
-                    );
-
-                    print('Event updated successfully in Google Calendar');
-                  } catch (error) {
-                    print('Error updating event in Google Calendar: $error');
-                  }
+                onUpdate: (updatedEvent) {
+                  _handleEventUpdate(context, updatedEvent);
                 },
               ),
             );
