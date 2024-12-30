@@ -54,7 +54,7 @@ class EventCardState extends State<EventCard> {
     _isExpanded = widget.expandMode;
   }
 
-  void _showEditDialog(BuildContext context) async {
+  void _updateEvent(BuildContext context) async {
     final accessToken = await AuthService().accessToken;
 
     if (accessToken != null) {
@@ -364,7 +364,7 @@ class EventCardState extends State<EventCard> {
                   if (widget.editEvent && _isExpanded) // Buton de editare
                     IconButton(
                       icon: const Icon(Icons.edit),
-                      onPressed: () => _showEditDialog(context),
+                      onPressed: () => _updateEvent(context),
                     ),
                   if (!widget.expandMode)
                     IconButton(
