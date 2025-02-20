@@ -1,3 +1,4 @@
+import 'package:TimeBuddy/env/env.dart';
 import 'package:TimeBuddy/utils/colors.dart';
 import 'package:TimeBuddy/widgets/location_search_bar.dart';
 import 'package:TimeBuddy/widgets/zoom_controls.dart';
@@ -94,8 +95,8 @@ class _LocationPickerPageState extends State<LocationPickerPage> {
             children: [
               TileLayer(
                 urlTemplate:
-                    'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-                subdomains: const ['a', 'b', 'c'],
+                    'https://api.tomtom.com/map/1/tile/basic/main/{z}/{x}/{y}.png?key=${Env.tomTomKey}',
+                subdomains: ['a', 'b', 'c'],
               ),
               MarkerLayer(
                 markers: _selectedLocation != null
