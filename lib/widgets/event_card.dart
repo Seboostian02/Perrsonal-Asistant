@@ -204,7 +204,7 @@ class EventCardState extends State<EventCard> {
             insetPadding: EdgeInsets.zero,
             child: EventView(
               events: [widget.event],
-              showBackArrow: true,
+              // showBackArrow: true,
               showRoute: true,
             ),
           );

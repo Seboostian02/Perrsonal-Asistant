@@ -169,7 +169,6 @@ class MainPageState extends State<MainPage> {
 
   void _onItemTapped(int index) async {
     if (index == 1) {
-      // Rulează doar pentru EventView
       await _onRefresh();
     }
     setState(() {

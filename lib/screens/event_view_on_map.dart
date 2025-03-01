@@ -16,14 +16,14 @@ import 'package:TimeBuddy/env/env.dart';
 
 class EventView extends StatefulWidget {
   final List<calendar.Event> events;
-  final bool showBackArrow;
+  // final bool showBackArrow;
   final bool showCurrLocation;
   final bool showRoute;
 
   const EventView(
       {Key? key,
       required this.events,
-      this.showBackArrow = false,
+      // this.showBackArrow = false,
       this.showCurrLocation = false,
       required this.showRoute})
       : super(key: key);
