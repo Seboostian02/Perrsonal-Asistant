@@ -24,9 +24,9 @@ class EventService {
 
   calendar.Event createNonNullEvent(calendar.Event? event) {
     return calendar.Event(
-      summary: event?.summary ?? "Default Title",
-      location: event?.location ?? "Default Location",
-      description: event?.description ?? "Default Description",
+      summary: event?.summary ?? "No Title",
+      location: event?.location ?? "No Location",
+      description: event?.description ?? "No Description",
       start: event?.start ?? calendar.EventDateTime(dateTime: DateTime.now()),
       end: event?.end ??
           calendar.EventDateTime(
