@@ -36,7 +36,7 @@ class TimeSelector extends StatelessWidget {
               child: Column(
                 children: [
                   const Text(
-                    'Start Time',
+                    'Oră începere',
                     style: TextStyle(
                         fontSize: 14, color: AppColors.secondaryColor),
                   ),
@@ -68,7 +68,7 @@ class TimeSelector extends StatelessWidget {
               child: Column(
                 children: [
                   const Text(
-                    'End Time',
+                    'Oră terminare',
                     style: TextStyle(
                         fontSize: 14, color: AppColors.secondaryColor),
                   ),

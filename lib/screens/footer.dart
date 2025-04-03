@@ -27,7 +27,7 @@ class Footer extends StatelessWidget {
               children: [
                 IconTextButton(
                   icon: Icons.home,
-                  label: 'Home',
+                  label: 'Acasă',
                   onPressed: () {
                     onItemTapped(0);
                   },
@@ -36,7 +36,7 @@ class Footer extends StatelessWidget {
                 const SizedBox(width: _sizeBoxWidth),
                 IconTextButton(
                   icon: Icons.map,
-                  label: 'Map',
+                  label: 'Hartă',
                   onPressed: () {
                     onItemTapped(1);
                   },
@@ -48,7 +48,7 @@ class Footer extends StatelessWidget {
               children: [
                 IconTextButton(
                   icon: Icons.cloud,
-                  label: 'Weather',
+                  label: 'Vreme',
                   onPressed: () {
                     onItemTapped(2);
                   },
@@ -57,7 +57,7 @@ class Footer extends StatelessWidget {
                 const SizedBox(width: _sizeBoxWidth),
                 IconTextButton(
                   icon: Icons.people_alt,
-                  label: 'Profile',
+                  label: 'Profil',
                   onPressed: () {
                     onItemTapped(3);
                   },

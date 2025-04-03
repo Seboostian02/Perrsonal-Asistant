@@ -16,6 +16,7 @@ import 'package:provider/provider.dart';
 import 'package:TimeBuddy/services/google_calendar_service.dart';
 import '../models/recurrence_type.dart';
 import '../services/auth_provider.dart';
+import 'package:intl/date_symbol_data_local.dart';
 
 enum RecurrenceType { none, daily, weekly, monthly }
 
@@ -43,6 +44,7 @@ class EventFormState extends State<EventForm> {
   @override
   void initState() {
     super.initState();
+    initializeDateFormatting('ro', null);
     final now = TimeOfDay.now();
     _startTime = TimeOfDay(hour: now.hour, minute: (now.minute + 15) % 60);
     _endTime = TimeOfDay(hour: (now.hour + 1) % 24, minute: now.minute);
@@ -113,10 +115,10 @@ class EventFormState extends State<EventForm> {
         description: _descriptionController.text,
         priority: selectedPriority,
         location: _isOnlineMeeting
-            ? 'Event is online'
+            ? 'Eveniment online'
             : _selectedLocation != null
                 ? '${_selectedLocation!.latitude}, ${_selectedLocation!.longitude}'
-                : 'No location specified',
+                : 'Nici o locație aleasă',
         date: _selectedDate,
         startTime: _startTime,
         endTime: _endTime,
@@ -125,7 +127,7 @@ class EventFormState extends State<EventForm> {
         recurrenceType: _recurrenceType,
       );
 
-      _showTopSnackBar(context, 'Event created successfully');
+      _showTopSnackBar(context, 'Eveniment creat cu succes!');
       Navigator.pop(context);
     } else {
       print("User is not logged in.");
@@ -193,7 +195,8 @@ class EventFormState extends State<EventForm> {
                   picked.minute >= _endTime.minute)) {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
-                content: Text('Start time must be before end time'),
+                content: Text(
+                    'Ora de început trebuie să fie înaintea orei de încheiere'),
               ),
             );
             return;
@@ -205,7 +208,8 @@ class EventFormState extends State<EventForm> {
                   picked.minute <= _startTime.minute)) {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
-                content: Text('End time must be after start time'),
+                content: Text(
+                    'Ora de încheiere trebuie să fie după ora de începere'),
               ),
             );
             return;
@@ -224,7 +228,7 @@ class EventFormState extends State<EventForm> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             const Text(
-              'New Event',
+              'Crearează eveniment',
               style: TextStyle(
                 color: AppColors.textColor,
                 fontWeight: FontWeight.bold,
@@ -298,7 +302,7 @@ class EventFormState extends State<EventForm> {
                     Container(
                       width: 200,
                       child: CheckboxListTile(
-                        title: const Text('Online meeting?'),
+                        title: const Text('Eveniment online?'),
                         value: _isOnlineMeeting,
                         onChanged: (bool? value) {
                           setState(() {
@@ -316,7 +320,8 @@ class EventFormState extends State<EventForm> {
                 const SizedBox(height: 20),
                 if (!_isOnlineMeeting)
                   CheckboxListTile(
-                    title: const Text('Add a location for this event?'),
+                    title: const Text(
+                        'Adăugați o locație pentru acest eveniment?'),
                     value: _selectedLocation != null,
                     onChanged: (bool? value) {
                       setState(() {

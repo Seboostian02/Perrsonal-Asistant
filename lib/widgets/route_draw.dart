@@ -23,15 +23,15 @@ class RouteDrawer extends StatefulWidget {
 
 class _RouteDrawerState extends State<RouteDrawer> {
   late MapController mapController;
-  String selectedTransportMode = 'Walking';
+  String selectedTransportMode = 'Mers pe jos';
   List<LatLng> routePoints = [];
   List<Polyline> trafficFlowPolylines = [];
   bool showTrafficTiles = false;
 
   final Map<String, String> transportModes = {
-    'Walking': 'foot-walking',
-    'Bike': 'cycling-regular',
-    'Driving': 'driving-hgv',
+    'Mers pe jos': 'foot-walking',
+    'Bicicleta': 'cycling-regular',
+    'Masina': 'driving-hgv',
   };
 
   @override
@@ -40,6 +40,24 @@ class _RouteDrawerState extends State<RouteDrawer> {
     mapController = MapController();
     _fetchRoute();
   }
+
+// Future<void> _fetchRoute() async {
+//     final String? apiKey = Env.opsKey;
+//     final mode = transportModes[selectedTransportMode];
+
+//     final url =
+//         'https://api.openrouteservice.org/v2/directions/$mode?api_key=$apiKey&start=${widget.currentLocation.longitude},${widget.currentLocation.latitude}&end=${widget.destination.longitude},${widget.destination.latitude}';
+
+//     final response = await http.get(Uri.parse(url), headers: {
+//       'Accept': 'application/json',
+//     });
+
+//     if (response.statusCode == 200) {
+//       print('Ruta obtinuta cu succes');
+//     } else {
+//       print('Eroare la obtinerea rutei: ${response.statusCode}');
+//     }
+// }
 
   Future<void> _fetchRoute() async {
     final String? apiKey = Env.opsKey;

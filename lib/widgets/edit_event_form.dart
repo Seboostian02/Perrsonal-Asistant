@@ -221,15 +221,15 @@ class _EditEventFormState extends State<EditEventForm> {
           children: [
             TextField(
               controller: _summaryController,
-              decoration: const InputDecoration(labelText: "Title"),
+              decoration: const InputDecoration(labelText: "Titlu"),
             ),
             TextField(
               controller: _descriptionController,
-              decoration: const InputDecoration(labelText: "Description"),
+              decoration: const InputDecoration(labelText: "Descriere"),
             ),
             const SizedBox(height: 16),
             ListTile(
-              title: Text("Event Location: $locationDisplay"),
+              title: Text("Locația evenimentului: $locationDisplay"),
             ),
             Column(
               children: [
@@ -249,7 +249,7 @@ class _EditEventFormState extends State<EditEventForm> {
                         });
                       },
                     ),
-                    const Text("Set as Online"),
+                    const Text("Setează ca Online"),
                   ],
                 ),
                 if (!isOnline)
@@ -271,14 +271,14 @@ class _EditEventFormState extends State<EditEventForm> {
               selectedPriority: _selectedPriority,
               onPriorityChanged: (priority) {
                 setState(() {
-                  _selectedPriority = priority ?? 'Low';
+                  _selectedPriority = priority ?? 'Scăzut';
                 });
               },
             ),
             const SizedBox(height: 16),
             ListTile(
               title: Text(
-                  "Event Date: ${DateFormat.yMMMd().format(_selectedDate)}"),
+                  "Data evenimentului: ${DateFormat.yMMMd().format(_selectedDate)}"),
               trailing: IconButton(
                 icon: const Icon(Icons.calendar_today),
                 onPressed: _pickDate,
@@ -293,14 +293,14 @@ class _EditEventFormState extends State<EditEventForm> {
                 ),
               ),
             ListTile(
-              title: Text("Start Time: ${_startTime.format(context)}"),
+              title: Text("Ora de început: ${_startTime.format(context)}"),
               trailing: IconButton(
                 icon: const Icon(Icons.access_time),
                 onPressed: () => _pickTime(isStartTime: true),
               ),
             ),
             ListTile(
-              title: Text("End Time: ${_endTime.format(context)}"),
+              title: Text("Ora de sfârșit: ${_endTime.format(context)}"),
               trailing: IconButton(
                 icon: const Icon(Icons.access_time),
                 onPressed: () => _pickTime(isStartTime: false),
@@ -318,7 +318,7 @@ class _EditEventFormState extends State<EditEventForm> {
             ElevatedButton(
               onPressed:
                   _timeErrorMessage == null ? () => _saveChanges() : null,
-              child: const Text("Save"),
+              child: const Text("Salvează"),
             ),
           ],
         ),

@@ -4,6 +4,7 @@ import 'package:googleapis/calendar/v3.dart' as calendar;
 import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/intl.dart';
 import '../widgets/event_card.dart';
+import 'package:intl/date_symbol_data_local.dart';
 
 class EventCalendar extends StatefulWidget {
   final List<calendar.Event> events;
@@ -26,6 +27,7 @@ class _EventCalendarState extends State<EventCalendar> {
   @override
   void initState() {
     super.initState();
+    initializeDateFormatting('ro', null);
     _selectedDay = DateTime.now().toLocal();
     _eventMap = _groupEventsByDate();
   }
@@ -53,7 +55,7 @@ class _EventCalendarState extends State<EventCalendar> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Event Calendar'),
+        title: const Text('Calendar evenimente'),
       ),
       body: Column(
         children: [
@@ -65,6 +67,7 @@ class _EventCalendarState extends State<EventCalendar> {
                     firstDay: DateTime.utc(2020, 1, 1),
                     lastDay: DateTime.utc(2030, 12, 31),
                     focusedDay: _selectedDay,
+                    locale: 'ro',
                     headerStyle: HeaderStyle(
                         formatButtonVisible: false, titleCentered: true),
                     selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
@@ -123,7 +126,7 @@ class _EventCalendarState extends State<EventCalendar> {
                       children: [
                         Center(
                           child: Text(
-                            'Events for ${DateFormat('d MMMM yyyy').format(_selectedDay)}',
+                            'Evenimente pentru ${DateFormat('d MMMM yyyy', 'ro').format(_selectedDay)}',
                             style: const TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
@@ -135,7 +138,7 @@ class _EventCalendarState extends State<EventCalendar> {
                         if (eventsForSelectedDay.isNotEmpty) ...[
                           const Center(
                             child: Text(
-                              'You have events today!',
+                              'Ai evenimente pentru astăzi!',
                               style: TextStyle(
                                 color: Colors.green,
                                 fontWeight: FontWeight.bold,

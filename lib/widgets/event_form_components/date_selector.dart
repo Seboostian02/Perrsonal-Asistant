@@ -30,7 +30,7 @@ class DateSelector extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    'Selected date: ${selectedDate.day}/${selectedDate.month}/${selectedDate.year}',
+                    'Dată selectată: ${selectedDate.day}/${selectedDate.month}/${selectedDate.year}',
                     style: const TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.normal,
@@ -51,7 +51,7 @@ class DateSelector extends StatelessWidget {
                       ),
                     ),
                     child: const Text(
-                      'Pick Date',
+                      'Selectează o dată',
                       style: TextStyle(fontSize: 18),
                     ),
                   ),

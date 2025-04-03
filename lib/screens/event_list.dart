@@ -64,7 +64,7 @@ class EventList extends StatelessWidget {
                 elevation: 4,
               ),
               child: const Text(
-                'View Events in Calendar Format',
+                'Vezi evenimentele în format de calendar',
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
@@ -88,14 +88,14 @@ class EventList extends StatelessWidget {
                   )
                 else ...[
                   const Text(
-                    "Today's Events:",
+                    "Evenimentele de azi:",
                     style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 10),
                   if (todayEvents.isEmpty)
                     const Center(
                       child: Text(
-                        "No events for today.",
+                        "Nici un eveniment programat pe azi.",
                         style: TextStyle(fontSize: 18, color: Colors.grey),
                       ),
                     )
@@ -109,7 +109,7 @@ class EventList extends StatelessWidget {
                       ),
                   const SizedBox(height: 20),
                   const Text(
-                    "All Events:",
+                    "Toate evenimentele:",
                     style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 10),

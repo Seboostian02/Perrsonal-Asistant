@@ -11,7 +11,7 @@ class EventDescriptionField extends StatelessWidget {
     return TextField(
       textAlign: TextAlign.center,
       controller: controller,
-      decoration: const InputDecoration(labelText: 'Event Description'),
+      decoration: const InputDecoration(labelText: 'Descriere'),
     );
   }
 }

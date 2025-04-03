@@ -77,7 +77,7 @@ class _LocationPickerPageState extends State<LocationPickerPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          'Pick a Location',
+          'Alegeți o locație',
           style: TextStyle(color: AppColors.textColor),
         ),
         backgroundColor: AppColors.primaryColor,
@@ -149,7 +149,7 @@ class _LocationPickerPageState extends State<LocationPickerPage> {
                     ),
                   ),
                   child: Text(
-                    "Choose this location",
+                    "Alegeți această locație",
                     style: TextStyle(color: AppColors.textColor),
                   ),
                 ),

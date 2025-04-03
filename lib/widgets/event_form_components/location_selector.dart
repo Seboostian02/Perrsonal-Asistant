@@ -35,7 +35,7 @@ class LocationSelector extends StatelessWidget {
         }
       },
       child: Text(
-        selectedLocation != null ? 'Location Selected' : 'Select Location',
+        selectedLocation != null ? 'Locație selectată' : 'Selectează locație',
       ),
     );
   }

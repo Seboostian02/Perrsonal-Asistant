@@ -48,7 +48,7 @@ class _RecurrenceSelectorState extends State<RecurrenceSelector> {
               constraints:
                   BoxConstraints(maxWidth: 100), // Poți ajusta această lățime
               child: Text(
-                'Select event recurrence: ', // Text explicativ
+                'Selectează recurența: ', // Text explicativ
                 style: TextStyle(
                   fontSize: 14,
                   color: Colors.grey[600], // Gri pentru text explicativ
@@ -98,8 +98,8 @@ class _RecurrenceSelectorState extends State<RecurrenceSelector> {
               ),
               child: Text(
                 widget.recurrenceEndDate == null
-                    ? 'Select Recurrence End Date'
-                    : 'Recurrence set to: ${DateFormat('dd MMM yyyy').format(widget.recurrenceEndDate!)}',
+                    ? 'Selectează o dată de finalizare'
+                    : 'Recurență setată: ${DateFormat('dd MMM yyyy').format(widget.recurrenceEndDate!)}',
                 style: const TextStyle(fontSize: 18),
               ),
             ),

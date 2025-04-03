@@ -10,7 +10,7 @@ class CreateEventButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return ElevatedButton(
       onPressed: () => onPressed(),
-      child: const Text('Create Event'),
+      child: const Text('Crează eveniment'),
     );
   }
 }

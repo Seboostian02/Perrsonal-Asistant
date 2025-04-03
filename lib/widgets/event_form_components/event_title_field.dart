@@ -10,7 +10,7 @@ class EventTitleField extends StatelessWidget {
     return TextField(
       textAlign: TextAlign.center,
       controller: controller,
-      decoration: const InputDecoration(labelText: 'Event Title'),
+      decoration: const InputDecoration(labelText: 'Titlu'),
     );
   }
 }

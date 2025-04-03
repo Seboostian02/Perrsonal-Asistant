@@ -9,6 +9,7 @@ import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
 import 'package:googleapis/calendar/v3.dart' as calendar;
 import 'package:provider/provider.dart';
+import 'package:intl/date_symbol_data_local.dart';
 
 class EventCard extends StatefulWidget {
   final calendar.Event event;
@@ -52,7 +53,19 @@ class EventCardState extends State<EventCard> {
   @override
   void initState() {
     super.initState();
+    initializeDateFormatting('ro', null);
     _isExpanded = widget.expandMode;
+  }
+
+  String _translatePriority(String priority) {
+    switch (priority) {
+      case 'Medium':
+        return 'Medie';
+      case 'High':
+        return 'Ridicata';
+      default:
+        return 'Scazuta';
+    }
   }
 
   void _showTopSnackBar(BuildContext context, String message) {
@@ -111,11 +124,11 @@ class EventCardState extends State<EventCard> {
         context: context,
         builder: (context) {
           return AlertDialog(
-            title: const Text("Edit Event"),
+            title: const Text("Editare eveniment"),
             content: isRecurring
                 ? const Text(
-                    "Do you want to edit this event or the entire series?")
-                : const Text("Are you sure you want to edit this event?"),
+                    "Doriți să editați acest eveniment sau întreaga serie?")
+                : const Text("Sigur doriți să editați acest eveniment?"),
             actions: [
               if (isRecurring) ...[
                 TextButton(
@@ -123,23 +136,23 @@ class EventCardState extends State<EventCard> {
                     editSeries = false;
                     Navigator.of(context).pop(true);
                   },
-                  child: const Text("This Event"),
+                  child: const Text("Acest eveniment"),
                 ),
                 TextButton(
                   onPressed: () {
                     editSeries = true;
                     Navigator.of(context).pop(true);
                   },
-                  child: const Text("Entire Series"),
+                  child: const Text("Întreaga serie"),
                 ),
               ] else ...[
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(false),
-                  child: const Text("No"),
+                  child: const Text("Nu"),
                 ),
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(true),
-                  child: const Text("Yes"),
+                  child: const Text("Da"),
                 ),
               ],
             ],
@@ -169,7 +182,7 @@ class EventCardState extends State<EventCard> {
           updateSeries: editSeries,
         );
 
-        print('Event updated successfully in Google Calendar');
+        print('Evenimentul a fost actualizat cu succes în Google Calendar');
       }
 
       if (confirmedEdit) {
@@ -238,34 +251,34 @@ class EventCardState extends State<EventCard> {
         context: context,
         builder: (context) {
           return AlertDialog(
-            title: const Text("Delete Event"),
+            title: const Text("Ștergere eveniment"),
             content: isRecurring
                 ? const Text(
-                    "Do you want to delete this event or the entire series?")
-                : const Text("Are you sure you want to delete this event?"),
+                    "Doriți să ștergeți acest eveniment sau întreaga serie?")
+                : const Text("Sigur doriți să ștergeți acest eveniment?"),
             actions: [
               if (isRecurring) ...[
                 TextButton(
                   onPressed: () {
                     Navigator.of(context).pop(true);
                   },
-                  child: const Text("This Event"),
+                  child: const Text("Acest eveniment"),
                 ),
                 TextButton(
                   onPressed: () {
                     deleteSeries = true;
                     Navigator.of(context).pop(true);
                   },
-                  child: const Text("Entire Series"),
+                  child: const Text("Toată seria"),
                 ),
               ] else ...[
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(false),
-                  child: const Text("No"),
+                  child: const Text("Nu"),
                 ),
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(true),
-                  child: const Text("Yes"),
+                  child: const Text("Da"),
                 ),
               ],
             ],
@@ -309,9 +322,9 @@ class EventCardState extends State<EventCard> {
         "${endDateTime.hour}:${endDateTime.minute.toString().padLeft(2, '0')}";
 
     final String formattedDate =
-        DateFormat('EEEE, d MMMM yyyy').format(startDateTime);
+        DateFormat('EEEE, d MMMM yyyy', 'ro').format(startDateTime);
 
-    String location = widget.event.location ?? "No Location";
+    String location = widget.event.location ?? "Nici o locație";
     List<String> locationParts;
 
     if (location.length > 30) {
@@ -357,15 +370,16 @@ class EventCardState extends State<EventCard> {
                     ),
                   ),
                   const SizedBox(width: 8),
-                  Text(
-                    'priority - ($priority)',
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                      color: AppColors.secondaryColor,
+                  if (widget.showLocation)
+                    Text(
+                      'prioritate - ${_translatePriority(priority)}',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                        color: AppColors.secondaryColor,
+                      ),
+                      overflow: TextOverflow.ellipsis,
                     ),
-                    overflow: TextOverflow.ellipsis,
-                  ),
                   if (widget.editEvent && _isExpanded) // Buton de editare
                     IconButton(
                       icon: const Icon(Icons.edit),
@@ -394,7 +408,7 @@ class EventCardState extends State<EventCard> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      widget.event.description ?? "No Description",
+                      widget.event.description ?? "Nici o descriere",
                       style: const TextStyle(
                           fontSize: 16, fontWeight: FontWeight.w500),
                     ),
@@ -405,7 +419,7 @@ class EventCardState extends State<EventCard> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Location:',
+                            'Locație:',
                             style: TextStyle(
                               fontSize: 16,
                               color: widget.showLocation
@@ -433,7 +447,7 @@ class EventCardState extends State<EventCard> {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'Date: $formattedDate',
+                      'Dată: $formattedDate',
                       style: const TextStyle(fontSize: 16),
                     ),
                     const SizedBox(height: 4),
@@ -444,12 +458,12 @@ class EventCardState extends State<EventCard> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Starts at: $startHour',
+                              'Oră start: $startHour',
                               style: const TextStyle(fontSize: 16),
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              'Ends at: $endHour',
+                              'Oră sfârșit: $endHour',
                               style: const TextStyle(fontSize: 16),
                             ),
                           ],

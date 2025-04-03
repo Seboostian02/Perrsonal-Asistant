@@ -22,7 +22,7 @@ class PrioritySelector extends StatelessWidget {
         children: [
           const SizedBox(height: 8), // Spațiu între text și dropdown
           Text(
-            'Select event priority', // Textul care explică dropdown-ul
+            'Prioritate eveniment', // Textul care explică dropdown-ul
             style: TextStyle(
               fontSize: 14,
               color: Colors.grey[600], // Culoare gri pentru text explicativ
