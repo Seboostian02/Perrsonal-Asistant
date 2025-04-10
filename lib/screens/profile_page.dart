@@ -15,7 +15,7 @@ class ProfilePage extends StatelessWidget {
 
     // Check if user is logged in
     if (currentUser == null) {
-      return const Center(child: Text("No user is logged in"));
+      return const Center(child: Text("Utilizatorul nu este autentificat."));
     }
 
     return Scaffold(
@@ -64,7 +64,7 @@ class ProfilePage extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Account Settings',
+                      'Setari cont',
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
@@ -77,7 +77,7 @@ class ProfilePage extends StatelessWidget {
                         Icon(Icons.security, color: AppColors.secondaryColor),
                         const SizedBox(width: 10),
                         Text(
-                          'Change Password',
+                          'Schimba parola',
                           style: TextStyle(fontSize: 16),
                         ),
                       ],
@@ -89,7 +89,7 @@ class ProfilePage extends StatelessWidget {
                             color: AppColors.secondaryColor),
                         const SizedBox(width: 10),
                         Text(
-                          'Notification Preferences',
+                          'Preferinte notificari',
                           style: TextStyle(fontSize: 16),
                         ),
                       ],
@@ -100,7 +100,7 @@ class ProfilePage extends StatelessWidget {
                         Icon(Icons.language, color: AppColors.secondaryColor),
                         const SizedBox(width: 10),
                         Text(
-                          'Language Preferences',
+                          'Preferinte limba',
                           style: TextStyle(fontSize: 16),
                         ),
                       ],

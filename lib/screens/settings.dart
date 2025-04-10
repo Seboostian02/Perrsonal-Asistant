@@ -14,14 +14,14 @@ class SettingsList extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Settings'),
+        title: const Text('Setari'),
       ),
       body: ListView(
         padding: const EdgeInsets.all(16.0),
         children: [
           ListTile(
             leading: const Icon(Icons.account_circle),
-            title: const Text('Profile'),
+            title: const Text('Profil'),
             onTap: () {
               showDialog(
                 context: context,
@@ -34,7 +34,7 @@ class SettingsList extends StatelessWidget {
           const Divider(),
           ListTile(
             leading: const Icon(Icons.notifications),
-            title: const Text('Notifications'),
+            title: const Text('Notificari'),
             onTap: () {
               showDialog(
                 context: context,
@@ -47,7 +47,7 @@ class SettingsList extends StatelessWidget {
           const Divider(),
           ListTile(
             leading: const Icon(Icons.lock),
-            title: const Text('Privacy'),
+            title: const Text('Confidentialitate'),
             onTap: () {
               showDialog(
                 context: context,
@@ -60,7 +60,7 @@ class SettingsList extends StatelessWidget {
           const Divider(),
           ListTile(
             leading: const Icon(Icons.help),
-            title: const Text('Help & Support'),
+            title: const Text('Ajutor & Suport'),
             onTap: () {
               showDialog(
                 context: context,
@@ -80,8 +80,8 @@ class SettingsList extends StatelessWidget {
                 padding:
                     const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
               ),
-              child:
-                  const Text('Log Out', style: TextStyle(color: Colors.white)),
+              child: const Text('Deconectare',
+                  style: TextStyle(color: Colors.white)),
             ),
         ],
       ),
