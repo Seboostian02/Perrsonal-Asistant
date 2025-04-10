@@ -80,7 +80,7 @@ class CurrentWeather extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              '${weatherData!['timelines']['minutely'][0]['values']['humidity']}% Humidity',
+              '${weatherData!['timelines']['minutely'][0]['values']['humidity']}% Umiditate',
               style: const TextStyle(
                 color: Colors.white,
               ),
