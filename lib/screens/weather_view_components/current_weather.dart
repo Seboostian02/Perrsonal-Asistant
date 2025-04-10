@@ -50,7 +50,7 @@ class CurrentWeather extends StatelessWidget {
                 ),
               ),
               Text(
-                "Cloudy with ${weatherData!['timelines']['minutely'][0]['values']['precipitationProbability']}% chance of precipitation",
+                "Precipitatii pe ${weatherData!['timelines']['minutely'][0]['values']['precipitationProbability']}% din suprafata",
                 style: const TextStyle(
                   fontSize: 18,
                   color: Colors.white,
@@ -59,7 +59,7 @@ class CurrentWeather extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
               ),
               Text(
-                'Wind: ${weatherData!['timelines']['minutely'][0]['values']['windSpeed']} km/h',
+                'Vant: ${weatherData!['timelines']['minutely'][0]['values']['windSpeed']} km/h',
                 style: const TextStyle(
                   fontSize: 18,
                   color: Colors.white,

@@ -78,7 +78,7 @@ class WeatherViewState extends State<WeatherView> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           const Text(
-                            'Current Weather',
+                            'Vreme Curenta',
                             style: TextStyle(
                                 fontSize: 22,
                                 fontWeight: FontWeight.bold,
@@ -89,7 +89,7 @@ class WeatherViewState extends State<WeatherView> {
                           ),
                           const SizedBox(height: 20),
                           const Text(
-                            'Hourly Forecast',
+                            'Prognoza orara',
                             style: TextStyle(
                                 fontSize: 22,
                                 fontWeight: FontWeight.bold,
@@ -103,7 +103,7 @@ class WeatherViewState extends State<WeatherView> {
                           ),
                           const SizedBox(height: 15),
                           const Text(
-                            'Weekly Forecast',
+                            'Prognoza saptamanala',
                             style: TextStyle(
                                 fontSize: 22,
                                 fontWeight: FontWeight.bold,

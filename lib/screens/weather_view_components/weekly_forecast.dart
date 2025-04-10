@@ -32,7 +32,7 @@ class _WeeklyForecastState extends State<WeeklyForecast> {
         final date = widget.weeklyWeatherData!.keys.elementAt(index);
         final dayWeather = widget.weeklyWeatherData![date];
         final formattedDate =
-            DateFormat('EEEE, MMM d, yyyy').format(DateTime.parse(date));
+            DateFormat('EEEE, d MMM yyyy', 'ro').format(DateTime.parse(date));
 
         return WeatherCard(
           date: formattedDate,
