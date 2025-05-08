@@ -25,7 +25,7 @@ class PrivacyPage extends StatelessWidget {
                   ),
                   const SizedBox(width: 8),
                   const Text(
-                    "Privacy Policy",
+                    "Politica de Confidentialitate",
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
@@ -44,12 +44,16 @@ class PrivacyPage extends StatelessWidget {
                     children: [
                       const SizedBox(height: 10),
                       const Text(
-                        "Last updated: December 2023",
+                        "Ultima actualizare: Decembrie 2023",
                         style: TextStyle(fontSize: 14, color: Colors.grey),
                       ),
                       const SizedBox(height: 20),
                       const Text(
-                        "1. **Data Collection:**\nThe app collects limited information such as location data and notifications to function optimally.\n\n2. **Use of Data:**\nThe information is used solely for the purposes mentioned, such as calendar planning and location-based alerts.\n\n3. **Data Protection:**\nInformation is encrypted and secured according to modern security standards.\n\n4. **Data Sharing:**\nWe do not share personal information with third parties without the user's explicit consent.\n\n5. **Contact:**\nIf you have any questions or concerns regarding our privacy policy, you can contact our team at ${ContactData.email}.",
+                        "1. **Colectarea datelor:**\nAplicatia colecteaza informatii limitate precum date despre locatie si notificari pentru a functiona optim.\n\n"
+                        "2. **Utilizarea datelor:**\nInformatiile sunt folosite exclusiv in scopurile mentionate, precum planificarea calendarului si alertele bazate pe locatie.\n\n"
+                        "3. **Protectia datelor:**\nInformatiile sunt criptate si protejate conform standardelor moderne de securitate.\n\n"
+                        "4. **Partajarea datelor:**\nNu partajam informatii personale cu terti fara consimtamantul expres al utilizatorului.\n\n"
+                        "5. **Contact:**\nDaca ai intrebari sau nelamuriri legate de politica noastra de confidentialitate, ne poti contacta la ${ContactData.email}.",
                         style: TextStyle(fontSize: 16),
                       ),
                     ],

@@ -25,7 +25,7 @@ class HelpSupportPage extends StatelessWidget {
                   ),
                   const SizedBox(width: 8),
                   const Text(
-                    "Help and Support",
+                    "Ajutor si Suport",
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
@@ -44,14 +44,14 @@ class HelpSupportPage extends StatelessWidget {
                     children: [
                       const SizedBox(height: 10),
                       const Text(
-                        "Welcome to the Help and Support section. Here you can find information on how to use the app, frequently asked questions, and ways to contact our support team.",
+                        "Bine ai venit in sectiunea de Ajutor si Suport. Aici poti gasi informatii despre utilizarea aplicatiei, intrebari frecvente si modalitati de a contacta echipa noastra de suport.",
                         style: TextStyle(fontSize: 16),
                       ),
                       const SizedBox(height: 20),
                       const Divider(),
                       const SizedBox(height: 10),
                       const Text(
-                        "Frequently Asked Questions:",
+                        "Intrebari frecvente:",
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
@@ -59,14 +59,14 @@ class HelpSupportPage extends StatelessWidget {
                       ),
                       const SizedBox(height: 10),
                       const Text(
-                        "1. How can I access my calendar in the app?\n   - After signing in, you can access the calendar from the home page.\n\n2. What should I do if I am not receiving event alerts?\n   - Check the notification permissions in your device settings.\n\n3. How can I contact the support team if I encounter a problem?\n   - You can send an email to ${ContactData.email}.",
+                        "1. Cum pot accesa calendarul in aplicatie?\n   - Dupa autentificare, poti accesa calendarul din pagina principala.\n\n2. Ce trebuie sa fac daca nu primesc notificari pentru evenimente?\n   - Verifica permisiunile de notificare din setarile dispozitivului tau.\n\n3. Cum pot contacta echipa de suport daca intampin o problema?\n   - Poti trimite un email la ${ContactData.email}.",
                         style: TextStyle(fontSize: 14),
                       ),
                       const SizedBox(height: 20),
                       const Divider(),
                       const SizedBox(height: 10),
                       const Text(
-                        "Contact Methods:",
+                        "Metode de contact:",
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
@@ -74,7 +74,7 @@ class HelpSupportPage extends StatelessWidget {
                       ),
                       const SizedBox(height: 10),
                       const Text(
-                        "- Email: ${ContactData.email}\n- In-app support: Send us feedback through the app settings.\n- Phone: ${ContactData.phone}",
+                        "- Email: ${ContactData.email}\n- Suport in aplicatie: Trimite-ne feedback din setarile aplicatiei.\n- Telefon: ${ContactData.phone}",
                         style: TextStyle(fontSize: 14),
                       ),
                     ],

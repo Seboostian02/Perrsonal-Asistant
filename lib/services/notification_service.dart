@@ -93,17 +93,17 @@ class NotificationService {
     final List<Map<String, dynamic>> notificationTimes = [
       {
         "time": eventStartTime.subtract(const Duration(hours: 24)),
-        "suffix": " - 24 hours before"
+        "suffix": " - 24 ore inante"
       },
       {
         "time": eventStartTime.subtract(const Duration(hours: 1)),
-        "suffix": " - 1 hour before"
+        "suffix": " - 1 ore inante"
       },
       {
         "time": eventStartTime.subtract(const Duration(minutes: 30)),
-        "suffix": " - 30 minutes before"
+        "suffix": " - 30 minute inainte"
       },
-      {"time": eventStartTime, "suffix": " - Event start time"},
+      {"time": eventStartTime, "suffix": " - Start eveniment"},
     ];
 
     for (int i = 0; i < notificationTimes.length; i++) {

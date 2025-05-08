@@ -122,7 +122,7 @@ class WeatherViewState extends State<WeatherView> {
                   : const Center(
                       child: Text(
                         'Failed to load weather data',
-                        style: TextStyle(color: Colors.red, fontSize: 18),
+                        style: TextStyle(color: Colors.white, fontSize: 18),
                       ),
                     ),
         ),

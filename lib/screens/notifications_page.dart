@@ -69,7 +69,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
     }
 
     final parts = title.split(' - ');
-    return parts.isNotEmpty ? 'Event name: ${parts[0]}' : 'No Title';
+    return parts.isNotEmpty ? 'Nume eveniment: ${parts[0]}' : 'No Title';
   }
 
   @override
@@ -77,7 +77,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
     return Scaffold(
       appBar: AppBar(
           title: const Text(
-        'Scheduled Notifications',
+        'Notificari programate',
         style: TextStyle(
           fontWeight: FontWeight.bold,
           fontSize: 20,
